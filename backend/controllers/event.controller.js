@@ -87,7 +87,7 @@ const getEventById = async (req, res) => {
 
 const getAllEvent = async (req, res) => {
   try {
-    const events = await Event.find();
+    const events = await Event.find().populate("createBy", "name");
     return res.status(200).json({
       success: true,
       message: "Lấy danh sách sự kiện thành công.",

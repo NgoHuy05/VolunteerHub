@@ -14,7 +14,7 @@ const EventSchema = new mongoose.Schema({
         enum: ["pending", "rejected", "approved", "completed"],
         default: "pending"
     },
-})
+}, { timestamps: true })
 
 const Event = mongoose.model("Event", EventSchema);
 module.exports = Event;

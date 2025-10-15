@@ -147,7 +147,7 @@ const getPostByIdUser = async (req, res) => {
 // [GET] /post
 const getAllPost = async (req, res) => {
   try {
-    const posts = await Post.find().populate("userId", "name");
+    const posts = await Post.find().populate("userId", "name").populate("eventId");
     return res.status(200).json({ success: true, message: "Lấy danh sách tất cả bài đăng", posts });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });

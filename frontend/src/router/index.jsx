@@ -2,7 +2,6 @@ import { createBrowserRouter } from "react-router-dom";
 import Home from "../pages/Home";
 
 import Layout from "../layout/Layout";
-import Admin from "../pages/Admin";
 import EventList from "../pages/Event/EventList";
 import EvenDetail from "../pages/Event/EventDetail";
 import EventJoining from "../pages/Event/EventJoining";
@@ -24,6 +23,14 @@ import ManagePending from "../pages/Manager/ManagePending";
 import ManageRejected from "../pages/Manager/ManageRejected";
 import ManageCompleted from "../pages/Manager/ManageCompleted";
 import ManageUser from "../pages/Manager/ManageUser";
+import AdminLayout from "../layout/AdminLayout";
+import AdminDashboard from "../pages/Admin/AdminDashboard";
+
+import AdminListEvent from "../pages/Admin/AdminListEvent";
+import AdminListUser from "../pages/Admin/AdminListUser";
+import AdminListPost from "../pages/Admin/AdminListPost";
+import AdminStatistic from "../pages/Admin/AdminStatistic";
+import AdminSetting from "../pages/Admin/AdminSetting";
 
 export const routers = createBrowserRouter([
   {
@@ -126,6 +133,32 @@ export const routers = createBrowserRouter([
   },
   {
     path: "admin",
-    element: <Admin />,
+    element: <AdminLayout />,
+    children: [
+      {
+        path: "dashboard",
+        element: <AdminDashboard />,
+      },
+      {
+        path: "list/posts",
+        element: <AdminListPost />,
+      },
+      {
+        path: "list/events",
+        element: <AdminListEvent />,
+      },
+      {
+        path: "list/users",
+        element: <AdminListUser />,
+      },
+      {
+        path: "statistic",
+        element: <AdminStatistic />,
+      },
+      {
+        path: "settings",
+        element: <AdminSetting />,
+      },
+    ],
   },
 ]);

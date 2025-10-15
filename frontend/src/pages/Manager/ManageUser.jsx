@@ -45,7 +45,6 @@ const ManageUser = () => {
   useEffect(() => {
     document.body.style.overflow = isWatchDetail ? "hidden" : "auto";
   }, [isWatchDetail]);
-console.log(userEvents);
 
   return (
     <div className="min-h-screen p-6 bg-gray-50">

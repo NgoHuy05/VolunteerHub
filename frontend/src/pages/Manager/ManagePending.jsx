@@ -15,7 +15,6 @@ const ManagePending = () => {
     const fetchEvent = async () => {
       try {
         const res = await getAllEventCreatedByAndStatus("pending");
-        console.log(res);
         setEvents(res.data.events);
       } catch (error) {
         console.error(error.response.data.message || error.message);

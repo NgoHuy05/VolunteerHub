@@ -19,7 +19,6 @@ const EventPendingJoin = () => {
     };
     fetchEvent();
   }, []);
-  console.log(events);
   
   const handleWatchDetail = (id) => {
     navigate(`/event/detail/${id}`);

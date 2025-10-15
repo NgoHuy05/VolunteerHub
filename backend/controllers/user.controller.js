@@ -87,13 +87,21 @@ const updateUser = async (req, res) => {
 const adminUpdateUser = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, role, status } = req.body;
+    const { name, role, status, location, age, gender } = req.body;
 
-    const user = await User.findByIdAndUpdate(
-      id,
-      { name, role, status },
-      { new: true }
-    ).select("-password");
+    // Update toàn bộ các trường được phép sửa
+    const updateFields = {
+      name,
+      role,
+      status,
+      location,
+      age,
+      gender,
+    };
+
+    const user = await User.findByIdAndUpdate(id, updateFields, {
+      new: true,
+    }).select("-password");
 
     if (!user) {
       return res
@@ -107,6 +115,7 @@ const adminUpdateUser = async (req, res) => {
       user,
     });
   } catch (error) {
+    console.error("❌ Lỗi cập nhật user:", error);
     return res
       .status(500)
       .json({ success: false, message: "Lỗi khi cập nhật người dùng." });
