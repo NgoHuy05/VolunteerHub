@@ -29,7 +29,6 @@ import AdminDashboard from "../pages/Admin/AdminDashboard";
 import AdminListEvent from "../pages/Admin/AdminListEvent";
 import AdminListUser from "../pages/Admin/AdminListUser";
 import AdminListPost from "../pages/Admin/AdminListPost";
-import AdminStatistic from "../pages/Admin/AdminStatistic";
 import AdminSetting from "../pages/Admin/AdminSetting";
 
 export const routers = createBrowserRouter([
@@ -150,10 +149,6 @@ export const routers = createBrowserRouter([
       {
         path: "list/users",
         element: <AdminListUser />,
-      },
-      {
-        path: "statistic",
-        element: <AdminStatistic />,
       },
       {
         path: "settings",
