@@ -81,7 +81,7 @@ const timeCategories = [
     time: "Trong tháng",
   },
   {
-    id: 5,
+    id: 6,
     time: "Trong năm",
   },
 ];

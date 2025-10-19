@@ -21,8 +21,10 @@ import {
   countAllUserByEventId,
   countJoiningUserByEventId,
   countPendingUserByEventId,
+  createUserEvent,
+  getUserEvent,
 } from "../../api/userEvent.api";
-import { convertDate, getPostTimeAgo,  } from "../../utils";
+import { convertDate, getPostTimeAgo } from "../../utils";
 
 const EvenDetail = () => {
   const [isSelectIntrodution, setIsSelectIntrodution] = useState(true);
@@ -32,6 +34,9 @@ const EvenDetail = () => {
   const [posts, setPosts] = useState([]);
   const [user, setUser] = useState(null);
   const [event, setEvent] = useState({});
+  const [userEvents, setUserEvents] = useState([]);
+  const [isJoined, setIsJoined] = useState(false);
+  const [isPending, setIsPending] = useState(false);
   const eventId = useParams();
 
   useEffect(() => {
@@ -58,20 +63,35 @@ const EvenDetail = () => {
 
     fetchEvent();
   }, [eventId]);
+  console.log(user);
+
+  useEffect(() => {
+    const fetchUserEvents = async () => {
+      const res = await getUserEvent();
+      setUserEvents(res.data.userEvents);
+    };
+    fetchUserEvents();
+  }, []);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const resUser = await getProfileUser();
+        setUser(resUser.data.user);
+      } catch (error) {
+        console.error(error.message);
+      }
+    };
+    fetchUser();
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const resUser = await getProfileUser();
-        setUser(resUser.data.user);
-
         const resPost = await getPostByIdEventApproved(eventId.id);
-
         const postsData = resPost.data?.posts;
-
         const resLiked = await getLikedPosts();
         const likedPostIds = resLiked.data.likedPostIds;
-
         const postsWithDetails = await Promise.all(
           postsData.map(async (p) => {
             try {
@@ -126,6 +146,53 @@ const EvenDetail = () => {
       );
     }
   };
+console.log(event);
+
+useEffect(() => {
+  if (!userEvents || !event || !user?._id) return;
+
+
+  const joined = 
+    event?.createBy?._id === user._id || userEvents.some(
+      (u) =>
+        u.eventId?._id?.toString() === event._id &&
+        u.status === "joining"
+    );
+
+  const pending = userEvents.some(
+    (u) =>
+      u.eventId?._id?.toString() === event._id &&
+      u.status === "pending"
+  );
+
+  setIsJoined(joined);
+  setIsPending(pending);
+}, [userEvents, event, user]);
+
+const handleRegisterJoinEvent = async (eventId) => {
+  try {
+    if (!user) return toast.error("Bạn cần đăng nhập trước khi tham gia!");
+
+    const data = {
+      userId: user._id,
+      eventId,
+      role: "user",
+      status: "pending",
+      startDay: new Date(),
+    };
+
+    const res = await createUserEvent(data);
+    toast.success(res.data.message || "Đăng ký tham gia thành công!");
+
+    // Cập nhật lại danh sách userEvents
+    const resUserEvent = await getUserEvent();
+    setUserEvents(resUserEvent.data.userEvents);
+
+  } catch (error) {
+    toast.error(error?.response?.data?.message || "Lỗi khi đăng ký sự kiện");
+  }
+};
+
 
   const handleSubmitComment = async (e, postId) => {
     e.preventDefault();
@@ -206,9 +273,27 @@ const EvenDetail = () => {
               </div>
             </div>
             <div className="flex gap-4 items-center">
-              <div className="px-4 py-2 w-[180px] text-center bg-gray-200 rounded-2xl hover:bg-gray-300 cursor-pointer transition duration-300">
-                Đăng kí tham gia
-              </div>
+{!isJoined ? (
+  isPending ? (
+    <div className="px-4 py-2 w-[180px] text-center bg-amber-200 rounded-2xl hover:bg-amber-300 cursor-pointer transition duration-300">
+      Đang chờ duyệt
+    </div>
+  ) : (
+    <div
+      onClick={() => handleRegisterJoinEvent(eventId.id)}
+      className="px-4 py-2 w-[180px] text-center bg-gray-200 rounded-2xl hover:bg-gray-300 cursor-pointer transition duration-300"
+    >
+      Đăng kí tham gia
+    </div>
+  )
+) : (
+  <div className="px-4 py-2 w-[180px] text-center bg-green-400 rounded-2xl hover:bg-green-500 cursor-pointer transition duration-300">
+    Đang tham gia
+  </div>
+)}
+
+
+
               <div className="relative w-[250px] max-w-sm p-4 items-center">
                 <FaSearch className="absolute left-7 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input
@@ -237,7 +322,8 @@ const EvenDetail = () => {
                   <FaUser />
                 </div>
                 <div>
-                  Sự kiện của <strong>{event?.createBy?.name || "Ẩn danh"}</strong>
+                  Sự kiện của
+              <strong> {event?.createBy?.name || "Ẩn danh"}</strong>
                 </div>
               </div>
 
@@ -259,11 +345,15 @@ const EvenDetail = () => {
             <div className="font-bold text-2xl">Số lượng người</div>
             <div className="flex justify-around items-center">
               <div className="flex flex-col gap-2 items-center">
-                <div className="text-2xl font-bold"> {event.numOfPendingUser} </div>
-                <div className="text-[18px]">Người đăng kí tham gia</div>
+                <div className="text-2xl font-bold">
+                  {event.numOfPendingUser}
+                </div>
+                <div className="text-[18px]">Người chờ duyệt tham gia</div>
               </div>
               <div className="flex flex-col gap-2 items-center">
-                <div className="text-2xl font-bold">{event.numOfJoiningUser}</div>
+                <div className="text-2xl font-bold">
+<div>{(event.numOfJoiningUser || 0) + 1}</div>
+                </div>
                 <div className="text-[18px]">Người đang tham gia </div>
               </div>
             </div>
