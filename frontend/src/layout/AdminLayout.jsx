@@ -109,19 +109,6 @@ const AdminLayout = () => {
             {sidebarOpen && <span>Quản lý bài đăng</span>}
           </NavLink>
 
-          {/* Báo cáo & Thống kê */}
-          <NavLink
-            to="/admin/statistic"
-            className={({ isActive }) =>
-              `flex gap-3 py-4 px-8 items-center cursor-pointer transition duration-200 hover:bg-[#0c1324] ${
-                isActive ? "bg-[#0c1324]" : ""
-              }`
-            }
-          >
-            <MdBarChart className="text-xl" />
-            {sidebarOpen && <span>Báo cáo & Thống kê</span>}
-          </NavLink>
-
           {/* Cấu hình hệ thống */}
           <NavLink
             to="/admin/settings"
@@ -132,7 +119,7 @@ const AdminLayout = () => {
             }
           >
             <MdSettings className="text-xl" />
-            {sidebarOpen && <span>Cấu hình hệ thống</span>}
+            {sidebarOpen && <span>Cài đặt</span>}
           </NavLink>
         </div>
       </div>

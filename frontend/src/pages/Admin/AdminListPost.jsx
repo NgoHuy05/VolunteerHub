@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo } from "react";
 import { getAllPost, deletePost, approvePost } from "../../api/post.api";
 import toast from "react-hot-toast";
 import { IoClose } from "react-icons/io5";
+import { convertDate } from "../../utils";
 
 const AdminListPost = () => {
   const [posts, setPosts] = useState([]);
@@ -161,7 +162,7 @@ const AdminListPost = () => {
               <th className="py-3 px-4">STT</th>
               <th className="py-3 px-4">Người đăng</th>
               <th className="py-3 px-4">Sự kiện</th>
-              <th className="py-3 px-4">Nội dung</th>
+              <th className="py-3 px-4">Ngày tạo</th>
               <th className="py-3 px-4 text-center">Trạng thái</th>
               <th className="py-3 px-4 text-center">Hành động</th>
             </tr>
@@ -182,8 +183,9 @@ const AdminListPost = () => {
                   <td className="py-3 px-4  max-w-[200px] ">
                     {post.eventId?.title || "Không có sự kiện"}
                   </td>
-                  <td className="py-3 px-4 max-w-[300px] whitespace-pre-line break-words">
-                    {post.content}
+         
+                  <td className="py-3 px-4 text-center">
+                    {convertDate(post.createdAt)}
                   </td>
 
                   <td className="py-3 px-4 text-center capitalize">
@@ -311,6 +313,15 @@ const AdminListPost = () => {
                       {currentPost.status}
                     </div>
                   </div>
+                  <div>
+  <div className="text-gray-500 text-sm uppercase font-semibold">
+    Ngày tạo
+  </div>
+  <div className="font-medium text-gray-800">
+    {convertDate(currentPost.createdAt)}
+  </div>
+</div>
+
                 </div>
 
                 {/* Nút duyệt / từ chối */}

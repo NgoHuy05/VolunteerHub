@@ -11,7 +11,6 @@ import { IoClose } from "react-icons/io5";
 const AdminListEvent = () => {
   const [events, setEvents] = useState([]);
   const [filteredEvents, setFilteredEvents] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -36,9 +35,7 @@ const AdminListEvent = () => {
       console.log(error.message);
 
       toast.error("Lỗi khi tải danh sách sự kiện");
-    } finally {
-      setLoading(false);
-    }
+    } 
   };
 
   const filterEvents = () => {
@@ -82,6 +79,7 @@ const AdminListEvent = () => {
       toast.error("Không thể xóa sự kiện");
     }
   };
+  
   useEffect(() => {
     document.body.style.overflow = isModalOpen ? "hidden" : "auto";
   }, [isModalOpen]);
@@ -92,10 +90,6 @@ const AdminListEvent = () => {
   const currentEvents = filteredEvents.slice(indexOfFirst, indexOfLast);
   const totalPages = Math.ceil(filteredEvents.length / eventsPerPage);
 
-  if (loading)
-    return (
-      <div className="text-center py-10 text-lg font-semibold">Đang tải...</div>
-    );
 
   return (
     <div className="bg-white p-5 rounded-xl shadow-md">
@@ -132,7 +126,6 @@ const AdminListEvent = () => {
               <th className="border p-2">Tên sự kiện</th>
               <th className="border p-2">Người tạo</th>
               <th className="border p-2">Trạng thái</th>
-              <th className="border p-2">Ngày tạo</th>
               <th className="border p-2">Hành động</th>
             </tr>
           </thead>
@@ -161,9 +154,7 @@ const AdminListEvent = () => {
                     {event.status}
                   </span>
                 </td>
-                <td className="border p-2 text-center">
-                  {new Date(event.createdAt).toLocaleDateString("vi-VN")}
-                </td>
+
                 <td className="border p-2 text-center">
                   <button
                     onClick={() => openModal(event._id)}
