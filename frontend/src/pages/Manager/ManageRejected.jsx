@@ -21,6 +21,8 @@ const ManageRejected = () => {
         setEvents(res.data.events);
       } catch (error) {
         console.error(error.response.data.message || error.message);
+      } finally {
+        setLoading(false);
       }
     };
     fetchEvent();
