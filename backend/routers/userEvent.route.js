@@ -6,6 +6,7 @@ const controllers = require("../controllers/userEvent.controller")
 router.get("/all/:id", authMiddleware, controllers.countAllUserByEventId);
 router.get("/pending/:id", authMiddleware, controllers.countPendingUserByEventId);
 router.get("/joining/:id", authMiddleware, controllers.countJoiningUserByEventId);
+router.get("/all", authMiddleware, controllers.getUserEvent);
 router.get("/events", authMiddleware, controllers.getEventByUserId);
 router.get("/events-status", authMiddleware, controllers.getEventByUserIdAndStatus);
 router.get("/pending-user", authMiddleware, controllers.getPendingUsersWithApprovedEvents);

@@ -101,7 +101,9 @@ const Home = () => {
                 AV
               </div>
               <div className="flex flex-col ">
-                <div onClick={() => navigate(`/event/detail/${post.event._id}`)} className="font-bold text-[25px] cursor-pointer hover:text-gray-600 transition duration-300">
+                <div onClick={() => navigate(`/event/detail/${post.event._id}`)} className="font-bold text-[2
+                
+                5px] cursor-pointer hover:text-gray-600 transition duration-300">
                   {post.event?.title || "Chưa có nhóm"}
                 </div>
                 <div className="flex gap-2 text-[13px] text-gray-600">

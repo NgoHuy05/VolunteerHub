@@ -16,6 +16,7 @@ const Profile = () => {
     name: "",
     location: "",
     gender: "none",
+    age: "",
     email: "",
   });
   const [isDisabled, setIsDisabled] = useState(true);

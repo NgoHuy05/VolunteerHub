@@ -22,6 +22,10 @@ export const countJoiningUserByEventId = (id) => {
     return axios.get(`${BASE_URL}/joining/${id}`, getAuthHeader());
 }
 
+export const getUserEvent = () => {
+    return axios.get(`${BASE_URL}/all`, getAuthHeader());
+}
+
 export const getEventByUserId = () => {
     return axios.get(`${BASE_URL}/events`, getAuthHeader());
 }

@@ -35,6 +35,28 @@ const createUserEvent = async (req, res) => {
   }
 };
 
+const getUserEvent = async (req, res) => {
+  try {
+    const userId = req.user.id; // Lấy từ token
+
+    // Tìm tất cả event mà user tham gia
+    const userEvents = await UserEvent.find({ userId: userId })
+      .populate("eventId")
+      .sort({ createdAt: -1 });
+
+    return res.status(200).json({
+      success: true,
+      message: "Lấy thành công danh sách sự kiện của user",
+      userEvents,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
 
 const getPendingUsersWithApprovedEvents = async (req, res) => {
   try {
@@ -230,5 +252,6 @@ module.exports = {
   countJoiningUserByEventId,
   getEventByUserId,
   getPendingUsersWithApprovedEvents,
-  approveUserJoinEvent
+  approveUserJoinEvent,
+  getUserEvent
 };
