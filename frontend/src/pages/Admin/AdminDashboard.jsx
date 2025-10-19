@@ -1,9 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  FaUsers,
-  FaRegNewspaper,
-  FaCalendarAlt,
-} from "react-icons/fa";
+import { FaUsers, FaRegNewspaper, FaCalendarAlt } from "react-icons/fa";
 import toast from "react-hot-toast";
 import { getAllUser } from "../../api/user.api";
 import { getAllEvent } from "../../api/event.api";
@@ -44,9 +40,7 @@ const AdminDashboard = () => {
       const users = usersRes.data.users || [];
       const events = eventsRes.data.events || [];
       const posts = postsRes.data.posts || [];
-console.log("usersRes:", usersRes.data);
-    console.log("eventsRes:", eventsRes.data);
-    console.log("postsRes:", postsRes.data);
+
       setStats({
         users: users.length,
         events: events.length,
@@ -90,6 +84,7 @@ console.log("usersRes:", usersRes.data);
       toast.error("Không thể tải dữ liệu dashboard");
     }
   };
+console.log(recentActivities);
 
   return (
     <div className="space-y-6">
@@ -122,7 +117,6 @@ console.log("usersRes:", usersRes.data);
             <p className="text-xl font-semibold">{stats.posts}</p>
           </div>
         </div>
-
       </div>
 
       {/* Biểu đồ tổng quan */}
@@ -147,23 +141,62 @@ console.log("usersRes:", usersRes.data);
         </ResponsiveContainer>
       </div>
 
-      {/* Hoạt động gần đây */}
-      <div className="bg-white p-5 rounded-2xl shadow">
-        <h3 className="text-lg font-semibold text-gray-700 mb-4">
-          Hoạt động gần đây
-        </h3>
-        {recentActivities.length === 0 ? (
-          <p className="text-gray-500 text-sm">Không có hoạt động mới.</p>
-        ) : (
-          <ul className="text-gray-700 text-sm space-y-2">
-            {recentActivities.map((activity, index) => (
-              <li key={index} className="border-b border-gray-100 pb-1">
-                {activity}
-              </li>
+<div className="bg-white p-5 rounded-2xl shadow">
+  <h3 className="text-lg font-semibold text-gray-700 mb-4">
+    Hoạt động gần đây
+  </h3>
+
+  {recentActivities.length === 0 ? (
+    <p className="text-gray-500 text-sm">Không có hoạt động mới.</p>
+  ) : (
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+      {/* Sự kiện */}
+      <div>
+        <h4 className="font-semibold text-green-600 mb-2 flex items-center gap-2">
+          <FaCalendarAlt /> Sự kiện
+        </h4>
+        <ul className="text-gray-700 text-sm space-y-2">
+          {recentActivities
+            .filter((a) => a.startsWith("📅"))
+            .map((a, i) => (
+              <li key={i} className="border-b border-gray-100 pb-1">{a}</li>
             ))}
-          </ul>
-        )}
+        </ul>
       </div>
+
+      {/* Bài viết */}
+      <div>
+        <h4 className="font-semibold text-purple-600 mb-2 flex items-center gap-2">
+          <FaRegNewspaper /> Bài viết
+        </h4>
+        <ul className="text-gray-700 text-sm space-y-2">
+          {recentActivities
+            .filter((a) => a.startsWith("📰"))
+            .map((a, i) => (
+              <li key={i} className="border-b border-gray-100 pb-1">{a}</li>
+            ))}
+        </ul>
+      </div>
+
+      {/* Người dùng */}
+      <div>
+        <h4 className="font-semibold text-blue-600 mb-2 flex items-center gap-2">
+          <FaUsers /> Người dùng
+        </h4>
+        <ul className="text-gray-700 text-sm space-y-2">
+          {recentActivities
+            .filter((a) => a.startsWith("👤"))
+            .map((a, i) => (
+              <li key={i} className="border-b border-gray-100 pb-1">{a}</li>
+            ))}
+        </ul>
+      </div>
+
+    </div>
+  )}
+</div>
+
     </div>
   );
 };
