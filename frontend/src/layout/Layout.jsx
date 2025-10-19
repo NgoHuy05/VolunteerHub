@@ -1,4 +1,4 @@
-import { NavLink, Outlet } from "react-router-dom";
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import ScrollToTop from "../components/ScrollToTop";
 import { FaSort } from "react-icons/fa";
@@ -30,6 +30,7 @@ const Layout = () => {
   const [selectedSort, setSelectedSort] = useState("Tất cả");
   const [user, setUser] = useState(null);
   const [eventJoining, setEventJoining] = useState([]);
+  const navigate = useNavigate();
   const ref = useRef(null);
   useClickOutside(ref, () => {
     setOpenDropdown(null);
@@ -106,6 +107,20 @@ const Layout = () => {
 
     fetchData();
   }, [selectedSort]); // 🔹 mỗi lần đổi category sort sẽ fetch lại posts
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const res = await getProfileUser();
+        setUser(res.data.user);
+      } catch (error) {
+        console.error(error.message || "Chưa login hoặc token hết hạn");
+        navigate("/login");
+      }
+    };
+    fetchUser();
+  }, [navigate]);
+
 
   return (
     <>
