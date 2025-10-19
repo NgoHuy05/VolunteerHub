@@ -2,7 +2,6 @@ import axios from "axios"
 import { getAuthHeader } from "./auth.api";
 const BASE_URL = "http://localhost:5555/userEvent";
 
-
 export const approveUserJoinEvent = (id, status) => {
     return axios.post(`${BASE_URL}/approve/${id}`, { status }, getAuthHeader());
 }

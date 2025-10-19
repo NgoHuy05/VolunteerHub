@@ -42,8 +42,14 @@ export const getEventById = (id) => {
 }
 
 export const createEvent = (data) => {
-    return axios.post(`${BASE_URL}/create`, data, getAuthHeader());
-}
+  return axios.post(`${BASE_URL}/create`, data, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+      ...getAuthHeader().headers, 
+    },
+  });
+};
+
 
 export const deleteEvent = (id) => {
     return axios.delete(`${BASE_URL}/delete/${id}`, getAuthHeader());

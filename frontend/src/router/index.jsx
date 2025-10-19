@@ -30,6 +30,7 @@ import AdminListEvent from "../pages/Admin/AdminListEvent";
 import AdminListUser from "../pages/Admin/AdminListUser";
 import AdminListPost from "../pages/Admin/AdminListPost";
 import AdminSetting from "../pages/Admin/AdminSetting";
+import ManageCreateEvent from "../pages/Manager/ManageCreateEvent";
 
 export const routers = createBrowserRouter([
   {
@@ -96,6 +97,10 @@ export const routers = createBrowserRouter([
     path: "manage",
     element: <ManageLayout />,
     children: [
+      {
+        path: "create",
+        element: <ManageCreateEvent />,
+      },
       {
         path: "your-event",
         element: <ManageYourEvent />,

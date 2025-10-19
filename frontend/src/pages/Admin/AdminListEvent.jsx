@@ -88,7 +88,7 @@ const AdminListEvent = () => {
     setConfirmingId(id);
     toast((t) => (
       <div className="text-sm">
-        <p className="mb-2">Bạn có chắc muốn xóa bài đăng này không?</p>
+        <p className="mb-2">Bạn có chắc muốn xóa sự kiện này không?</p>
         <div className="flex gap-2 justify-end">
           <button
             onClick={async () => {
@@ -98,10 +98,10 @@ const AdminListEvent = () => {
                 if (res.data.success) {
                   setEvents((prev) => prev.filter((p) => p._id !== id));
                   setIsModalOpen(false);
-                  toast.success("Xóa bài đăng thành công");
+                  toast.success("Xóa sự kiện thành công");
                 } else toast.error(res.data.message || "Xóa thất bại");
               } catch {
-                toast.error("Lỗi khi xóa bài viết");
+                toast.error("Lỗi khi xóa sự kiện");
               }
               setConfirmingId(null);
             }}

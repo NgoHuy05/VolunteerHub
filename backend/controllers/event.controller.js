@@ -9,10 +9,9 @@ const createEvent = async (req, res) => {
       category,
       startDate,
       endDate,
-      banner,
-      createBy,
-      status,
     } = req.body;
+
+    const bannerUrl = req.file?.path || ""; // URL do Cloudinary trả về
 
     const event = await Event.create({
       title,
@@ -21,21 +20,18 @@ const createEvent = async (req, res) => {
       category,
       startDate,
       endDate,
-      banner,
-      createBy,
-      status,
+      banner: bannerUrl,
+      createBy: req.user.id,
+      status: "pending",
     });
 
-    return res.status(201).json({
+    res.status(201).json({
       success: true,
-      message: "Tạo sự kiện thành công, vui lòng chờ phê duyệt.",
+      message: "Tạo sự kiện thành công, vui lòng chờ duyệt",
       event,
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Lỗi khi tạo sự kiện.",
-    });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 

@@ -3,6 +3,8 @@ import { FaSearch } from "react-icons/fa";
 import { FaUser } from "react-icons/fa";
 import { NavLink, Outlet } from "react-router-dom";
 import { FaArrowUp } from "react-icons/fa";
+import { IoCreate } from "react-icons/io5";
+
 import {
   FaCheckCircle,
   FaHourglassHalf,
@@ -39,6 +41,24 @@ const ManageLayout = () => {
                   className="w-full pl-10 p-2 border rounded-2xl focus:outline-none bg-gray-200"
                 />
               </div>
+
+              <NavLink
+                to="/manage/create"
+                className={({ isActive }) =>
+                  `flex items-center ml-1 mr-1 justify-between p-4 rounded gap-2 transition-all hover:bg-gray-200 duration-300 cursor-pointer ${
+                    isActive ? "bg-gray-200" : ""
+                  }`
+                }
+              >
+                <div className="flex items-center gap-2">
+                  <div className="text-[20px] text-red-500">
+                    <IoCreate />
+                  </div>
+                  <div className="text-[18px]">
+                    Tạo sự kiện mới
+                  </div>
+                </div>
+              </NavLink>
 
               <NavLink
                 to="/manage/post"
