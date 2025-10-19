@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { getAllPost, deletePost, approvePost } from "../../api/post.api";
 import toast from "react-hot-toast";
 import { IoClose } from "react-icons/io5";
@@ -10,9 +10,8 @@ const AdminListPost = () => {
   const [confirmingId, setConfirmingId] = useState(null);
   const [currentPost, setCurrentPost] = useState(null);
   const [isWatchDetail, setIsWatchDetail] = useState(false);
-
-  // Filter + pagination
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [filteredPosts, setFilteredPosts] = useState([]);
+  const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const postsPerPage = 8;
@@ -98,17 +97,26 @@ const AdminListPost = () => {
     setIsWatchDetail(true);
   };
 
-  // Lọc + tìm kiếm
-  const filteredPosts = useMemo(() => {
-    let data = [...posts];
-    if (statusFilter !== "all")
-      data = data.filter((p) => p.status === statusFilter);
-    if (search.trim())
-      data = data.filter((p) =>
-        p.userId?.name?.toLowerCase().includes(search.toLowerCase())
+  // Lọc theo từ khóa tìm kiếm
+  useEffect(() => {
+    const keyword = search.toLowerCase().trim();
+    let filtered = posts;
+
+    if (filter !== "all") {
+      filtered = filtered.filter((e) => e.eventId.status === filter);
+    }
+
+    if (keyword) {
+      filtered = filtered.filter(
+        (e) =>
+          e.userId?.name?.toLowerCase().includes(keyword) ||
+          e.eventId.title?.toLowerCase().includes(keyword)
       );
-    return data;
-  }, [posts, statusFilter, search]);
+    }
+
+    setFilteredPosts(filtered);
+    setCurrentPage(1);
+  }, [search, filter, posts]);
 
   // Pagination logic
   const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
@@ -117,9 +125,7 @@ const AdminListPost = () => {
     currentPage * postsPerPage
   );
 
-  useEffect(() => {
-    setCurrentPage(1); // reset page khi đổi filter
-  }, [statusFilter, search]);
+  console.log(posts);
 
   if (loading)
     return (
@@ -136,15 +142,15 @@ const AdminListPost = () => {
       <div className="flex flex-wrap gap-3 mb-5 items-center">
         <input
           type="text"
-          placeholder="Tìm theo tên người đăng..."
+          placeholder="Tìm theo tên sự kiện hoặc tên người đăng"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="border border-gray-300 rounded-lg px-3 py-2 focus:ring focus:ring-blue-200 outline-none"
+          className="w-[350px] border border-gray-300 rounded-lg px-3 py-2 focus:ring focus:ring-blue-200 outline-none"
         />
 
         <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
+          value={filter}
+          onChange={(e) => setFilter(e.target.value)}
           className="border border-gray-300 rounded-lg px-3 py-2 bg-white"
         >
           <option value="all">Tất cả</option>
@@ -183,7 +189,7 @@ const AdminListPost = () => {
                   <td className="py-3 px-4  max-w-[200px] ">
                     {post.eventId?.title || "Không có sự kiện"}
                   </td>
-         
+
                   <td className="py-3 px-4 text-center">
                     {convertDate(post.createdAt)}
                   </td>
@@ -314,14 +320,13 @@ const AdminListPost = () => {
                     </div>
                   </div>
                   <div>
-  <div className="text-gray-500 text-sm uppercase font-semibold">
-    Ngày tạo
-  </div>
-  <div className="font-medium text-gray-800">
-    {convertDate(currentPost.createdAt)}
-  </div>
-</div>
-
+                    <div className="text-gray-500 text-sm uppercase font-semibold">
+                      Ngày tạo
+                    </div>
+                    <div className="font-medium text-gray-800">
+                      {convertDate(currentPost.createdAt)}
+                    </div>
+                  </div>
                 </div>
 
                 {/* Nút duyệt / từ chối */}

@@ -7,6 +7,9 @@ const AdminListUser = () => {
   const [loading, setLoading] = useState(true);
   const [confirmingId, setConfirmingId] = useState(null);
   const [editingUser, setEditingUser] = useState(null);
+  const [filter, setFilter] = useState("all");
+  const [search, setSearch] = useState("");
+  const [filteredUsers, setFilteredUsers] = useState([]);
 
   // Model form đầy đủ field (email có nhưng sẽ readonly)
   const [form, setForm] = useState({
@@ -50,6 +53,21 @@ const AdminListUser = () => {
       status: user.status || "active",
     });
   };
+
+  useEffect(() => {
+    const keywords = search.toLowerCase().trim();
+    let filtered = users;
+
+    if (filter !== "all") {
+      filtered = filtered.filter(e => e.role === filter);
+    }
+
+    if (keywords) {
+      filtered = filtered.filter((e) => e?.name.toLowerCase().includes(keywords))
+    }
+
+    setFilteredUsers(filtered);
+  }, [search, filter, users]);
 
   // Đóng modal
   const closeModal = () => setEditingUser(null);
@@ -140,6 +158,28 @@ const AdminListUser = () => {
     <div className="p-5">
       <h2 className="text-2xl font-semibold mb-6">Danh sách người dùng</h2>
 
+      {/* Bộ lọc */}
+      <div className="flex flex-wrap gap-3 mb-5 items-center">
+        <input
+          type="text"
+          placeholder="Tìm theo tên người dùng"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-[350px] border border-gray-300 rounded-lg px-3 py-2 focus:ring focus:ring-blue-200 outline-none"
+        />
+
+        <select
+          value={filter}
+          onChange={(e) => setFilter(e.target.value)}
+          className="border border-gray-300 rounded-lg px-3 py-2 bg-white"
+        >
+          <option value="all">Tất cả</option>
+          <option value="admin">Admin</option>
+          <option value="manager">Manager</option>
+          <option value="user">User</option>
+        </select>
+      </div>
+
       <div className="overflow-x-auto bg-white rounded-xl shadow-md">
         <table className="w-full text-left border-collapse">
           <thead className="bg-gray-100 border-b">
@@ -153,8 +193,8 @@ const AdminListUser = () => {
             </tr>
           </thead>
           <tbody>
-            {users.length > 0 ? (
-              users.map((user, index) => (
+            {filteredUsers.length > 0 ? (
+              filteredUsers.map((user, index) => (
                 <tr key={user._id} className="border-b hover:bg-gray-50 transition">
                   <td className="py-3 px-4">{index + 1}</td>
                   <td className="py-3 px-4">{user.name}</td>

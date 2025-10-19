@@ -23,9 +23,26 @@ const AdminListEvent = () => {
     fetchEvents();
   }, []);
 
+  // Lọc theo từ khóa tìm kiếm
   useEffect(() => {
-    filterEvents();
-  }, [filter, events]);
+    const keyword = search.toLowerCase().trim();
+    let filtered = events;
+
+    if (filter !== "all") {
+      filtered = filtered.filter((e) => e.status === filter);
+    }
+
+    if (keyword) {
+      filtered = filtered.filter(
+        (e) =>
+          e.createBy?.name?.toLowerCase().includes(keyword) ||
+          e.title?.toLowerCase().includes(keyword)
+      );
+    }
+
+    setFilteredEvents(filtered);
+    setCurrentPage(1);
+  }, [search, filter, events]);
 
   const fetchEvents = async () => {
     try {
@@ -35,13 +52,7 @@ const AdminListEvent = () => {
       console.log(error.message);
 
       toast.error("Lỗi khi tải danh sách sự kiện");
-    } 
-  };
-
-  const filterEvents = () => {
-    if (filter === "all") setFilteredEvents(events);
-    else setFilteredEvents(events.filter((e) => e.status === filter));
-    setCurrentPage(1);
+    }
   };
 
   const openModal = async (id) => {
@@ -79,30 +90,28 @@ const AdminListEvent = () => {
       toast.error("Không thể xóa sự kiện");
     }
   };
-  
+
   useEffect(() => {
     document.body.style.overflow = isModalOpen ? "hidden" : "auto";
   }, [isModalOpen]);
 
-  // Pagination
   const indexOfLast = currentPage * eventsPerPage;
   const indexOfFirst = indexOfLast - eventsPerPage;
   const currentEvents = filteredEvents.slice(indexOfFirst, indexOfLast);
   const totalPages = Math.ceil(filteredEvents.length / eventsPerPage);
 
-
   return (
     <div className="bg-white p-5 rounded-xl shadow-md">
-  <h2 className="text-2xl font-bold text-gray-800">Danh sách sự kiện</h2>
+      <h2 className="text-2xl font-bold text-gray-800">Danh sách sự kiện</h2>
 
       {/* Bộ lọc */}
       <div className="flex flex-wrap gap-3 mb-5 items-center">
         <input
           type="text"
-          placeholder="Tìm theo tên người đăng..."
+          placeholder="Tìm theo tên sự kiện hoặc tên người đăng"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="border border-gray-300 rounded-lg px-3 py-2 focus:ring focus:ring-blue-200 outline-none"
+          className="w-[350px] border border-gray-300 rounded-lg px-3 py-2 focus:ring focus:ring-blue-200 outline-none"
         />
 
         <select
@@ -169,8 +178,7 @@ const AdminListEvent = () => {
         </table>
       )}
 
-
-{/* Pagination */}
+      {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex justify-center items-center mt-5 gap-2">
           <button
@@ -202,7 +210,6 @@ const AdminListEvent = () => {
           </button>
         </div>
       )}
-
 
       {/* Modal xem chi tiết */}
       {isModalOpen && currentEvent && (

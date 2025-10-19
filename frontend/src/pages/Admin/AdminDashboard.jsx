@@ -196,7 +196,7 @@ console.log(recentActivities);
     </div>
   )}
 </div>
-
+  
     </div>
   );
 };
