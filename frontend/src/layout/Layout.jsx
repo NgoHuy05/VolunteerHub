@@ -54,7 +54,7 @@ const Layout = () => {
     const fetchEventJoing = async () => {
       try {
         const resEventJoining = await getEventByUserId();
-        setEventJoining(resEventJoining.data.events);
+        setEventJoining(resEventJoining?.data?.events);
       } catch (error) {
         console.error(error?.response?.data?.message || error.message);
       }
@@ -152,19 +152,18 @@ const Layout = () => {
             <div className="mt-5 mb-5">Sự kiện đang tham gia</div>
             <div className="flex flex-col gap-2">
               {eventJoining
-                .filter((event) => event.status === "joining")
                 .map((ev) => (
                   <NavLink
-                    key={ev.eventId._id}
-                    to={`/event/detail/${ev.eventId._id}`}
+                    key={ev._id}
+                    to={`/event/detail/${ev._id}`}
                     className="flex items-center gap-3 p-3 rounded-lg bg-white shadow-sm hover:shadow-md hover:bg-gray-100 transition-all duration-300 "
                   >
                     <div
-                      style={{ backgroundImage: `url(${ev.eventId.banner})` }}
+                      style={{ backgroundImage: `url(${ev.banner})` }}
                       className="size-[60px] bg-cover bg-center rounded-md flex-shrink-0"
                     ></div>
                     <h3 className="text-base font-medium text-gray-800">
-                      {ev.eventId.title}
+                      {ev.title}
                     </h3>
                   </NavLink>
                 ))}
