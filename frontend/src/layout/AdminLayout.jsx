@@ -29,6 +29,19 @@ const AdminLayout = () => {
       console.error(error?.response?.data?.message || error);
     }
   };
+useEffect(() => {
+  const handleResize = () => {
+    if (window.innerWidth < 1024) {
+      setSidebarOpen(false);
+    } else {
+      setSidebarOpen(true);
+    }
+  };
+
+  handleResize(); // chạy 1 lần khi load
+  window.addEventListener("resize", handleResize);
+  return () => window.removeEventListener("resize", handleResize);
+}, []);
 
   useEffect(() => {
     if (user && user.role !== "admin") {
