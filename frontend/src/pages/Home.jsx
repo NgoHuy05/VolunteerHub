@@ -100,8 +100,8 @@ const Home = () => {
               <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
                 AV
               </div>
-              <div className="flex flex-col">
-                <div onClick={() => navigate(`/event/detail/${post.event._id}`)} className="font-bold text-[15px] cursor-pointer hover:text-gray-600 transition duration-300">
+              <div className="flex flex-col ">
+                <div onClick={() => navigate(`/event/detail/${post.event._id}`)} className="font-bold text-[25px] cursor-pointer hover:text-gray-600 transition duration-300">
                   {post.event?.title || "Chưa có nhóm"}
                 </div>
                 <div className="flex gap-2 text-[13px] text-gray-600">
@@ -178,7 +178,7 @@ const Home = () => {
 
             {/* Nội dung bài viết */}
             <div className="p-4 flex-1 overflow-y-auto flex flex-col gap-2">
-              <div onClick={() => navigate(`/event/detail/${currentPost.event._id}`)} className="font-bold text-[15px] cursor-pointer hover:text-gray-600 transition duration-300">
+              <div onClick={() => navigate(`/event/detail/${currentPost.event._id}`)} className="font-bold text-[25px] cursor-pointer hover:text-gray-600 transition duration-300">
                 {currentPost.event?.title || "Chưa có nhóm"}
               </div>
               <div className="text-[15px]">{currentPost.content}</div>
