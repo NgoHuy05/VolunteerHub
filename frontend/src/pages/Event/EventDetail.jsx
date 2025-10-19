@@ -22,7 +22,7 @@ import {
   countJoiningUserByEventId,
   countPendingUserByEventId,
 } from "../../api/userEvent.api";
-import { convertDate, getTimeAgo } from "../../utils";
+import { convertDate, getPostTimeAgo,  } from "../../utils";
 
 const EvenDetail = () => {
   const [isSelectIntrodution, setIsSelectIntrodution] = useState(true);
@@ -305,7 +305,7 @@ const EvenDetail = () => {
                       </div>
                       <div className="flex gap-2 text-[13px] text-gray-600">
                         <div>{post?.userId?.name}</div>
-                        <div>{getTimeAgo(post)}</div>
+                        <div>{getPostTimeAgo(post)}</div>
                       </div>
                     </div>
                   </div>
