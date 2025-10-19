@@ -17,6 +17,7 @@ const AdminListEvent = () => {
   const [currentEvent, setCurrentEvent] = useState(null);
   const [search, setSearch] = useState("");
   const [confirmingId, setConfirmingId] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const eventsPerPage = 10;
 
@@ -47,12 +48,15 @@ const AdminListEvent = () => {
 
   const fetchEvents = async () => {
     try {
+      setLoading(true);
+
       const res = await getAllEvent();
       setEvents(res.data.events || []);
     } catch (error) {
       console.log(error.message);
-
       toast.error("Lỗi khi tải danh sách sự kiện");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -80,7 +84,7 @@ const AdminListEvent = () => {
       toast.error("Không thể cập nhật trạng thái sự kiện");
     }
   };
- const handleDelete = async (id) => {
+  const handleDelete = async (id) => {
     setConfirmingId(id);
     toast((t) => (
       <div className="text-sm">
@@ -118,7 +122,6 @@ const AdminListEvent = () => {
       </div>
     ));
   };
- 
 
   useEffect(() => {
     document.body.style.overflow = isModalOpen ? "hidden" : "auto";
@@ -128,7 +131,13 @@ const AdminListEvent = () => {
   const indexOfFirst = indexOfLast - eventsPerPage;
   const currentEvents = filteredEvents.slice(indexOfFirst, indexOfLast);
   const totalPages = Math.ceil(filteredEvents.length / eventsPerPage);
-
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-[300px]">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-gray-800"></div>
+      </div>
+    );
+  }
   return (
     <div className="bg-white p-5 rounded-xl shadow-md">
       <h2 className="text-2xl font-bold text-gray-800">Danh sách sự kiện</h2>
@@ -363,8 +372,7 @@ const AdminListEvent = () => {
                   onClick={() => handleDelete(currentEvent._id)}
                   className="w-[100px] py-2 rounded-xl font-semibold text-white bg-gray-500 hover:bg-gray-600 shadow-sm transition"
                 >
-                                          {confirmingId === currentEvent._id ? "Đang xóa..." : "Xóa"}
-
+                  {confirmingId === currentEvent._id ? "Đang xóa..." : "Xóa"}
                 </button>
               </div>
             </div>

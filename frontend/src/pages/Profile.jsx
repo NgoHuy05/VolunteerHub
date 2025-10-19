@@ -10,6 +10,7 @@ import { BsUpload } from "react-icons/bs";
 import { CgProfile } from "react-icons/cg";
 
 const Profile = () => {
+  const [loading, setLoading] = useState(true);
   const [isSelectAccount, setIsSelectAccount] = useState(true);
   const [user, setUser] = useState({});
   const [form, setForm] = useState({
@@ -30,6 +31,7 @@ const Profile = () => {
   useEffect(() => {
     const fetchProfileUser = async () => {
       try {
+        setLoading(true);
         const res = await getProfileUser();
         const data = res?.data?.user || {};
         setUser(data);
@@ -44,6 +46,8 @@ const Profile = () => {
         toast.error(
           error?.response?.data?.message || "Không thể tải thông tin người dùng"
         );
+      } finally {
+        setLoading(false);
       }
     };
     fetchProfileUser();
@@ -104,6 +108,13 @@ const Profile = () => {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-[300px]">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-gray-800"></div>
+      </div>
+    );
+  }
   return (
     <>
       <Header />

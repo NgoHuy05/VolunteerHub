@@ -14,7 +14,8 @@ const Home = () => {
   const [currentPost, setCurrentPost] = useState(null);
   const { posts, setPosts, user } = useOutletContext();
   const [content, setContent] = useState(null);
-  const navigate = useNavigate(); 
+
+  const navigate = useNavigate();
 
   // 🔹 Mở modal bình luận
   const handleOpenModal = (post) => {
@@ -65,9 +66,9 @@ const Home = () => {
       );
 
       setCurrentPost((prev) => ({
-      ...prev,
-      comments: [...prev.comments, { content: content, userId: user }],
-    }));
+        ...prev,
+        comments: [...prev.comments, { content: content, userId: user }],
+      }));
       setContent("");
     } catch (error) {
       toast.error(
@@ -75,7 +76,6 @@ const Home = () => {
       );
     }
   };
-
 
   // 🔹 Ẩn cuộn khi mở modal
   useEffect(() => {
@@ -101,9 +101,12 @@ const Home = () => {
                 AV
               </div>
               <div className="flex flex-col ">
-                <div onClick={() => navigate(`/event/detail/${post.event._id}`)} className="font-bold text-[2
+                <div
+                  onClick={() => navigate(`/event/detail/${post.event._id}`)}
+                  className="font-bold text-[2
                 
-                5px] cursor-pointer hover:text-gray-600 transition duration-300">
+                5px] cursor-pointer hover:text-gray-600 transition duration-300"
+                >
                   {post.event?.title || "Chưa có nhóm"}
                 </div>
                 <div className="flex gap-2 text-[13px] text-gray-600">
@@ -180,7 +183,12 @@ const Home = () => {
 
             {/* Nội dung bài viết */}
             <div className="p-4 flex-1 overflow-y-auto flex flex-col gap-2">
-              <div onClick={() => navigate(`/event/detail/${currentPost.event._id}`)} className="font-bold text-[25px] cursor-pointer hover:text-gray-600 transition duration-300">
+              <div
+                onClick={() =>
+                  navigate(`/event/detail/${currentPost.event._id}`)
+                }
+                className="font-bold text-[25px] cursor-pointer hover:text-gray-600 transition duration-300"
+              >
                 {currentPost.event?.title || "Chưa có nhóm"}
               </div>
               <div className="text-[15px]">{currentPost.content}</div>

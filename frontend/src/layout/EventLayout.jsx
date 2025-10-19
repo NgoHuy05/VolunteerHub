@@ -102,7 +102,9 @@ const EventLayout = () => {
                       }
                     >
                       <FaHourglassHalf className="text-yellow-500 text-[20px]" />
-                      <div className="text-[16px]">Chờ duyệt tham gia sự kiện</div>
+                      <div className="text-[16px]">
+                        Chờ duyệt tham gia sự kiện
+                      </div>
                     </NavLink>
                     <NavLink
                       to="rejected"
@@ -113,7 +115,9 @@ const EventLayout = () => {
                       }
                     >
                       <MdCancel className="text-red-500 text-[20px]" />
-                      <div className="text-[16px]">Bị từ chối tham gia sự kiện </div>
+                      <div className="text-[16px]">
+                        Bị từ chối tham gia sự kiện{" "}
+                      </div>
                     </NavLink>
                     <NavLink
                       to="completed"

@@ -21,7 +21,6 @@ const ManageLayout = () => {
     });
   };
 
-
   return (
     <>
       <Header />

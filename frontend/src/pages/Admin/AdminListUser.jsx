@@ -25,6 +25,8 @@ const AdminListUser = () => {
   // Lấy danh sách người dùng
   const fetchUsers = async () => {
     try {
+      setLoading(true);
+
       const res = await getAllUser();
       if (res.data.success) setUsers(res.data.users);
       else toast.error("Không thể lấy danh sách người dùng");
@@ -59,11 +61,13 @@ const AdminListUser = () => {
     let filtered = users;
 
     if (filter !== "all") {
-      filtered = filtered.filter(e => e.role === filter);
+      filtered = filtered.filter((e) => e.role === filter);
     }
 
     if (keywords) {
-      filtered = filtered.filter((e) => e?.name.toLowerCase().includes(keywords))
+      filtered = filtered.filter((e) =>
+        e?.name.toLowerCase().includes(keywords)
+      );
     }
 
     setFilteredUsers(filtered);
@@ -147,12 +151,13 @@ const AdminListUser = () => {
     document.body.style.overflow = editingUser ? "hidden" : "auto";
   }, [editingUser]);
 
-  if (loading)
+  if (loading) {
     return (
       <div className="flex justify-center items-center h-[300px]">
         <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-gray-800"></div>
       </div>
     );
+  }
 
   return (
     <div className="p-5">
@@ -195,7 +200,10 @@ const AdminListUser = () => {
           <tbody>
             {filteredUsers.length > 0 ? (
               filteredUsers.map((user, index) => (
-                <tr key={user._id} className="border-b hover:bg-gray-50 transition">
+                <tr
+                  key={user._id}
+                  className="border-b hover:bg-gray-50 transition"
+                >
                   <td className="py-3 px-4">{index + 1}</td>
                   <td className="py-3 px-4">{user.name}</td>
                   <td className="py-3 px-4">{user.email}</td>
@@ -220,7 +228,10 @@ const AdminListUser = () => {
               ))
             ) : (
               <tr>
-                <td colSpan="6" className="text-center py-5 text-gray-500 italic">
+                <td
+                  colSpan="6"
+                  className="text-center py-5 text-gray-500 italic"
+                >
                   Không có người dùng nào.
                 </td>
               </tr>
@@ -236,7 +247,10 @@ const AdminListUser = () => {
             {/* Header */}
             <div className="flex justify-between items-center px-5 py-3 border-b bg-gray-50">
               <h3 className="text-lg font-semibold">✏️ Chỉnh sửa người dùng</h3>
-              <button onClick={closeModal} className="text-2xl font-bold hover:text-gray-500">
+              <button
+                onClick={closeModal}
+                className="text-2xl font-bold hover:text-gray-500"
+              >
                 ×
               </button>
             </div>
@@ -251,7 +265,9 @@ const AdminListUser = () => {
 
               {/* Email hiển thị nhưng không chỉnh được */}
               <div>
-                <label className="block text-sm font-medium text-gray-600 mb-1">Email</label>
+                <label className="block text-sm font-medium text-gray-600 mb-1">
+                  Email
+                </label>
                 <input
                   type="email"
                   value={form.email}
@@ -259,7 +275,9 @@ const AdminListUser = () => {
                   disabled
                   className="w-full border rounded-lg px-3 py-2 bg-gray-100 text-gray-600 cursor-not-allowed"
                 />
-                <div className="text-xs text-gray-500 mt-1">Email không thể chỉnh sửa.</div>
+                <div className="text-xs text-gray-500 mt-1">
+                  Email không thể chỉnh sửa.
+                </div>
               </div>
 
               <Input
@@ -310,10 +328,16 @@ const AdminListUser = () => {
 
             {/* Footer */}
             <div className="flex justify-end gap-3 px-5 py-3 border-t bg-gray-50">
-              <button onClick={closeModal} className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">
+              <button
+                onClick={closeModal}
+                className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300"
+              >
                 Hủy
               </button>
-              <button onClick={handleSave} className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+              <button
+                onClick={handleSave}
+                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+              >
                 Lưu thay đổi
               </button>
             </div>
@@ -327,7 +351,9 @@ const AdminListUser = () => {
 // Component Input tái sử dụng
 const Input = ({ label, type = "text", value, onChange }) => (
   <div>
-    <label className="block text-sm font-medium text-gray-600 mb-1">{label}</label>
+    <label className="block text-sm font-medium text-gray-600 mb-1">
+      {label}
+    </label>
     <input
       type={type}
       value={value}
@@ -340,7 +366,9 @@ const Input = ({ label, type = "text", value, onChange }) => (
 // Component Select tái sử dụng
 const Select = ({ label, value, onChange, options }) => (
   <div>
-    <label className="block text-sm font-medium text-gray-600 mb-1">{label}</label>
+    <label className="block text-sm font-medium text-gray-600 mb-1">
+      {label}
+    </label>
     <select
       value={value}
       onChange={onChange}

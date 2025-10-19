@@ -95,6 +95,7 @@ const EventList = () => {
   const categoryRef = useRef(null);
   const timeRef = useRef(null);
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchEventApproved();
@@ -103,45 +104,49 @@ const EventList = () => {
 
   const fetchEventApproved = async () => {
     try {
+      setLoading(true);
       const res = await getApprovedEventsUserNotJoined();
       setEvents(res.data.events);
     } catch (error) {
       toast.error(error?.response?.data?.message || error.message);
       console.error(error?.response?.data?.message || error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
   const fetchUser = async () => {
     try {
+      setLoading(true);
       const res = await getProfileUser();
       setUser(res.data.user);
     } catch (error) {
       toast.error(error?.response?.data?.message || error.message);
       console.error(error?.response?.data?.message || error.message);
+    } finally {
+      setLoading(false);
     }
-  }
+  };
 
-const handleRegisterJoinEvent = async (eventId) => {
-  try {
-    if (!user) return toast.error("Bạn cần đăng nhập trước khi tham gia!");
+  const handleRegisterJoinEvent = async (eventId) => {
+    try {
+      if (!user) return toast.error("Bạn cần đăng nhập trước khi tham gia!");
 
-    const data = {
-      userId: user._id,
-      eventId,
-      role: "user",
-      status: "pending",
-      startDay: new Date(),
-    };
+      const data = {
+        userId: user._id,
+        eventId,
+        role: "user",
+        status: "pending",
+        startDay: new Date(),
+      };
 
-    const res = await createUserEvent(data);
-    toast.success(res.data.message || "Đăng ký tham gia thành công!");
-    fetchEventApproved(); // 🔄 Cập nhật lại danh sách
-  } catch (error) {
-    toast.error(error?.response?.data?.message || "Lỗi khi đăng ký sự kiện");
-  }
-};
-
-
+      const res = await createUserEvent(data);
+      toast.success(res.data.message || "Đăng ký tham gia thành công!");
+      fetchEventApproved(); // 🔄 Cập nhật lại danh sách
+    } catch (error) {
+      toast.error(error?.response?.data?.message || "Lỗi khi đăng ký sự kiện");
+    }
+  };
 
   useClickOutside(categoryRef, () => {
     if (openDropdown === "category") setOpenDropdown(null);
@@ -181,6 +186,13 @@ const handleRegisterJoinEvent = async (eventId) => {
 
     return passCategory && passTime;
   });
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-[300px]">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-gray-800"></div>
+      </div>
+    );
+  }
   return (
     <>
       <div className="flex flex-col gap-4">
@@ -305,7 +317,7 @@ const handleRegisterJoinEvent = async (eventId) => {
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    handleRegisterJoinEvent(event._id)
+                    handleRegisterJoinEvent(event._id);
                   }}
                   className="p-2 bg-green-500 text-white rounded-2xl mt-auto hover:bg-green-600 transition-all hover:scale-105 duration-300 cursor-pointer"
                 >

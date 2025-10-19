@@ -1,10 +1,5 @@
 const ManageNotification = () => {
-
-  return (
-    <>
-      ManageNotification
-    </>
-  );
+  return <>ManageNotification</>;
 };
 
 export default ManageNotification;

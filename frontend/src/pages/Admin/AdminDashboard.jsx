@@ -21,6 +21,7 @@ const AdminDashboard = () => {
     events: 0,
     posts: 0,
   });
+  const [loading, setLoading] = useState(true);
 
   const [recentActivities, setRecentActivities] = useState([]);
   const [chartData, setChartData] = useState([]);
@@ -31,6 +32,8 @@ const AdminDashboard = () => {
 
   const fetchStats = async () => {
     try {
+      setLoading(true);
+
       const [usersRes, eventsRes, postsRes] = await Promise.all([
         getAllUser(),
         getAllEvent(),
@@ -82,10 +85,17 @@ const AdminDashboard = () => {
     } catch (error) {
       console.error(error.message);
       toast.error("Không thể tải dữ liệu dashboard");
+    } finally {
+      setLoading(false);
     }
   };
-console.log(recentActivities);
-
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-[300px]">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-gray-800"></div>
+      </div>
+    );
+  }
   return (
     <div className="space-y-6">
       <h2 className="text-3xl font-bold text-gray-800">
@@ -141,62 +151,65 @@ console.log(recentActivities);
         </ResponsiveContainer>
       </div>
 
-<div className="bg-white p-5 rounded-2xl shadow">
-  <h3 className="text-lg font-semibold text-gray-700 mb-4">
-    Hoạt động gần đây
-  </h3>
+      <div className="bg-white p-5 rounded-2xl shadow">
+        <h3 className="text-lg font-semibold text-gray-700 mb-4">
+          Hoạt động gần đây
+        </h3>
 
-  {recentActivities.length === 0 ? (
-    <p className="text-gray-500 text-sm">Không có hoạt động mới.</p>
-  ) : (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {recentActivities.length === 0 ? (
+          <p className="text-gray-500 text-sm">Không có hoạt động mới.</p>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Sự kiện */}
+            <div>
+              <h4 className="font-semibold text-green-600 mb-2 flex items-center gap-2">
+                <FaCalendarAlt /> Sự kiện
+              </h4>
+              <ul className="text-gray-700 text-sm space-y-2">
+                {recentActivities
+                  .filter((a) => a.startsWith("📅"))
+                  .map((a, i) => (
+                    <li key={i} className="border-b border-gray-100 pb-1">
+                      {a}
+                    </li>
+                  ))}
+              </ul>
+            </div>
 
-      {/* Sự kiện */}
-      <div>
-        <h4 className="font-semibold text-green-600 mb-2 flex items-center gap-2">
-          <FaCalendarAlt /> Sự kiện
-        </h4>
-        <ul className="text-gray-700 text-sm space-y-2">
-          {recentActivities
-            .filter((a) => a.startsWith("📅"))
-            .map((a, i) => (
-              <li key={i} className="border-b border-gray-100 pb-1">{a}</li>
-            ))}
-        </ul>
+            {/* Bài viết */}
+            <div>
+              <h4 className="font-semibold text-purple-600 mb-2 flex items-center gap-2">
+                <FaRegNewspaper /> Bài viết
+              </h4>
+              <ul className="text-gray-700 text-sm space-y-2">
+                {recentActivities
+                  .filter((a) => a.startsWith("📰"))
+                  .map((a, i) => (
+                    <li key={i} className="border-b border-gray-100 pb-1">
+                      {a}
+                    </li>
+                  ))}
+              </ul>
+            </div>
+
+            {/* Người dùng */}
+            <div>
+              <h4 className="font-semibold text-blue-600 mb-2 flex items-center gap-2">
+                <FaUsers /> Người dùng
+              </h4>
+              <ul className="text-gray-700 text-sm space-y-2">
+                {recentActivities
+                  .filter((a) => a.startsWith("👤"))
+                  .map((a, i) => (
+                    <li key={i} className="border-b border-gray-100 pb-1">
+                      {a}
+                    </li>
+                  ))}
+              </ul>
+            </div>
+          </div>
+        )}
       </div>
-
-      {/* Bài viết */}
-      <div>
-        <h4 className="font-semibold text-purple-600 mb-2 flex items-center gap-2">
-          <FaRegNewspaper /> Bài viết
-        </h4>
-        <ul className="text-gray-700 text-sm space-y-2">
-          {recentActivities
-            .filter((a) => a.startsWith("📰"))
-            .map((a, i) => (
-              <li key={i} className="border-b border-gray-100 pb-1">{a}</li>
-            ))}
-        </ul>
-      </div>
-
-      {/* Người dùng */}
-      <div>
-        <h4 className="font-semibold text-blue-600 mb-2 flex items-center gap-2">
-          <FaUsers /> Người dùng
-        </h4>
-        <ul className="text-gray-700 text-sm space-y-2">
-          {recentActivities
-            .filter((a) => a.startsWith("👤"))
-            .map((a, i) => (
-              <li key={i} className="border-b border-gray-100 pb-1">{a}</li>
-            ))}
-        </ul>
-      </div>
-
-    </div>
-  )}
-</div>
-  
     </div>
   );
 };

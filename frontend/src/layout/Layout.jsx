@@ -30,6 +30,8 @@ const Layout = () => {
   const [selectedSort, setSelectedSort] = useState("Tất cả");
   const [user, setUser] = useState(null);
   const [eventJoining, setEventJoining] = useState([]);
+  const [loading, setLoading] = useState(true);
+
   const navigate = useNavigate();
   const ref = useRef(null);
   useClickOutside(ref, () => {
@@ -53,10 +55,13 @@ const Layout = () => {
   useEffect(() => {
     const fetchEventJoing = async () => {
       try {
+        setLoading(true);
         const resEventJoining = await getEventByUserId();
         setEventJoining(resEventJoining?.data?.events);
       } catch (error) {
         console.error(error?.response?.data?.message || error.message);
+      } finally {
+        setLoading(false);
       }
     };
     fetchEventJoing();
@@ -65,6 +70,8 @@ const Layout = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setLoading(true);
+
         const resUser = await getProfileUser();
         setUser(resUser.data.user);
 
@@ -102,6 +109,8 @@ const Layout = () => {
         setPosts(postsWithDetails);
       } catch (error) {
         console.error(error?.response?.data?.message || error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -111,16 +120,27 @@ const Layout = () => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
+        setLoading(true);
+
         const res = await getProfileUser();
         setUser(res.data.user);
       } catch (error) {
         console.error(error.message || "Chưa login hoặc token hết hạn");
         navigate("/login");
+      } finally {
+        setLoading(false);
       }
     };
     fetchUser();
   }, [navigate]);
 
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-[300px]">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-gray-800"></div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -151,22 +171,21 @@ const Layout = () => {
             <div className="w-full h-[1px] bg-gray-500 mt-5"></div>
             <div className="mt-5 mb-5">Sự kiện đang tham gia</div>
             <div className="flex flex-col gap-2">
-              {eventJoining
-                .map((ev) => (
-                  <NavLink
-                    key={ev._id}
-                    to={`/event/detail/${ev._id}`}
-                    className="flex items-center gap-3 p-3 rounded-lg bg-white shadow-sm hover:shadow-md hover:bg-gray-100 transition-all duration-300 "
-                  >
-                    <div
-                      style={{ backgroundImage: `url(${ev.banner})` }}
-                      className="size-[60px] bg-cover bg-center rounded-md flex-shrink-0"
-                    ></div>
-                    <h3 className="text-base font-medium text-gray-800">
-                      {ev.title}
-                    </h3>
-                  </NavLink>
-                ))}
+              {eventJoining.map((ev) => (
+                <NavLink
+                  key={ev._id}
+                  to={`/event/detail/${ev._id}`}
+                  className="flex items-center gap-3 p-3 rounded-lg bg-white shadow-sm hover:shadow-md hover:bg-gray-100 transition-all duration-300 "
+                >
+                  <div
+                    style={{ backgroundImage: `url(${ev.banner})` }}
+                    className="size-[60px] bg-cover bg-center rounded-md flex-shrink-0"
+                  ></div>
+                  <h3 className="text-base font-medium text-gray-800">
+                    {ev.title}
+                  </h3>
+                </NavLink>
+              ))}
             </div>
           </div>
         </div>

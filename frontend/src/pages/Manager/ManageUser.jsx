@@ -2,12 +2,16 @@ import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { convertDate } from "../../utils";
 import { IoClose } from "react-icons/io5";
-import { approveUserJoinEvent, getPendingUsersWithApprovedEvents } from "../../api/userEvent.api";
+import {
+  approveUserJoinEvent,
+  getPendingUsersWithApprovedEvents,
+} from "../../api/userEvent.api";
 
 const ManageUser = () => {
   const [userEvents, setUserEvents] = useState([]);
   const [current, setCurrent] = useState(null);
   const [isWatchDetail, setIsWatchDetail] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchPendingUsers();
@@ -15,10 +19,13 @@ const ManageUser = () => {
 
   const fetchPendingUsers = async () => {
     try {
+      setLoading(true);
       const res = await getPendingUsersWithApprovedEvents();
       setUserEvents(res.data.data);
     } catch (error) {
       toast.error(error?.response?.data?.message || error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -45,7 +52,13 @@ const ManageUser = () => {
   useEffect(() => {
     document.body.style.overflow = isWatchDetail ? "hidden" : "auto";
   }, [isWatchDetail]);
-
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-[300px]">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-gray-800"></div>
+      </div>
+    );
+  }
   return (
     <div className="min-h-screen p-6 bg-gray-50">
       {userEvents.length === 0 ? (
@@ -104,7 +117,7 @@ const ManageUser = () => {
                       Xem chi tiết
                     </button>
                     <button
-                    onClick={() => handleApprovedUser(item._id, "joining")}
+                      onClick={() => handleApprovedUser(item._id, "joining")}
                       className="w-[110px] py-2 text-sm font-semibold text-white bg-green-500 hover:bg-green-600 rounded-xl transition duration-300 cursor-pointer"
                     >
                       Duyệt
@@ -147,7 +160,6 @@ const ManageUser = () => {
                         <div className="font-medium text-gray-800">
                           {`Địa chỉ: ${current.userId?.location}`}
                         </div>
-
                       </div>
 
                       <div>
@@ -171,10 +183,20 @@ const ManageUser = () => {
 
                     {/* Nút hành động */}
                     <div className="flex justify-center gap-5 mt-5">
-                      <button onClick={() => handleApprovedUser(current._id, "joining")} className="w-[100px] py-2 rounded-xl font-semibold text-white bg-green-500 hover:bg-green-600 shadow-sm transition duration-300 cursor-pointer">
+                      <button
+                        onClick={() =>
+                          handleApprovedUser(current._id, "joining")
+                        }
+                        className="w-[100px] py-2 rounded-xl font-semibold text-white bg-green-500 hover:bg-green-600 shadow-sm transition duration-300 cursor-pointer"
+                      >
                         Duyệt
                       </button>
-                      <button onClick={() => handleApprovedUser(current._id, "rejected")} className="w-[100px] py-2 rounded-xl font-semibold text-white bg-red-500 hover:bg-red-600 shadow-sm transition duration-300 cursor-pointer">
+                      <button
+                        onClick={() =>
+                          handleApprovedUser(current._id, "rejected")
+                        }
+                        className="w-[100px] py-2 rounded-xl font-semibold text-white bg-red-500 hover:bg-red-600 shadow-sm transition duration-300 cursor-pointer"
+                      >
                         Từ chối
                       </button>
                     </div>

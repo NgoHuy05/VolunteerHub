@@ -3,9 +3,8 @@ import { getAuthHeader } from "./auth.api";
 const BASE_URL = "http://localhost:5555/userEvent";
 
 
-
 export const approveUserJoinEvent = (id, status) => {
-    return axios.post(`${BASE_URL}/approve/${id}`, {status}, getAuthHeader());
+    return axios.post(`${BASE_URL}/approve/${id}`, { status }, getAuthHeader());
 }
 export const createUserEvent = (data) => {
     return axios.post(`${BASE_URL}/create`, data, getAuthHeader());
@@ -34,9 +33,9 @@ export const getPendingUsersWithApprovedEvents = () => {
 }
 
 export const getEventByUserIdAndStatus = (status) => {
-  return axios.get(`${BASE_URL}/events-status`, {
-    params: { status },
-    ...getAuthHeader(),
-  });
+    return axios.get(`${BASE_URL}/events-status`, {
+        params: { status },
+        ...getAuthHeader(),
+    });
 };
 

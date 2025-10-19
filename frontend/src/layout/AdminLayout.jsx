@@ -5,7 +5,6 @@ import {
   MdMenu,
   MdNotifications,
   MdArticle,
-  MdBarChart,
   MdSettings,
 } from "react-icons/md";
 import { FaUser, FaCrown } from "react-icons/fa";
@@ -16,6 +15,7 @@ const AdminLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchUser();
@@ -23,25 +23,28 @@ const AdminLayout = () => {
 
   const fetchUser = async () => {
     try {
+      setLoading(true);
       const res = await getProfileUser();
       setUser(res.data.user);
     } catch (error) {
       console.error(error?.response?.data?.message || error);
+    } finally {
+      setLoading(false);
     }
   };
-useEffect(() => {
-  const handleResize = () => {
-    if (window.innerWidth < 1024) {
-      setSidebarOpen(false);
-    } else {
-      setSidebarOpen(true);
-    }
-  };
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 1024) {
+        setSidebarOpen(false);
+      } else {
+        setSidebarOpen(true);
+      }
+    };
 
-  handleResize(); // chạy 1 lần khi load
-  window.addEventListener("resize", handleResize);
-  return () => window.removeEventListener("resize", handleResize);
-}, []);
+    handleResize(); // chạy 1 lần khi load
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   useEffect(() => {
     if (user && user.role !== "admin") {
@@ -50,7 +53,13 @@ useEffect(() => {
   }, [user, navigate]);
 
   if (!user) return null;
-
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-[300px]">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-gray-800"></div>
+      </div>
+    );
+  }
   return (
     <div className="flex bg-gray-200 min-h-screen">
       {/* SIDEBAR */}

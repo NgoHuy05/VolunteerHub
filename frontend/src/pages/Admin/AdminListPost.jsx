@@ -19,6 +19,8 @@ const AdminListPost = () => {
   // Lấy danh sách bài viết
   const fetchPosts = async () => {
     try {
+      setLoading(true);
+
       const res = await getAllPost();
       if (res.data.success) setPosts(res.data.posts);
       else toast.error("Không thể lấy danh sách bài đăng");
@@ -125,16 +127,13 @@ const AdminListPost = () => {
     currentPage * postsPerPage
   );
 
-
-console.log(posts);
-
-  if (loading)
+  if (loading) {
     return (
       <div className="flex justify-center items-center h-[300px]">
         <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-gray-800"></div>
       </div>
     );
-
+  }
   return (
     <div className="p-5">
       <h2 className="text-2xl font-semibold mb-6">Danh sách bài đăng</h2>
@@ -190,7 +189,7 @@ console.log(posts);
                   <td className="py-3 px-4  max-w-[200px] ">
                     {post.eventId?.title || "Không có sự kiện"}
                   </td>
-         
+
                   <td className="py-3 px-4 text-center">
                     {convertDate(post.createdAt)}
                   </td>
@@ -321,14 +320,13 @@ console.log(posts);
                     </div>
                   </div>
                   <div>
-  <div className="text-gray-500 text-sm uppercase font-semibold">
-    Ngày tạo
-  </div>
-  <div className="font-medium text-gray-800">
-    {convertDate(currentPost.createdAt)}
-  </div>
-</div>
-
+                    <div className="text-gray-500 text-sm uppercase font-semibold">
+                      Ngày tạo
+                    </div>
+                    <div className="font-medium text-gray-800">
+                      {convertDate(currentPost.createdAt)}
+                    </div>
+                  </div>
                 </div>
 
                 {/* Nút duyệt / từ chối */}
