@@ -16,6 +16,7 @@ const AdminListEvent = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentEvent, setCurrentEvent] = useState(null);
   const [search, setSearch] = useState("");
+  const [confirmingId, setConfirmingId] = useState(null);
 
   const eventsPerPage = 10;
 
@@ -79,17 +80,45 @@ const AdminListEvent = () => {
       toast.error("Không thể cập nhật trạng thái sự kiện");
     }
   };
-
-  const handleDelete = async (id) => {
-    try {
-      await deleteEvent(id);
-      toast.success("Xóa sự kiện thành công!");
-      fetchEvents();
-      setIsModalOpen(false);
-    } catch {
-      toast.error("Không thể xóa sự kiện");
-    }
+ const handleDelete = async (id) => {
+    setConfirmingId(id);
+    toast((t) => (
+      <div className="text-sm">
+        <p className="mb-2">Bạn có chắc muốn xóa bài đăng này không?</p>
+        <div className="flex gap-2 justify-end">
+          <button
+            onClick={async () => {
+              toast.dismiss(t.id);
+              try {
+                const res = await deleteEvent(id);
+                if (res.data.success) {
+                  setEvents((prev) => prev.filter((p) => p._id !== id));
+                  setIsModalOpen(false);
+                  toast.success("Xóa bài đăng thành công");
+                } else toast.error(res.data.message || "Xóa thất bại");
+              } catch {
+                toast.error("Lỗi khi xóa bài viết");
+              }
+              setConfirmingId(null);
+            }}
+            className="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600"
+          >
+            Xóa
+          </button>
+          <button
+            onClick={() => {
+              toast.dismiss(t.id);
+              setConfirmingId(null);
+            }}
+            className="bg-gray-300 px-3 py-1 rounded-md hover:bg-gray-400"
+          >
+            Hủy
+          </button>
+        </div>
+      </div>
+    ));
   };
+ 
 
   useEffect(() => {
     document.body.style.overflow = isModalOpen ? "hidden" : "auto";
@@ -334,7 +363,8 @@ const AdminListEvent = () => {
                   onClick={() => handleDelete(currentEvent._id)}
                   className="w-[100px] py-2 rounded-xl font-semibold text-white bg-gray-500 hover:bg-gray-600 shadow-sm transition"
                 >
-                  Xóa
+                                          {confirmingId === currentEvent._id ? "Đang xóa..." : "Xóa"}
+
                 </button>
               </div>
             </div>

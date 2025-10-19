@@ -206,7 +206,7 @@ const AdminListUser = () => {
                       onClick={() => openEditModal(user)}
                       className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-md"
                     >
-                      Chỉnh sửa
+                      Edit
                     </button>
                     <button
                       onClick={() => handleDelete(user._id)}
@@ -302,8 +302,8 @@ const AdminListUser = () => {
                 value={form.status}
                 onChange={(e) => setForm({ ...form, status: e.target.value })}
                 options={[
-                  { value: "active", label: "Hoạt động" },
-                  { value: "banned", label: "Bị khóa" },
+                  { value: "active", label: "Active" },
+                  { value: "banned", label: "Banned" },
                 ]}
               />
             </div>

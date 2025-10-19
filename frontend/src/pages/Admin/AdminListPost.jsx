@@ -125,7 +125,8 @@ const AdminListPost = () => {
     currentPage * postsPerPage
   );
 
-  console.log(posts);
+
+console.log(posts);
 
   if (loading)
     return (
@@ -189,7 +190,7 @@ const AdminListPost = () => {
                   <td className="py-3 px-4  max-w-[200px] ">
                     {post.eventId?.title || "Không có sự kiện"}
                   </td>
-
+         
                   <td className="py-3 px-4 text-center">
                     {convertDate(post.createdAt)}
                   </td>
@@ -320,13 +321,14 @@ const AdminListPost = () => {
                     </div>
                   </div>
                   <div>
-                    <div className="text-gray-500 text-sm uppercase font-semibold">
-                      Ngày tạo
-                    </div>
-                    <div className="font-medium text-gray-800">
-                      {convertDate(currentPost.createdAt)}
-                    </div>
-                  </div>
+  <div className="text-gray-500 text-sm uppercase font-semibold">
+    Ngày tạo
+  </div>
+  <div className="font-medium text-gray-800">
+    {convertDate(currentPost.createdAt)}
+  </div>
+</div>
+
                 </div>
 
                 {/* Nút duyệt / từ chối */}
