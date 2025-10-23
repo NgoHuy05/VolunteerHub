@@ -72,9 +72,12 @@ const AdminDashboard = () => {
       const latestUsers = users
         .slice(-3)
         .reverse()
-        .map((u) => `👤 Người dùng mới: ${u.name} vừa tham gia ${getTimeAgo(
+        .map(
+          (u) =>
+            `👤 Người dùng mới: ${u.name} vừa tham gia ${getTimeAgo(
               u.createdAt
-            )}.`);
+            )}.`
+        );
 
       setRecentActivities([...latestEvents, ...latestPosts, ...latestUsers]);
 

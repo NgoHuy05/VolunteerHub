@@ -12,7 +12,7 @@ import toast from "react-hot-toast";
 const Home = () => {
   const [openCommentModal, setOpenCommentModal] = useState(false);
   const [currentPost, setCurrentPost] = useState(null);
-  const { posts, setPosts, user, loading  } = useOutletContext();
+  const { posts, setPosts, user, loading } = useOutletContext();
   const [content, setContent] = useState(null);
 
   const navigate = useNavigate();
@@ -53,7 +53,7 @@ const Home = () => {
       const res = await createComment({ content, postId });
       toast.success(res?.message || "Tạo bình luận thành công");
       console.log(res);
-      
+
       // Update posts state để hiển thị comment mới
       setPosts((prev) =>
         prev.map((p) =>
@@ -82,7 +82,7 @@ const Home = () => {
   useEffect(() => {
     document.body.style.overflow = openCommentModal ? "hidden" : "auto";
   }, [openCommentModal]);
-console.log(posts);
+  console.log(posts);
   if (loading) {
     return (
       <div className="flex justify-center items-center h-[300px]">
@@ -106,10 +106,10 @@ console.log(posts);
             {/* Header */}
             <div className="p-4 flex gap-3 items-center border-b border-gray-200">
               <img
-                  src={post?.userId?.avatar || "/default-avatar.png"}
-                  alt="avatar"
-                  className="size-15 rounded-full object-cover"
-                />
+                src={post?.userId?.avatar || "/default-avatar.png"}
+                alt="avatar"
+                className="size-15 rounded-full object-cover"
+              />
               <div className="flex flex-col ">
                 <div
                   onClick={() => navigate(`/event/detail/${post.event._id}`)}
@@ -220,11 +220,11 @@ console.log(posts);
               <div className="space-y-2 mt-4">
                 {currentPost.comments.map((c, idx) => (
                   <div key={idx} className="flex items-start gap-2">
-                   <img
-                  src={c?.userId.avatar || "/default-avatar.png"}
-                  alt="avatar"
-                  className="size-12 rounded-full object-cover"
-                />
+                    <img
+                      src={c?.userId.avatar || "/default-avatar.png"}
+                      alt="avatar"
+                      className="size-12 rounded-full object-cover"
+                    />
                     <div className="bg-gray-100 p-2 rounded-xl flex flex-col gap-2 flex-1">
                       <span className="font-semibold text-sm">
                         {c.userId.name}

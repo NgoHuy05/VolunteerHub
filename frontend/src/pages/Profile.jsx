@@ -47,7 +47,6 @@ const Profile = () => {
           gender: data.gender || "none",
           email: data.email || "",
           avatar: data.avatar || "/default-avatar.png", // ← thêm dòng này
-
         });
       } catch (error) {
         toast.error(
@@ -71,7 +70,7 @@ const Profile = () => {
     const file = e.target.files[0];
     if (!file) return;
     console.log(e.target.files);
-    
+
     const formData = new FormData();
     formData.append("avatar", file);
 
@@ -315,44 +314,55 @@ const Profile = () => {
             </>
           ) : (
             <form onSubmit={handleSavePassword} className="flex flex-col gap-6">
-  <input
-    type="text"
-    name="username"
-    value={user?.email || ""}
-    autoComplete="username"
-    hidden
-    readOnly
-  />
+              <input
+                type="text"
+                name="username"
+                value={user?.email || ""}
+                autoComplete="username"
+                hidden
+                readOnly
+              />
 
-  <div className="font-bold text-3xl">Thay đổi mật khẩu</div>
+              <div className="font-bold text-3xl">Thay đổi mật khẩu</div>
 
-  {[ 
-    { label: "Mật khẩu cũ", name: "oldPassword", auto: "current-password" },
-    { label: "Mật khẩu mới", name: "newPassword", auto: "new-password" },
-    { label: "Xác nhận mật khẩu mới", name: "confirmPassword", auto: "new-password" },
-  ].map((item) => (
-    <div key={item.name} className="flex flex-col gap-4">
-      <label>{item.label}</label>
-      <input
-        type="password"
-        name={item.name}
-        value={passwordForm[item.name]}
-        onChange={handlePasswordChange}
-        autoComplete={item.auto}
-        className="w-full px-4 py-3 rounded-xl text-gray-700 border border-gray-700 focus:outline-none"
-      />
-    </div>
-  ))}
+              {[
+                {
+                  label: "Mật khẩu cũ",
+                  name: "oldPassword",
+                  auto: "current-password",
+                },
+                {
+                  label: "Mật khẩu mới",
+                  name: "newPassword",
+                  auto: "new-password",
+                },
+                {
+                  label: "Xác nhận mật khẩu mới",
+                  name: "confirmPassword",
+                  auto: "new-password",
+                },
+              ].map((item) => (
+                <div key={item.name} className="flex flex-col gap-4">
+                  <label>{item.label}</label>
+                  <input
+                    type="password"
+                    name={item.name}
+                    value={passwordForm[item.name]}
+                    onChange={handlePasswordChange}
+                    autoComplete={item.auto}
+                    className="w-full px-4 py-3 rounded-xl text-gray-700 border border-gray-700 focus:outline-none"
+                  />
+                </div>
+              ))}
 
-  <button
-    type="submit"
-    className="flex justify-center gap-2 w-[100px] bg-sky-400 text-white p-2 rounded-2xl items-center transition duration-300 hover:bg-sky-500 cursor-pointer"
-  >
-    <FaSave />
-    <div>Lưu</div>
-  </button>
-</form>
-
+              <button
+                type="submit"
+                className="flex justify-center gap-2 w-[100px] bg-sky-400 text-white p-2 rounded-2xl items-center transition duration-300 hover:bg-sky-500 cursor-pointer"
+              >
+                <FaSave />
+                <div>Lưu</div>
+              </button>
+            </form>
           )}
         </div>
       </div>

@@ -24,7 +24,7 @@ const ManageLayout = () => {
 
   return (
     <>
-          <ScrollToTop/>
+      <ScrollToTop />
 
       <Header />
 
@@ -33,7 +33,9 @@ const ManageLayout = () => {
           {/* 🧭 Sidebar desktop */}
           <div>
             <div className="hidden lg:flex flex-col bg-white min-h-screen fixed w-[25%]">
-              <div className="font-bold text-2xl pl-4 mt-2">Quản lí sự kiện</div>
+              <div className="font-bold text-2xl pl-4 mt-2">
+                Quản lí sự kiện
+              </div>
 
               {/* Tìm kiếm */}
               <div className="relative w-full max-w-sm p-4 items-center">
@@ -178,121 +180,120 @@ const ManageLayout = () => {
       {/* 🔹 Thanh điều hướng dưới cho mobile */}
       <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-300 flex justify-around py-2 z-50 shadow-md">
         {/* Tạo sự kiện */}
+        <NavLink
+          to="/manage/create"
+          className={({ isActive }) =>
+            `flex items-center ml-1 mr-1 justify-between p-4 rounded gap-2 hover:bg-gray-200 transition-all duration-300 cursor-pointer ${
+              isActive ? "bg-gray-200" : ""
+            }`
+          }
+        >
+          <div className="flex items-center gap-2">
+            <IoCreate className="text-[20px] text-red-500" />
+            <div className="text-[18px]">Tạo </div>
+          </div>
+        </NavLink>
+
+        {/* Bài viết chờ duyệt */}
+        <NavLink
+          to="/manage/post"
+          className={({ isActive }) =>
+            `flex items-center ml-1 mr-1 justify-between p-4 rounded gap-2 hover:bg-gray-200 transition-all duration-300 cursor-pointer ${
+              isActive ? "bg-gray-200" : ""
+            }`
+          }
+        >
+          <div className="flex items-center gap-2">
+            <FaHourglassHalf className="text-[20px] text-sky-500" />
+            <div className="text-[18px]">Bài viết</div>
+          </div>
+        </NavLink>
+
+        {/* Người dùng chờ duyệt */}
+        <NavLink
+          to="/manage/user"
+          className={({ isActive }) =>
+            `flex items-center ml-1 mr-1 justify-between p-4 rounded gap-2 hover:bg-gray-200 transition-all duration-300 cursor-pointer ${
+              isActive ? "bg-gray-200" : ""
+            }`
+          }
+        >
+          <div className="flex items-center gap-2">
+            <FaHourglassHalf className="text-[20px] text-amber-500" />
+            <div className="text-[18px]">Người dùng</div>
+          </div>
+        </NavLink>
+
+        {/* Sự kiện của bạn */}
+        <div>
+          <div
+            onClick={() => setIsOpenYourEvent(!isOpenYourEvent)}
+            className="flex items-center justify-between ml-1 mr-1 p-4 rounded gap-2 hover:bg-gray-200 duration-300 cursor-pointer"
+          >
+            <div className="flex items-center gap-2">
+              <FaUser className="text-[20px] text-gray-500" />
+              <div className="text-[18px]">Sự kiện</div>
+            </div>
+            {isOpenYourEvent ? (
+              <IoIosArrowUp className="text-[20px]" />
+            ) : (
+              <IoIosArrowDown className="text-[20px]" />
+            )}
+          </div>
+
+          {isOpenYourEvent && (
+            <div className="flex flex-col">
               <NavLink
-                to="/manage/create"
+                to="approved"
                 className={({ isActive }) =>
-                  `flex items-center ml-1 mr-1 justify-between p-4 rounded gap-2 hover:bg-gray-200 transition-all duration-300 cursor-pointer ${
+                  `flex items-center mr-1 ml-5 p-4 rounded gap-2 hover:bg-gray-200 transition-all duration-300 cursor-pointer ${
                     isActive ? "bg-gray-200" : ""
                   }`
                 }
               >
-                <div className="flex items-center gap-2">
-                  <IoCreate className="text-[20px] text-red-500" />
-                  <div className="text-[18px]">Tạo </div>
-                </div>
+                <FaCheckCircle className="text-green-500 text-[20px]" />
+                <div className="text-[16px]">Đã được duyệt</div>
               </NavLink>
 
-              {/* Bài viết chờ duyệt */}
               <NavLink
-                to="/manage/post"
+                to="pending"
                 className={({ isActive }) =>
-                  `flex items-center ml-1 mr-1 justify-between p-4 rounded gap-2 hover:bg-gray-200 transition-all duration-300 cursor-pointer ${
+                  `flex items-center mr-1 ml-5 p-4 rounded gap-2 hover:bg-gray-200 transition-all duration-300 cursor-pointer ${
                     isActive ? "bg-gray-200" : ""
                   }`
                 }
               >
-                <div className="flex items-center gap-2">
-                  <FaHourglassHalf className="text-[20px] text-sky-500" />
-                  <div className="text-[18px]">Bài viết</div>
-                </div>
+                <FaHourglassHalf className="text-yellow-500 text-[20px]" />
+                <div className="text-[16px]">Chờ duyệt</div>
               </NavLink>
 
-              {/* Người dùng chờ duyệt */}
               <NavLink
-                to="/manage/user"
+                to="rejected"
                 className={({ isActive }) =>
-                  `flex items-center ml-1 mr-1 justify-between p-4 rounded gap-2 hover:bg-gray-200 transition-all duration-300 cursor-pointer ${
+                  `flex items-center mr-1 ml-5 p-4 rounded gap-2 hover:bg-gray-200 transition-all duration-300 cursor-pointer ${
                     isActive ? "bg-gray-200" : ""
                   }`
                 }
               >
-                <div className="flex items-center gap-2">
-                  <FaHourglassHalf className="text-[20px] text-amber-500" />
-                  <div className="text-[18px]">Người dùng</div>
-                </div>
+                <MdCancel className="text-red-500 text-[20px]" />
+                <div className="text-[16px]">Bị từ chối</div>
               </NavLink>
 
-              {/* Sự kiện của bạn */}
-              <div>
-                <div
-                  onClick={() => setIsOpenYourEvent(!isOpenYourEvent)}
-                  className="flex items-center justify-between ml-1 mr-1 p-4 rounded gap-2 hover:bg-gray-200 duration-300 cursor-pointer"
-                >
-                  <div className="flex items-center gap-2">
-                    <FaUser className="text-[20px] text-gray-500" />
-                    <div className="text-[18px]">Sự kiện</div>
-                  </div>
-                  {isOpenYourEvent ? (
-                    <IoIosArrowUp className="text-[20px]" />
-                  ) : (
-                    <IoIosArrowDown className="text-[20px]" />
-                  )}
-                </div>
-
-                {isOpenYourEvent && (
-                  <div className="flex flex-col">
-                    <NavLink
-                      to="approved"
-                      className={({ isActive }) =>
-                        `flex items-center mr-1 ml-5 p-4 rounded gap-2 hover:bg-gray-200 transition-all duration-300 cursor-pointer ${
-                          isActive ? "bg-gray-200" : ""
-                        }`
-                      }
-                    >
-                      <FaCheckCircle className="text-green-500 text-[20px]" />
-                      <div className="text-[16px]">Đã được duyệt</div>
-                    </NavLink>
-
-                    <NavLink
-                      to="pending"
-                      className={({ isActive }) =>
-                        `flex items-center mr-1 ml-5 p-4 rounded gap-2 hover:bg-gray-200 transition-all duration-300 cursor-pointer ${
-                          isActive ? "bg-gray-200" : ""
-                        }`
-                      }
-                    >
-                      <FaHourglassHalf className="text-yellow-500 text-[20px]" />
-                      <div className="text-[16px]">Chờ duyệt</div>
-                    </NavLink>
-
-                    <NavLink
-                      to="rejected"
-                      className={({ isActive }) =>
-                        `flex items-center mr-1 ml-5 p-4 rounded gap-2 hover:bg-gray-200 transition-all duration-300 cursor-pointer ${
-                          isActive ? "bg-gray-200" : ""
-                        }`
-                      }
-                    >
-                      <MdCancel className="text-red-500 text-[20px]" />
-                      <div className="text-[16px]">Bị từ chối</div>
-                    </NavLink>
-
-                    <NavLink
-                      to="completed"
-                      className={({ isActive }) =>
-                        `flex items-center mr-1 ml-5 p-4 rounded gap-2 hover:bg-gray-200 transition-all duration-300 cursor-pointer ${
-                          isActive ? "bg-gray-200" : ""
-                        }`
-                      }
-                    >
-                      <FaRegCalendarCheck className="text-blue-500 text-[20px]" />
-                      <div className="text-[16px]">Hoàn thành</div>
-                    </NavLink>
-                  </div>
-                )}
+              <NavLink
+                to="completed"
+                className={({ isActive }) =>
+                  `flex items-center mr-1 ml-5 p-4 rounded gap-2 hover:bg-gray-200 transition-all duration-300 cursor-pointer ${
+                    isActive ? "bg-gray-200" : ""
+                  }`
+                }
+              >
+                <FaRegCalendarCheck className="text-blue-500 text-[20px]" />
+                <div className="text-[16px]">Hoàn thành</div>
+              </NavLink>
+            </div>
+          )}
+        </div>
       </div>
-      </div>
-
     </>
   );
 };

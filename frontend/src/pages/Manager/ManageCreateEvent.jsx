@@ -45,7 +45,13 @@ const ManageCreateEvent = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!form.title || !form.description || !form.location || !form.category || !form.startDate) {
+    if (
+      !form.title ||
+      !form.description ||
+      !form.location ||
+      !form.category ||
+      !form.startDate
+    ) {
       toast.error("Vui lòng điền đầy đủ các trường bắt buộc!");
       return;
     }
@@ -93,7 +99,9 @@ const ManageCreateEvent = () => {
         <div className="fixed inset-0 backdrop-blur-[1px] bg-[rgba(0,0,0,0.3)] flex items-center justify-center z-50">
           <div className="bg-white w-full max-w-3xl h-[90%] rounded-2xl shadow-lg flex flex-col relative">
             <div className="flex justify-between items-center px-6 py-4 border-b bg-indigo-50">
-              <h2 className="text-xl font-semibold text-indigo-700">Tạo sự kiện mới</h2>
+              <h2 className="text-xl font-semibold text-indigo-700">
+                Tạo sự kiện mới
+              </h2>
               <button
                 onClick={handleCloseModel}
                 className="text-gray-600 hover:text-red-500 transition text-2xl"
@@ -108,7 +116,9 @@ const ManageCreateEvent = () => {
             >
               {/* Tiêu đề */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Tiêu đề *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Tiêu đề *
+                </label>
                 <input
                   name="title"
                   type="text"
@@ -121,7 +131,9 @@ const ManageCreateEvent = () => {
 
               {/* Mô tả */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Mô tả *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Mô tả *
+                </label>
                 <textarea
                   name="description"
                   value={form.description}
@@ -134,7 +146,9 @@ const ManageCreateEvent = () => {
 
               {/* Địa điểm */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Địa điểm *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Địa điểm *
+                </label>
                 <input
                   name="location"
                   type="text"
@@ -147,7 +161,9 @@ const ManageCreateEvent = () => {
 
               {/* Danh mục */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Danh mục *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Danh mục *
+                </label>
                 <select
                   name="category"
                   value={form.category}
@@ -156,18 +172,30 @@ const ManageCreateEvent = () => {
                 >
                   <option value="">-- Chọn danh mục --</option>
                   <option value="Giáo dục & đào tạo">Giáo dục & đào tạo</option>
-                  <option value="Y tế & chăm sóc sức khỏe">Y tế & chăm sóc sức khỏe</option>
-                  <option value="Môi trường & bảo vệ thiên nhiên">Môi trường & bảo vệ thiên nhiên</option>
-                  <option value="Văn hóa – nghệ thuật">Văn hóa – nghệ thuật</option>
-                  <option value="Thể thao & giải trí">Thể thao & giải trí</option>
-                  <option value="Hoạt động cộng đồng">Hoạt động cộng đồng</option>
+                  <option value="Y tế & chăm sóc sức khỏe">
+                    Y tế & chăm sóc sức khỏe
+                  </option>
+                  <option value="Môi trường & bảo vệ thiên nhiên">
+                    Môi trường & bảo vệ thiên nhiên
+                  </option>
+                  <option value="Văn hóa – nghệ thuật">
+                    Văn hóa – nghệ thuật
+                  </option>
+                  <option value="Thể thao & giải trí">
+                    Thể thao & giải trí
+                  </option>
+                  <option value="Hoạt động cộng đồng">
+                    Hoạt động cộng đồng
+                  </option>
                 </select>
               </div>
 
               {/* Ngày bắt đầu & kết thúc */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Ngày bắt đầu *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Ngày bắt đầu *
+                  </label>
                   <input
                     name="startDate"
                     type="date"
@@ -177,7 +205,9 @@ const ManageCreateEvent = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Ngày kết thúc</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Ngày kết thúc
+                  </label>
                   <input
                     name="endDate"
                     type="date"
@@ -190,7 +220,9 @@ const ManageCreateEvent = () => {
 
               {/* Banner */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Ảnh bìa (Banner)</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Ảnh bìa (Banner)
+                </label>
                 <input
                   name="banner"
                   type="file"
@@ -198,21 +230,21 @@ const ManageCreateEvent = () => {
                   onChange={handleFileChange}
                   className="block w-full text-sm text-gray-500 border border-gray-300 rounded-xl file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:bg-indigo-100 file:text-indigo-700 hover:file:bg-indigo-200"
                 />
-{bannerPreview?.length > 0 && (
-  <div className="mt-3 grid grid-cols-2 md:grid-cols-3 gap-3">
-    {bannerPreview.map((src, index) => (
-      src && (
-        <img
-          key={index}
-          src={src}
-          alt={`Preview ${index}`}
-          className="w-full max-h-60 object-cover rounded-xl"
-        />
-      )
-    ))}
-  </div>
-)}
-
+                {bannerPreview?.length > 0 && (
+                  <div className="mt-3 grid grid-cols-2 md:grid-cols-3 gap-3">
+                    {bannerPreview.map(
+                      (src, index) =>
+                        src && (
+                          <img
+                            key={index}
+                            src={src}
+                            alt={`Preview ${index}`}
+                            className="w-full max-h-60 object-cover rounded-xl"
+                          />
+                        )
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Submit */}
@@ -221,7 +253,9 @@ const ManageCreateEvent = () => {
                   type="submit"
                   disabled={loading}
                   className={`px-6 py-3 text-white rounded-xl font-medium shadow ${
-                    loading ? "bg-gray-400 cursor-not-allowed" : "bg-indigo-600 hover:bg-indigo-700"
+                    loading
+                      ? "bg-gray-400 cursor-not-allowed"
+                      : "bg-indigo-600 hover:bg-indigo-700"
                   }`}
                 >
                   {loading ? "Đang gửi..." : "Xác nhận tạo sự kiện"}
