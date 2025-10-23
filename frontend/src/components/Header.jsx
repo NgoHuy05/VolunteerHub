@@ -112,8 +112,8 @@ const Header = () => {
 
             {(user.role === "manager" || user.role === "admin") && (
               <NavLink
-                key="/event/manage"
-                to="/event/manage"
+                key="/manage/your-event"
+                to="/manage/your-event"
                 onClick={() => setOpenDropdown(null)}
                 className="block py-2 px-3 hover:bg-gray-100 rounded"
               >
@@ -139,10 +139,10 @@ const Header = () => {
           className="rounded-full transition-all hover:scale-105 duration-300 cursor-pointer"
         >
           <img
-                  src={user?.avatar || "/default-avatar.png"}
-                  alt="avatar"
-                  className="size-15 rounded-full object-cover"
-                />
+            src={user?.avatar || "/default-avatar.png"}
+            alt="avatar"
+            className="size-15 rounded-full object-cover"
+          />
         </button>
         {openDropdown === "notification" && (
           <div className="absolute top-full w-[320px] right-0 mt-2 bg-white shadow-lg border border-gray-200 p-4 rounded-xl">
