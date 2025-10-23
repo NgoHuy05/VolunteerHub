@@ -153,9 +153,12 @@ const Layout = () => {
               to="profile"
               className="flex items-center ml-1 mr-1 p-4 rounded gap-2 transition-all hover:bg-gray-300 duration-300 cursor-pointer"
             >
-              <div className="p-2 text-[25px] font-bold bg-gray-300 rounded-full ">
-                <CgProfile />
-              </div>
+              <img
+  src={user?.avatar ? user.avatar : "/default-avatar.png"}
+  alt="avatar"
+  className="size-12 rounded-full object-cover"
+/>
+
               <div className="text-[18px]">{user?.name || "Huy"} </div>
             </NavLink>
             <NavLink
@@ -178,9 +181,12 @@ const Layout = () => {
                   className="flex items-center gap-3 p-3 rounded-lg bg-white shadow-sm hover:shadow-md hover:bg-gray-100 transition-all duration-300 "
                 >
                   <div
-                    style={{ backgroundImage: `url(${ev.banner})` }}
-                    className="size-[60px] bg-cover bg-center rounded-md flex-shrink-0"
-                  ></div>
+  style={{
+    backgroundImage: `url(${ev.banner ? ev.banner : "/default-banner.jpg"})`,
+  }}
+  className="size-[60px] bg-cover bg-center rounded-md flex-shrink-0"
+/>
+
                   <h3 className="text-base font-medium text-gray-800">
                     {ev.title}
                   </h3>
@@ -190,7 +196,7 @@ const Layout = () => {
           </div>
         </div>
         <div className="px-[32px] py-4 min-h-screen">
-          <Outlet context={{ posts, setPosts, user }} />
+          <Outlet context={{ posts, setPosts, user, loading }} />
           <button
             onClick={handleScrollToTop}
             className="hidden md:block fixed bottom-5 right-5 text-[25px] border rounded-full p-2 z-50 hover:bg-white transition duration-300 cursor-pointer"

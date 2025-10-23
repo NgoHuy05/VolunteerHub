@@ -4,17 +4,34 @@ const Event = require("../models/Event.model");
 // [POST] /post
 const createPost = async (req, res) => {
   try {
-    const { eventId, userId, content, images, status } = req.body;
-    const post = await Post.create({ eventId, userId, content, images, status });
+    const userId = req.user.id;
+    const { eventId, content } = req.body;
+
+    // Lấy danh sách ảnh từ Cloudinary (multer-storage-cloudinary)
+    const images = req.files ? req.files.map(file => file.path) : [];
+
+    const post = await Post.create({
+      eventId,
+      userId,
+      content,
+      images,
+    });
+
     return res.status(201).json({
       success: true,
       message: "Tạo bài đăng thành công, vui lòng chờ duyệt",
       post,
     });
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    console.error("❌ Lỗi tạo bài đăng:", error);
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Lỗi server khi tạo bài đăng",
+    });
   }
 };
+
+
 
 // [PUT] /post/:id
 const updatePost = async (req, res) => {
@@ -71,7 +88,7 @@ const deletePost = async (req, res) => {
 const getPostById = async (req, res) => {
   try {
     const { id } = req.params;
-    const post = await Post.findById(id).populate("userId", "name");
+    const post = await Post.findById(id).populate("userId", "avatar name");
     if (!post)
       return res.status(404).json({ success: false, message: "Không tìm thấy bài đăng" });
 
@@ -85,7 +102,7 @@ const getPostById = async (req, res) => {
 const getPostByIdEvent = async (req, res) => {
   try {
     const { eventId } = req.params;
-    const posts = await Post.find({ eventId });
+    const posts = await Post.find({ eventId }).populate("userId", "avatar name");
     return res.status(200).json({ success: true, message: "Lấy danh sách bài đăng theo eventId", posts });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
@@ -96,7 +113,7 @@ const getPostByIdEvent = async (req, res) => {
 const getPostByIdEventApproved = async (req, res) => {
   try {
     const { eventId } = req.params;
-    const posts = await Post.find({ eventId, status: "approved" });
+    const posts = await Post.find({ eventId, status: "approved" }).populate("userId", "name avatar");
     return res.status(200).json({ success: true, message: "Lấy danh sách bài đăng đã duyệt theo eventId", posts });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
@@ -105,17 +122,17 @@ const getPostByIdEventApproved = async (req, res) => {
 
 const getEventApprovedWithPostByIdEventPending = async (req, res) => {
   try {
-    const events = await Event.find({ status: "approved" }); 
+    const events = await Event.find({ status: "approved" });
 
     const eventsWithAllPosts = await Promise.all(
       events.map(async (event) => {
         const posts = await Post.find({
           eventId: event._id,
           status: "pending",
-        }).populate("userId", "name avatar"); 
+        }).populate("userId", "name avatar");
 
         return {
-          ...event.toObject(), 
+          ...event.toObject(),
           posts,
         };
       })
@@ -147,7 +164,7 @@ const getPostByIdUser = async (req, res) => {
 // [GET] /post
 const getAllPost = async (req, res) => {
   try {
-    const posts = await Post.find().populate("userId", "name").populate("eventId");
+    const posts = await Post.find().populate("userId", "name").populate("eventId").populate("userId", "avatar name");
     return res.status(200).json({ success: true, message: "Lấy danh sách tất cả bài đăng", posts });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
@@ -157,7 +174,7 @@ const getAllPost = async (req, res) => {
 // [GET] /post/approved
 const getAllPostApproved = async (req, res) => {
   try {
-    const posts = await Post.find({ status: "approved", approvedAt: { $exists: true } }).populate("userId", "name");
+    const posts = await Post.find({ status: "approved", approvedAt: { $exists: true } }).populate("userId", "name avatar");
     return res.status(200).json({ success: true, message: "Lấy danh sách tất cả bài đăng đã duyệt", posts });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
@@ -198,7 +215,7 @@ const approvePost = async (req, res) => {
 const filterPost = async (req, res) => {
   try {
     const { title } = req.body;
-    let query = Post.find({ status: "approved", approvedAt: { $exists: true } }).populate("userId", "name");
+    let query = Post.find({ status: "approved", approvedAt: { $exists: true } }).populate("userId", "name avatar");
 
     if (title === "Top") query = query.sort({ approvedAt: -1 });
     else if (title === "Mới nhất") query = query.sort({ approvedAt: -1 });

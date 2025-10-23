@@ -31,8 +31,14 @@ export const getPostByIdUser = (userId) => {
 };
 
 export const createPost = (data) => {
-    return axios.post(`${BASE_URL}/create`, data, getAuthHeader())
+  return axios.post(`${BASE_URL}/create`, data, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+      ...getAuthHeader().headers,
+    },
+  });
 };
+
 export const filterPost = (title) => {
     return axios.post(`${BASE_URL}/filter`, {title}, getAuthHeader())
 };

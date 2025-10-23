@@ -79,7 +79,7 @@ const Header = () => {
           >
             <div className="flex items-center gap-2">
               <div>
-                <BiEdit />{" "}
+                <BiEdit />
               </div>
               <div>Quản lí</div>
             </div>
@@ -136,9 +136,13 @@ const Header = () => {
         </button>
         <button
           onClick={() => toggleDropdown("avatar")}
-          className="p-2 text-[20px] font-bold bg-gray-300 rounded-full transition-all hover:scale-105 hover:bg-gray-400 duration-300 cursor-pointer"
+          className="rounded-full transition-all hover:scale-105 duration-300 cursor-pointer"
         >
-          <CgProfile />
+          <img
+                  src={user?.avatar || "/default-avatar.png"}
+                  alt="avatar"
+                  className="size-15 rounded-full object-cover"
+                />
         </button>
         {openDropdown === "notification" && (
           <div className="absolute top-full w-[320px] right-0 mt-2 bg-white shadow-lg border border-gray-200 p-4 rounded-xl">

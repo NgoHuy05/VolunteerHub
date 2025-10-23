@@ -21,7 +21,7 @@ const UserSchema = new mongoose.Schema({
         enum: ["active", "banned"],
         default: "active",
     },
-
+    avatar: {type: String},
 },
     { timestamps: true })
 

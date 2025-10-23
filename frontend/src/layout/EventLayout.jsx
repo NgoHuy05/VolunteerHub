@@ -28,9 +28,9 @@ const EventLayout = () => {
       <ScrollToTop />
       <Header />
       <div className="bg-gray-200 min-h-screen">
-        <div className="grid grid-cols-1 lg:grid-cols-[20%_75%] text-black gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-[25%_70%] text-black gap-4">
           <div>
-            <div className="hidden lg:flex flex-col bg-white min-h-screen fixed w-[20%]">
+            <div className="hidden lg:flex flex-col bg-white min-h-screen fixed w-[25%]">
               <div className="font-bold text-2xl pl-4 mt-2">Sự kiện</div>
               <div className="relative w-full max-w-sm p-4 items-center">
                 <FaSearch className="absolute left-7 top-1/2 -translate-y-1/2 text-gray-400" />

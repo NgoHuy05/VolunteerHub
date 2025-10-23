@@ -5,7 +5,7 @@ const cloudinary = require("../config/cloudinary");
 const storage = new CloudinaryStorage({
   cloudinary,
   params: {
-    folder: "volunteerhub_banners", // Tên folder lưu trên Cloudinary
+    folder: "volunteerhub_banners", 
     allowed_formats: ["jpg", "jpeg", "png"],
   },
 });

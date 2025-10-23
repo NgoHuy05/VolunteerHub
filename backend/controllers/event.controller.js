@@ -11,7 +11,7 @@ const createEvent = async (req, res) => {
       endDate,
     } = req.body;
 
-    const bannerUrl = req.file?.path || ""; // URL do Cloudinary trả về
+    const bannerUrl = req.file?.path || ""; 
 
     const event = await Event.create({
       title,

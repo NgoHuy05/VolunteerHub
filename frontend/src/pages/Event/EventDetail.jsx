@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { FaSearch } from "react-icons/fa";
-import { FaArrowRightLong } from "react-icons/fa6";
+import { FaArrowRightLong, FaS } from "react-icons/fa6";
 import toast from "react-hot-toast";
 import { useParams } from "react-router-dom";
 import { BiLike, BiSolidLike } from "react-icons/bi";
@@ -10,7 +10,7 @@ import { useEffect } from "react";
 import { countLike, getLikedPosts, LikeUnLike } from "../../api/like.api";
 import { createComment, getCommentByPostId } from "../../api/comment.api";
 import { getProfileUser } from "../../api/user.api";
-import { getPostByIdEventApproved } from "../../api/post.api";
+import { createPost, getPostByIdEventApproved } from "../../api/post.api";
 import { getEventById } from "../../api/event.api";
 import { FaPlus } from "react-icons/fa";
 import { FaUsers } from "react-icons/fa";
@@ -39,7 +39,12 @@ const EvenDetail = () => {
   const [isPending, setIsPending] = useState(false);
   const eventId = useParams();
   const [loading, setLoading] = useState(true);
-
+  const [bannerPreview, setBannerPreview] = useState([]); // mảng url preview
+  const [form, setForm] = useState({
+    content: "",
+    images: [], // mảng File
+  });
+  const [openCreateModel, setOpenCreateModel] = useState(false);
   useEffect(() => {
     const fetchEvent = async () => {
       try {
@@ -68,6 +73,20 @@ const EvenDetail = () => {
     fetchEvent();
   }, [eventId]);
   console.log(user);
+  const handleOpenCreatePost = () => {
+    if (!isJoined) {
+      toast.error("⚠️ Vui lòng tham gia sự kiện trước khi tạo bài viết!");
+      return;
+    }
+    setOpenCreateModel(true);
+    setForm({
+      content: "",
+      images: [], // mảng File
+    });
+    setBannerPreview([]);
+  };
+
+  console.log(posts);
 
   useEffect(() => {
     const fetchUserEvents = async () => {
@@ -82,6 +101,83 @@ const EvenDetail = () => {
     };
     fetchUserEvents();
   }, []);
+  // state
+
+  // handle file change: append (không ghi đè) và tạo preview
+  const handleFileChange = (e) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    // append files (để người dùng có thể chọn nhiều lần)
+    setForm((prev) => ({
+      ...prev,
+      images: [...(prev.images || []), ...files],
+    }));
+
+    // tạo preview cho các file mới rồi ghép vào preview hiện tại
+    const newPreviews = files.map((f) => URL.createObjectURL(f));
+    setBannerPreview((prev) => [...prev, ...newPreviews]);
+
+    // reset input để người dùng có thể chọn lại cùng file (optional but useful)
+    e.target.value = null;
+  };
+
+  // dọn object URLs khi component unmount hoặc khi previews thay đổi
+  useEffect(() => {
+    return () => {
+      // cleanup khi component unmount
+      bannerPreview.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, []);
+
+  // nếu muốn cleanup mỗi khi bannerPreview thay đổi (giữ logic nếu bạn thay previews)
+  useEffect(() => {
+    return () => {
+      bannerPreview.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, [bannerPreview]);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!form.content) {
+      toast.error("Vui lòng điền đầy đủ các trường bắt buộc!");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const formData = new FormData();
+      formData.append("eventId", eventId.id);
+      formData.append("content", form.content);
+
+      if (form.images && form.images.length > 0) {
+        for (const img of form.images) {
+          formData.append("images", img);
+        }
+      }
+
+      await createPost(formData);
+      toast.success("🎉 Tạo bài đăng thành công, vui lòng chờ admin duyệt!");
+
+      setOpenCreateModel(false);
+      setBannerPreview([]); // ✅ phải là mảng trống, KHÔNG dùng null
+      setForm({
+        content: "",
+        images: [],
+      });
+    } catch (error) {
+      console.error(error);
+      toast.error(error?.response?.data?.message || error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -241,6 +337,7 @@ const EvenDetail = () => {
   useEffect(() => {
     document.body.style.overflow = openCommentModal ? "hidden" : "auto";
   }, [openCommentModal]);
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-[300px]">
@@ -379,12 +476,97 @@ const EvenDetail = () => {
         </div>
       ) : (
         <>
-          <div className="flex gap-2 justify-center w-[200px] items-center my-10 py-5 border border-gray-400 rounded-2xl">
+          <button
+            onClick={handleOpenCreatePost}
+            className="flex gap-2 justify-center w-[200px] items-center my-10 py-5 border border-gray-400 rounded-2xl"
+          >
             <div>
               <FaPlus />
             </div>
             <div>Tạo bài viết mới</div>
-          </div>
+          </button>
+
+          {openCreateModel && (
+            <div className="fixed inset-0 backdrop-blur-[1px] bg-[rgba(0,0,0,0.3)] flex items-center justify-center z-50">
+              <div className="bg-white w-full max-w-3xl h-[90%] rounded-2xl shadow-lg flex flex-col relative">
+                <div className="flex justify-between items-center px-6 py-4 border-b bg-indigo-50">
+                  <h2 className="text-xl font-semibold text-indigo-700">
+                    Tạo bài viết mới
+                  </h2>
+                  <button
+                    onClick={() => setOpenCreateModel(false)}
+                    className="text-gray-600 hover:text-red-500 transition text-2xl"
+                  >
+                    <IoClose />
+                  </button>
+                </div>
+
+                <form
+                  onSubmit={handleSubmit}
+                  className="flex flex-col gap-5 p-6 overflow-y-auto"
+                >
+                  {/* Tiêu đề */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Tiêu đề *
+                    </label>
+                    <input
+                      name="content"
+                      type="text"
+                      value={form.content}
+                      onChange={handleChange}
+                      placeholder="Nhập tiêu đề nội dung..."
+                      className="w-full border border-gray-300 rounded-xl px-3 py-2 focus:ring-2 focus:ring-indigo-400 focus:outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Ảnh bìa (Banner)
+                    </label>
+                    <input
+                      type="file"
+                      multiple
+                      accept="image/*"
+                      onChange={handleFileChange}
+                      className="block w-full text-sm text-gray-500 border border-gray-300 rounded-xl 
+             file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 
+             file:bg-indigo-100 file:text-indigo-700 hover:file:bg-indigo-200"
+                    />
+
+                    {bannerPreview && bannerPreview.length > 0 && (
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mt-3">
+                        {bannerPreview.map((url, index) => (
+                          <img
+                            key={index}
+                            src={url}
+                            alt={`preview-${index}`}
+                            className="w-full h-40 object-cover rounded-xl"
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Submit */}
+                  <div className="flex justify-end mt-6">
+                    <button
+                      type="submit"
+                      disabled={loading}
+                      className={`px-6 py-3 text-white rounded-xl font-medium shadow ${
+                        loading
+                          ? "bg-gray-400 cursor-not-allowed"
+                          : "bg-indigo-600 hover:bg-indigo-700"
+                      }`}
+                    >
+                      {loading ? "Đang gửi..." : "Xác nhận tạo bài đăng"}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+
           <div className="px-4 py-6 min-h-screen flex flex-col gap-6">
             {/* 🔹 Nếu không có bài viết */}
             {posts.length === 0 ? (
@@ -399,9 +581,12 @@ const EvenDetail = () => {
                 >
                   {/* Header */}
                   <div className="p-4 flex gap-3 items-center border-b border-gray-200">
-                    <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
-                      AV
-                    </div>
+                    <img
+                      src={post?.userId?.avatar || "/default-avatar.png"}
+                      alt="avatar"
+                      className="size-15 rounded-full object-cover"
+                    />
+
                     <div className="flex flex-col">
                       <div className="font-bold text-[15px]">
                         {post.event?.title || "Chưa có nhóm"}
@@ -502,12 +687,15 @@ const EvenDetail = () => {
                     <div className="space-y-2 mt-4">
                       {currentPost.comments.map((c, idx) => (
                         <div key={idx} className="flex items-start gap-2">
-                          <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center text-xs">
-                            AV
-                          </div>
+                          <img
+                            src={c?.userId?.avatar || "/default-avatar.png"}
+                            alt="avatar"
+                            className="size-12 rounded-full object-cover"
+                          />
+
                           <div className="bg-gray-100 p-2 rounded-xl flex flex-col gap-2 flex-1">
                             <span className="font-semibold text-sm">
-                              {c.userId.name}
+                              {c.userId?.name}
                             </span>
                             <div>{c.content}</div>
                           </div>

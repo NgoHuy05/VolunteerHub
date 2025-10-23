@@ -6,13 +6,13 @@ import { useNavigate, useOutletContext } from "react-router-dom";
 
 import { createComment } from "../api/comment.api";
 import { countLike, LikeUnLike } from "../api/like.api";
-import { getTimeAgo } from "../utils";
+import { getPostTimeAgo } from "../utils";
 import toast from "react-hot-toast";
 
 const Home = () => {
   const [openCommentModal, setOpenCommentModal] = useState(false);
   const [currentPost, setCurrentPost] = useState(null);
-  const { posts, setPosts, user } = useOutletContext();
+  const { posts, setPosts, user, loading  } = useOutletContext();
   const [content, setContent] = useState(null);
 
   const navigate = useNavigate();
@@ -52,7 +52,8 @@ const Home = () => {
     try {
       const res = await createComment({ content, postId });
       toast.success(res?.message || "Tạo bình luận thành công");
-
+      console.log(res);
+      
       // Update posts state để hiển thị comment mới
       setPosts((prev) =>
         prev.map((p) =>
@@ -81,7 +82,14 @@ const Home = () => {
   useEffect(() => {
     document.body.style.overflow = openCommentModal ? "hidden" : "auto";
   }, [openCommentModal]);
-
+console.log(posts);
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-[300px]">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-gray-800"></div>
+      </div>
+    );
+  }
   return (
     <div className="px-4 py-6 bg-gray-100 min-h-screen flex flex-col gap-6">
       {/* 🔹 Nếu không có bài viết */}
@@ -97,9 +105,11 @@ const Home = () => {
           >
             {/* Header */}
             <div className="p-4 flex gap-3 items-center border-b border-gray-200">
-              <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
-                AV
-              </div>
+              <img
+                  src={post?.userId?.avatar || "/default-avatar.png"}
+                  alt="avatar"
+                  className="size-15 rounded-full object-cover"
+                />
               <div className="flex flex-col ">
                 <div
                   onClick={() => navigate(`/event/detail/${post.event._id}`)}
@@ -111,7 +121,7 @@ const Home = () => {
                 </div>
                 <div className="flex gap-2 text-[13px] text-gray-600">
                   <div>{post?.userId?.name}</div>
-                  <div>{getTimeAgo(post)}</div>
+                  <div>{getPostTimeAgo(post)}</div>
                 </div>
               </div>
             </div>
@@ -210,9 +220,11 @@ const Home = () => {
               <div className="space-y-2 mt-4">
                 {currentPost.comments.map((c, idx) => (
                   <div key={idx} className="flex items-start gap-2">
-                    <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center text-xs">
-                      AV
-                    </div>
+                   <img
+                  src={c?.userId.avatar || "/default-avatar.png"}
+                  alt="avatar"
+                  className="size-12 rounded-full object-cover"
+                />
                     <div className="bg-gray-100 p-2 rounded-xl flex flex-col gap-2 flex-1">
                       <span className="font-semibold text-sm">
                         {c.userId.name}

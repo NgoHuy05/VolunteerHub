@@ -45,7 +45,6 @@ const ManageCreateEvent = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validation cơ bản
     if (!form.title || !form.description || !form.location || !form.category || !form.startDate) {
       toast.error("Vui lòng điền đầy đủ các trường bắt buộc!");
       return;
@@ -199,13 +198,21 @@ const ManageCreateEvent = () => {
                   onChange={handleFileChange}
                   className="block w-full text-sm text-gray-500 border border-gray-300 rounded-xl file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:bg-indigo-100 file:text-indigo-700 hover:file:bg-indigo-200"
                 />
-                {bannerPreview && (
-                  <img
-                    src={bannerPreview}
-                    alt="Preview"
-                    className="mt-3 w-full max-h-60 object-cover rounded-xl"
-                  />
-                )}
+{bannerPreview?.length > 0 && (
+  <div className="mt-3 grid grid-cols-2 md:grid-cols-3 gap-3">
+    {bannerPreview.map((src, index) => (
+      src && (
+        <img
+          key={index}
+          src={src}
+          alt={`Preview ${index}`}
+          className="w-full max-h-60 object-cover rounded-xl"
+        />
+      )
+    ))}
+  </div>
+)}
+
               </div>
 
               {/* Submit */}

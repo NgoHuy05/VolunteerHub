@@ -60,9 +60,10 @@ const deleteUser = async (req, res) => {
 const updateUser = async (req, res) => {
   try {
     const { name, location, age, gender } = req.body;
+    const avatar = req.file?.path || "";
     const user = await User.findByIdAndUpdate(
       req.user.id,
-      { name, location, age, gender },
+      { name, location, age, gender, avatar },
       { new: true }
     ).select("-password");
 
@@ -81,6 +82,20 @@ const updateUser = async (req, res) => {
     return res
       .status(500)
       .json({ success: false, message: "Lỗi khi cập nhật thông tin người dùng." });
+  }
+};
+
+const updateUserAvatar = async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ success: false, message: "Chưa có file." });
+    const user = await User.findByIdAndUpdate(
+      req.user.id,
+      { avatar: req.file.path },
+      { new: true }
+    ).select("-password");
+    res.status(200).json({ success: true, user });
+  } catch (err) {
+    res.status(500).json({ success: false, message: "Lỗi cập nhật avatar." });
   }
 };
 
@@ -167,4 +182,5 @@ module.exports = {
   updateUser,
   adminUpdateUser,
   changePassword,
+  updateUserAvatar
 };

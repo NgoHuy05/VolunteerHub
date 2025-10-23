@@ -48,9 +48,17 @@ const ManageCompleted = () => {
                 onClick={() => handleWatchDetail(event._id)}
                 className="relative flex flex-col gap-2 p-4 bg-white shadow rounded-lg border border-gray-200 hover:scale-105 hover:bg-gray-200 transition-all duration-300 cursor-pointer"
               >
-                <div>
-                  <img src={event.banner} alt={event._id} />
-                </div>
+                                                {event?.banner ? (
+  <img
+    src={event.banner}
+    alt={event._id}
+    className="w-full h-auto rounded-xl object-cover"
+  />
+) : (
+  <div className="w-full h-40 flex items-center justify-center bg-gray-100 text-gray-400 rounded-xl">
+    Không có ảnh
+  </div>
+)}
                 <div className="flex gap-5 font-bold items-center justify-center">
                   <div>{convertDate(event.startDate)}</div>
                   <div>

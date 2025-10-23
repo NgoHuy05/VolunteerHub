@@ -19,6 +19,15 @@ export const updateUser = (data) => {
     return axios.patch(`${BASE_URL}/update`, data, getAuthHeader())
 }
 
+
+export const updateUserAvatar = (data) => {
+    return axios.patch(`${BASE_URL}/update/avatar`, data, {
+        headers: {
+            "Content-Type": "multipart/form-data",
+            ...getAuthHeader().headers,
+        },
+    });
+};
 export const adminUpdateUser = (id, data) => {
     return axios.patch(`${BASE_URL}/update/${id}`, data, getAuthHeader())
 }
