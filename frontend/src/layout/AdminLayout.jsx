@@ -1,17 +1,24 @@
-import { Outlet, useNavigate, NavLink } from "react-router-dom";
+import {Link, Outlet, useNavigate, NavLink } from "react-router-dom";
 import {
   MdSpaceDashboard,
   MdOutlineEventNote,
   MdMenu,
-  MdNotifications,
   MdArticle,
   MdSettings,
 } from "react-icons/md";
+import { IoMdNotifications } from "react-icons/io";
 import { FaUser, FaCrown } from "react-icons/fa";
 import { useEffect, useState } from "react";
 import { getProfileUser } from "../api/user.api";
+import { getNotificationsByIdAdmin } from "../api/notification.api";
+import { logout } from "../api/auth.api";
+import { CgProfile } from "react-icons/cg";
+import { MdOutlineContactPage } from "react-icons/md";
+import { CiLogout } from "react-icons/ci";
 
 const AdminLayout = () => {
+  const [openDropdown, setOpenDropdown] = useState(null);
+  const [notification, setNotification] = useState([]);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
@@ -20,7 +27,25 @@ const AdminLayout = () => {
   useEffect(() => {
     fetchUser();
   }, []);
+  useEffect(() => {
+    const fetchNotification = async () => {
+      try {
+        const resNotification = await getNotificationsByIdAdmin();
 
+        setNotification(resNotification.data.notifications);
+      } catch (error) {
+        console.error(error?.response?.data?.message || error);
+      }
+    };
+
+    fetchNotification();
+  }, []);
+  const toggleDropdown = (type) => {
+    setOpenDropdown(openDropdown === type ? null : type);
+  };
+
+  console.log(notification);
+  
   const fetchUser = async () => {
     try {
       setLoading(true);
@@ -149,7 +174,7 @@ const AdminLayout = () => {
       {/* MAIN */}
       <div className="flex-1 flex flex-col">
         {/* HEADER */}
-        <div className="flex justify-between items-center bg-white shadow p-4">
+        <div className="relative flex justify-between items-center bg-white shadow p-4">
           <div className="flex items-center gap-4">
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -163,9 +188,16 @@ const AdminLayout = () => {
             </h1>
           </div>
 
-          <div className="flex items-center gap-6">
-            <MdNotifications className="text-2xl text-gray-600 cursor-pointer hover:text-black" />
-            <div className="flex items-center gap-3">
+          <div className=" flex items-center gap-6 transition-all hover:scale-105 duration-300 cursor-pointer">
+            <button
+              onClick={() => toggleDropdown("notification")}
+              className="p-2 text-[20px] font-bold bg-gray-300 rounded-full transition-all hover:scale-105 hover:bg-gray-400 duration-300 cursor-pointer"
+            >
+              <IoMdNotifications />
+            </button>{" "}
+            <div className="flex items-center gap-3"
+            onClick={() => toggleDropdown("avatar")}>
+              
               <img
                 src={
                   user.avatar ||
@@ -177,6 +209,66 @@ const AdminLayout = () => {
               <span className="font-medium text-gray-700">{user.name}</span>
             </div>
           </div>
+          {openDropdown === "notification" && (
+            <div className="absolute top-full w-[340px] right-0 mt-2 bg-white shadow-lg border border-gray-200 rounded-xl max-h-[400px] overflow-y-auto">
+              {Array.isArray(notification) && notification.length > 0 ? (
+                <ul className="divide-y divide-gray-200">
+                  {notification.map((n) => (
+                    <li
+                      key={n._id}
+                      className={`p-3 hover:bg-gray-100 transition-all cursor-pointer ${
+                        !n.isRead ? "bg-gray-50" : ""
+                      }`}
+                    >
+                      <div className="flex items-start gap-3">
+                        {n.senderId?.avatar ? (
+                          <img
+                            src={n.senderId.avatar}
+                            alt="avatar"
+                            className="w-10 h-10 rounded-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
+                            <CgProfile className="text-gray-600 text-2xl" />
+                          </div>
+                        )}
+
+                        <div className="flex-1">
+                          <p className="text-sm text-gray-800">{n.content}</p>
+                          <p className="text-xs text-gray-400 mt-1">
+                            {new Date(n.createdAt).toLocaleString("vi-VN")}
+                          </p>
+                        </div>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-gray-500 text-sm text-center py-3">
+                  Chưa có thông báo mới
+                </p>
+              )}
+            </div>
+          )}
+          {openDropdown === "avatar" && (
+            <div className="absolute top-full right-0 mt-2 bg-white shadow-lg border border-gray-200 p-3 rounded-xl w-[200px]">
+              <Link
+                to="/profile"
+                className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 transition duration-200"
+              >
+                <MdOutlineContactPage className="text-green-600" />
+                <span className="text-gray-800 font-medium">Profile</span>
+              </Link>
+
+              <button
+                onClick={logout}
+                className="w-full mt-2 flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-red-50 transition duration-200 text-red-600 cursor-pointer"
+              >
+                <CiLogout className="text-red-500 cursor-pointer" />
+                <div className="w-full text-left">Logout</div>
+              </button>
+            </div>
+          )}
         </div>
 
         {/* CONTENT */}

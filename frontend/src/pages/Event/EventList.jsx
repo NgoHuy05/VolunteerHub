@@ -21,6 +21,7 @@ import { useNavigate } from "react-router-dom";
 import { getApprovedEventsUserNotJoined } from "../../api/event.api";
 import { getProfileUser } from "../../api/user.api";
 import { createUserEvent } from "../../api/userEvent.api";
+import { createUserRegisterNotification } from "../../api/notification.api";
 const eventCategories = [
   {
     id: 0,
@@ -141,7 +142,9 @@ const EventList = () => {
       };
 
       const res = await createUserEvent(data);
+      
       toast.success(res.data.message || "Đăng ký tham gia thành công!");
+      await createUserRegisterNotification(eventId)
       fetchEventApproved(); // 🔄 Cập nhật lại danh sách
     } catch (error) {
       toast.error(error?.response?.data?.message || "Lỗi khi đăng ký sự kiện");

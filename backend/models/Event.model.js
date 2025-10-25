@@ -5,7 +5,7 @@ const EventSchema = new mongoose.Schema({
     description: { type: String, required: true },
     location: { type: String, required: true },
     category: { type: String, required: true },
-    startDate: { type: Date, required: true },
+    startDate: { type: Date, required: false },
     endDate: { type: Date, required: false },
     banner: { type: String },
     createBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },

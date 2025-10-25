@@ -7,6 +7,7 @@ import {
 } from "../../api/event.api";
 import toast from "react-hot-toast";
 import { IoClose } from "react-icons/io5";
+import { createApproveEventNotification } from "../../api/notification.api";
 
 const AdminListEvent = () => {
   const [events, setEvents] = useState([]);
@@ -73,6 +74,7 @@ const AdminListEvent = () => {
   const handleApprove = async (id, status) => {
     try {
       await approveEvent(id, status);
+      await createApproveEventNotification(id);
       toast.success(
         status === "approved"
           ? "Duyệt sự kiện thành công!"

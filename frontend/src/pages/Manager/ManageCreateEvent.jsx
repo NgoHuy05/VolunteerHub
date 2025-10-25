@@ -3,6 +3,7 @@ import { FaPlus } from "react-icons/fa";
 import { IoClose } from "react-icons/io5";
 import { createEvent } from "../../api/event.api";
 import toast from "react-hot-toast";
+import { createEventNotification } from "../../api/notification.api";
 
 const ManageCreateEvent = () => {
   const [isOpenModel, setIsOpenModel] = useState(false);
@@ -49,8 +50,7 @@ const ManageCreateEvent = () => {
       !form.title ||
       !form.description ||
       !form.location ||
-      !form.category ||
-      !form.startDate
+      !form.category 
     ) {
       toast.error("Vui lòng điền đầy đủ các trường bắt buộc!");
       return;
@@ -63,9 +63,9 @@ const ManageCreateEvent = () => {
         data.append(key, form[key]);
       });
 
-      await createEvent(data);
+      const res = await createEvent(data);
       toast.success("🎉 Tạo mới thành công, vui lòng chờ admin duyệt!");
-
+      await createEventNotification(res.data.event._id)
       setIsOpenModel(false);
       setBannerPreview(null);
       setForm({
@@ -194,7 +194,7 @@ const ManageCreateEvent = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Ngày bắt đầu *
+                    Ngày bắt đầu
                   </label>
                   <input
                     name="startDate"
@@ -231,15 +231,14 @@ const ManageCreateEvent = () => {
                   className="block w-full text-sm text-gray-500 border border-gray-300 rounded-xl file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:bg-indigo-100 file:text-indigo-700 hover:file:bg-indigo-200"
                 />
                 {bannerPreview && (
-  <div className="mt-3">
-    <img
-      src={bannerPreview}
-      alt="Preview"
-      className="w-full max-h-60 object-cover rounded-xl"
-    />
-  </div>
-)}
-
+                  <div className="mt-3">
+                    <img
+                      src={bannerPreview}
+                      alt="Preview"
+                      className="w-full max-h-60 object-cover rounded-xl"
+                    />
+                  </div>
+                )}
               </div>
 
               {/* Submit */}

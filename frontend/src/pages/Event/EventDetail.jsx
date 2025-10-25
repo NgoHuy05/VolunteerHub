@@ -2,7 +2,7 @@ import { useState } from "react";
 import { FaSearch } from "react-icons/fa";
 import { FaArrowRightLong, FaS } from "react-icons/fa6";
 import toast from "react-hot-toast";
-import { useParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import { BiLike, BiSolidLike } from "react-icons/bi";
 import { FaRegComment } from "react-icons/fa";
 import { IoClose } from "react-icons/io5";
@@ -27,9 +27,10 @@ import {
   getUserEvent,
 } from "../../api/userEvent.api";
 import { convertDate, getPostTimeAgo } from "../../utils";
+import { createLikeNotification, createPostNotification, createUserRegisterNotification } from "../../api/notification.api";
 
 const EvenDetail = () => {
-  const [isSelectIntrodution, setIsSelectIntrodution] = useState(true);
+  const [isSelectIntrodution, setIsSelectIntrodution] = useState(false);
   const [openCommentModal, setOpenCommentModal] = useState(false);
   const [currentPost, setCurrentPost] = useState(null);
   const [content, setContent] = useState(null);
@@ -40,6 +41,8 @@ const EvenDetail = () => {
   const [isJoined, setIsJoined] = useState(false);
   const [isPending, setIsPending] = useState(false);
   const eventId = useParams();
+  const location = useLocation(); // 🟢 nhận state
+  const { openCommentModal: openFromNotify, postId } = location.state || {};
   const [loading, setLoading] = useState(true);
   const [bannerPreview, setBannerPreview] = useState([]); // mảng url preview
   const [form, setForm] = useState({
@@ -74,7 +77,18 @@ const EvenDetail = () => {
 
     fetchEvent();
   }, [eventId]);
-  console.log(user);
+  console.log(posts);
+
+  useEffect(() => {
+    if (openFromNotify && postId) {
+      const post = posts.find((p) => p._id === postId);
+      if (post) {
+        setCurrentPost(post); // ✅ bây giờ currentPost là object hợp lệ
+        setOpenCommentModal(true);
+      }
+    }
+  }, [openFromNotify, postId, posts]);
+
   const handleOpenCreatePost = () => {
     if (!isJoined) {
       toast.error("⚠️ Vui lòng tham gia sự kiện trước khi tạo bài viết!");
@@ -164,9 +178,10 @@ const EvenDetail = () => {
         }
       }
 
-      await createPost(formData);
+      const res = await createPost(formData);
       toast.success("🎉 Tạo bài đăng thành công, vui lòng chờ admin duyệt!");
 
+      await createPostNotification(res.data.post._id);
       setOpenCreateModel(false);
       setBannerPreview([]); // ✅ phải là mảng trống, KHÔNG dùng null
       setForm({
@@ -239,26 +254,37 @@ const EvenDetail = () => {
     setOpenCommentModal(true);
   };
 
-  // 🔹 Like / Unlike
-  const handleLikeUnLike = async (postId) => {
+  const handleLikePost = async (postId) => {
     try {
+      // 1️⃣ Like hoặc Unlike bài viết
       const resLike = await LikeUnLike(postId);
-      const res = await countLike(postId);
+
+      // 2️⃣ Nếu là "Like" → tạo thông báo
+      if (resLike.data.liked) {
+        await createLikeNotification(postId);
+        console.log("like thanh cong");
+      }
+
+      // 3️⃣ Cập nhật lại số lượt like trong state
+      const resCount = await countLike(postId);
       setPosts((prev) =>
         prev.map((p) =>
           p._id === postId
-            ? { ...p, likeCount: res.data.likeCount, liked: resLike.data.liked }
+            ? {
+                ...p,
+                likeCount: resCount.data.likeCount,
+                liked: resLike.data.liked,
+              }
             : p
         )
       );
     } catch (error) {
       console.error(
-        "Lỗi khi like/unlike:",
+        "❌ Lỗi khi like hoặc tạo thông báo:",
         error.response?.data?.message || error.message
       );
     }
   };
-  console.log(event);
 
   useEffect(() => {
     if (!userEvents || !event || !user?._id) return;
@@ -292,7 +318,7 @@ const EvenDetail = () => {
 
       const res = await createUserEvent(data);
       toast.success(res.data.message || "Đăng ký tham gia thành công!");
-
+      await createUserRegisterNotification(eventId)
       // Cập nhật lại danh sách userEvents
       const resUserEvent = await getUserEvent();
       setUserEvents(resUserEvent.data.userEvents);
@@ -637,7 +663,7 @@ const EvenDetail = () => {
                   {/* Nút Like & Comment */}
                   <div className="flex border-t">
                     <button
-                      onClick={() => handleLikeUnLike(post._id)}
+                      onClick={() => handleLikePost(post._id)}
                       className="flex-1 py-2 flex items-center justify-center gap-2 hover:bg-gray-100 transition duration-200 cursor-pointer"
                     >
                       {post.liked ? (
@@ -664,7 +690,7 @@ const EvenDetail = () => {
               <div className="fixed inset-0 backdrop-blur-[1px] bg-[rgba(0,0,0,0.3)] flex items-center justify-center z-50">
                 <div className="bg-white w-full max-w-3xl h-[90%] rounded-2xl shadow-lg flex flex-col relative">
                   {/* Header */}
-                  <div className="flex justify-between items-center p-4 border-b border-gray-200 sticky top-0 bg-white rounded-xl z-10">
+                  <div className="flex justify-between items-center p-4 border-b border-gray-200 bg-white rounded-xl z-10">
                     <div className="text-xl font-semibold">
                       Bài viết của {currentPost.userId?.name}
                     </div>
@@ -678,8 +704,39 @@ const EvenDetail = () => {
 
                   {/* Nội dung bài viết */}
                   <div className="p-4 flex-1 overflow-y-auto flex flex-col gap-2">
-                    <div className="font-bold text-[15px]">
-                      {currentPost.event?.title || "Chưa có nhóm"}
+                    {/* Header */}
+                    <div className="p-4 flex gap-3 items-center border-b border-gray-200">
+                      <img
+                        src={
+                          currentPost?.event?.banner || "/default-banner.png"
+                        }
+                        alt="avatar"
+                        className="size-15 rounded-xl object-cover"
+                      />
+                      <div className="flex flex-col ">
+                        <div
+                          className="font-bold text-[2
+                
+                5px] cursor-pointer hover:text-gray-600 transition duration-300"
+                        >
+                          {currentPost.event?.title || "Chưa có nhóm"}
+                        </div>
+                        <div className="flex gap-2 items-center text-[13px] text-gray-600">
+                          {currentPost?.userId?.avatar ? (
+                            <img
+                              src={currentPost?.userId?.avatar}
+                              alt="avatar"
+                              className="w-10 h-10 rounded-full object-cover"
+                            />
+                          ) : (
+                            <div className="p-1 text-3xl rounded-full">
+                              <CgProfile />
+                            </div>
+                          )}
+                          <div>{currentPost?.userId?.name}</div>
+                          <div>{getPostTimeAgo(currentPost)}</div>
+                        </div>
+                      </div>
                     </div>
                     <div className="text-[15px]">{currentPost.content}</div>
 
@@ -695,20 +752,52 @@ const EvenDetail = () => {
                         ))}
                       </div>
                     )}
+                    {/* Like count */}
+                    <div className="flex items-center gap-2 p-4 border-t border-b border-gray-200 text-gray-600">
+                      <BiSolidLike className="text-blue-500" />
+                      <span>{currentPost.likeCount || 0} lượt thích</span>
+                    </div>
 
+                    {/* Nút Like & Comment */}
+                    <div className="flex border-t">
+                      <button
+                        onClick={() => handleLikePost(currentPost._id)}
+                        className="flex-1 py-2 flex items-center justify-center gap-2 hover:bg-gray-100 transition duration-200 cursor-pointer"
+                      >
+                        {currentPost.liked ? (
+                          <BiSolidLike className="text-blue-500" />
+                        ) : (
+                          <BiLike />
+                        )}
+                        <span>{currentPost.liked ? "Đã thích" : "Thích"}</span>
+                      </button>
+
+                      <button
+                        onClick={() => handleOpenModal(currentPost)}
+                        className="flex-1 py-2 flex items-center justify-center gap-2 hover:bg-gray-100 transition duration-200 cursor-pointer"
+                      >
+                        <FaRegComment />
+                        <span>Bình luận</span>
+                      </button>
+                    </div>
                     {/* Bình luận */}
                     <div className="space-y-2 mt-4">
                       {currentPost.comments.map((c, idx) => (
                         <div key={idx} className="flex items-start gap-2">
-                          <img
-                            src={c?.userId?.avatar || "/default-avatar.png"}
-                            alt="avatar"
-                            className="size-12 rounded-full object-cover"
-                          />
-
+                          {c?.userId?.avatar ? (
+                            <img
+                              src={c?.userId?.avatar}
+                              alt="avatar"
+                              className="w-10 h-10 rounded-full object-cover"
+                            />
+                          ) : (
+                            <div className="p-1 text-3xl rounded-full">
+                              <CgProfile />
+                            </div>
+                          )}
                           <div className="bg-gray-100 p-2 rounded-xl flex flex-col gap-2 flex-1">
                             <span className="font-semibold text-sm">
-                              {c.userId?.name}
+                              {c.userId.name}
                             </span>
                             <div>{c.content}</div>
                           </div>

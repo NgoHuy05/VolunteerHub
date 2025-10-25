@@ -6,6 +6,7 @@ import {
   approveUserJoinEvent,
   getPendingUsersWithApprovedEvents,
 } from "../../api/userEvent.api";
+import { createApproveUserNotification } from "../../api/notification.api";
 
 const ManageUser = () => {
   const [userEvents, setUserEvents] = useState([]);
@@ -33,16 +34,21 @@ const ManageUser = () => {
     setCurrent(item);
     setIsWatchDetail(true);
   };
-  const handleApprovedUser = async (postId, status) => {
+  const handleApprovedUser = async (item, status) => {
     try {
-      const res = await approveUserJoinEvent(postId, status);
+      const res = await approveUserJoinEvent(item._id, status);
+
       if (status === "joining") {
+        await createApproveUserNotification({
+          eventId: item.eventId._id,
+          userId: item.userId._id,
+        });
         toast.success(res.data.message || "Đã duyệt người dùng");
       } else {
         toast.success(res.data.message || "Đã từ chối người dùng");
       }
-      setIsWatchDetail(false);
 
+      setIsWatchDetail(false);
       await fetchPendingUsers();
     } catch (error) {
       toast.error(error?.response?.data?.message || "Lỗi khi duyệt người dùng");
@@ -117,7 +123,7 @@ const ManageUser = () => {
                       Xem chi tiết
                     </button>
                     <button
-                      onClick={() => handleApprovedUser(item._id, "joining")}
+                      onClick={() => handleApprovedUser(item, "joining")}
                       className="w-[110px] py-2 text-sm font-semibold text-white bg-green-500 hover:bg-green-600 rounded-xl transition duration-300 cursor-pointer"
                     >
                       Duyệt
@@ -184,17 +190,14 @@ const ManageUser = () => {
                     {/* Nút hành động */}
                     <div className="flex justify-center gap-5 mt-5">
                       <button
-                        onClick={() =>
-                          handleApprovedUser(current._id, "joining")
-                        }
+                        onClick={() => handleApprovedUser(current, "joining")}
                         className="w-[100px] py-2 rounded-xl font-semibold text-white bg-green-500 hover:bg-green-600 shadow-sm transition duration-300 cursor-pointer"
                       >
                         Duyệt
                       </button>
+
                       <button
-                        onClick={() =>
-                          handleApprovedUser(current._id, "rejected")
-                        }
+                        onClick={() => handleApprovedUser(current, "rejected")}
                         className="w-[100px] py-2 rounded-xl font-semibold text-white bg-red-500 hover:bg-red-600 shadow-sm transition duration-300 cursor-pointer"
                       >
                         Từ chối

@@ -6,6 +6,7 @@ import {
 } from "../../api/post.api";
 import { convertDate } from "../../utils";
 import { IoClose } from "react-icons/io5";
+import { createApprovePostNotification } from "../../api/notification.api";
 
 const ManagePost = () => {
   const [events, setEvents] = useState([]);
@@ -39,6 +40,7 @@ const ManagePost = () => {
       const res = await approvePost(postId, status);
       if (status === "approved") {
         toast.success(res.data.message || "Đã duyệt bài viết");
+        await createApprovePostNotification(postId);
       } else {
         toast.success(res.data.message || "Đã từ chối bài viết");
       }

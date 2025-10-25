@@ -4,11 +4,14 @@ import { IoClose } from "react-icons/io5";
 import { useEffect, useState } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { CgProfile } from "react-icons/cg";
-
 import { createComment } from "../api/comment.api";
 import { countLike, LikeUnLike } from "../api/like.api";
 import { getPostTimeAgo } from "../utils";
 import toast from "react-hot-toast";
+import {
+  createCommentNotification,
+  createLikeNotification,
+} from "../api/notification.api";
 
 const Home = () => {
   const [openCommentModal, setOpenCommentModal] = useState(false);
@@ -24,21 +27,33 @@ const Home = () => {
     setOpenCommentModal(true);
   };
 
-  // 🔹 Like / Unlike
-  const handleLikeUnLike = async (postId) => {
+  const handleLikePost = async (postId) => {
     try {
+      // 1️⃣ Like hoặc Unlike bài viết
       const resLike = await LikeUnLike(postId);
-      const res = await countLike(postId);
+
+      // 2️⃣ Nếu là "Like" → tạo thông báo
+      if (resLike.data.liked) {
+        await createLikeNotification(postId);
+        console.log("like thanh cong");
+      }
+
+      // 3️⃣ Cập nhật lại số lượt like trong state
+      const resCount = await countLike(postId);
       setPosts((prev) =>
         prev.map((p) =>
           p._id === postId
-            ? { ...p, likeCount: res.data.likeCount, liked: resLike.data.liked }
+            ? {
+                ...p,
+                likeCount: resCount.data.likeCount,
+                liked: resLike.data.liked,
+              }
             : p
         )
       );
     } catch (error) {
       console.error(
-        "Lỗi khi like/unlike:",
+        "❌ Lỗi khi like hoặc tạo thông báo:",
         error.response?.data?.message || error.message
       );
     }
@@ -46,22 +61,27 @@ const Home = () => {
 
   const handleSubmitComment = async (e, postId) => {
     e.preventDefault();
-    if (!content) {
-      toast.error("Vui lòng nhập đầy đủ thông tin");
+
+    if (!content.trim()) {
+      toast.error("Vui lòng nhập nội dung bình luận");
       return;
     }
-    try {
-      const res = await createComment({ content, postId });
-      toast.success(res?.message || "Tạo bình luận thành công");
-      console.log(res);
 
-      // Update posts state để hiển thị comment mới
+    try {
+      // 1️⃣ Gửi bình luận
+      const res = await createComment({ content, postId });
+      toast.success(res?.data?.message || "Bình luận thành công");
+
+      // 2️⃣ Sau khi bình luận thành công → tạo notification
+      await createCommentNotification(postId);
+
+      // 3️⃣ Cập nhật lại danh sách comment
       setPosts((prev) =>
         prev.map((p) =>
           p._id === postId
             ? {
                 ...p,
-                comments: [...p.comments, { content: content, userId: user }],
+                comments: [...p.comments, { content, userId: user }],
               }
             : p
         )
@@ -69,12 +89,15 @@ const Home = () => {
 
       setCurrentPost((prev) => ({
         ...prev,
-        comments: [...prev.comments, { content: content, userId: user }],
+        comments: [...prev.comments, { content, userId: user }],
       }));
+
+      // 4️⃣ Reset ô nhập
       setContent("");
     } catch (error) {
+      console.error("❌ Lỗi khi bình luận:", error);
       toast.error(
-        error?.response?.data?.message || error?.message || "Đăng nhập thất bại"
+        error.response?.data?.message || error.message || "Lỗi khi bình luận"
       );
     }
   };
@@ -164,7 +187,7 @@ const Home = () => {
             {/* Nút Like & Comment */}
             <div className="flex border-t">
               <button
-                onClick={() => handleLikeUnLike(post._id)}
+                onClick={() => handleLikePost(post._id)}
                 className="flex-1 py-2 flex items-center justify-center gap-2 hover:bg-gray-100 transition duration-200 cursor-pointer"
               >
                 {post.liked ? (
@@ -191,7 +214,7 @@ const Home = () => {
         <div className="fixed inset-0 backdrop-blur-[1px] bg-[rgba(0,0,0,0.3)] flex items-center justify-center z-50">
           <div className="bg-white w-full max-w-3xl h-[90%] rounded-2xl shadow-lg flex flex-col relative">
             {/* Header */}
-            <div className="flex justify-between items-center p-4 border-b border-gray-200 sticky top-0 bg-white rounded-xl z-10">
+            <div className="flex justify-between items-center p-4 border-b border-gray-200 bg-white rounded-xl z-10">
               <div className="text-xl font-semibold">
                 Bài viết của {currentPost.userId?.name}
               </div>
@@ -205,13 +228,37 @@ const Home = () => {
 
             {/* Nội dung bài viết */}
             <div className="p-4 flex-1 overflow-y-auto flex flex-col gap-2">
-              <div
-                onClick={() =>
-                  navigate(`/event/detail/${currentPost.event._id}`)
-                }
-                className="font-bold text-[25px] cursor-pointer hover:text-gray-600 transition duration-300"
-              >
-                {currentPost.event?.title || "Chưa có nhóm"}
+              {/* Header */}
+              <div className="p-4 flex gap-3 items-center border-b border-gray-200">
+                <img
+                  src={currentPost?.event?.banner || "/default-banner.png"}
+                  alt="avatar"
+                  className="size-15 rounded-xl object-cover"
+                />
+                <div className="flex flex-col ">
+                  <div
+                    className="font-bold text-[2
+                
+                5px] cursor-pointer hover:text-gray-600 transition duration-300"
+                  >
+                    {currentPost.event?.title || "Chưa có nhóm"}
+                  </div>
+                  <div className="flex gap-2 items-center text-[13px] text-gray-600">
+                    {currentPost?.userId?.avatar ? (
+                      <img
+                        src={currentPost?.userId?.avatar}
+                        alt="avatar"
+                        className="w-10 h-10 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="p-1 text-3xl rounded-full">
+                        <CgProfile />
+                      </div>
+                    )}
+                    <div>{currentPost?.userId?.name}</div>
+                    <div>{getPostTimeAgo(currentPost)}</div>
+                  </div>
+                </div>
               </div>
               <div className="text-[15px]">{currentPost.content}</div>
 
@@ -227,16 +274,49 @@ const Home = () => {
                   ))}
                 </div>
               )}
+              {/* Like count */}
+              <div className="flex items-center gap-2 p-4 border-t border-b border-gray-200 text-gray-600">
+                <BiSolidLike className="text-blue-500" />
+                <span>{currentPost.likeCount || 0} lượt thích</span>
+              </div>
 
+              {/* Nút Like & Comment */}
+              <div className="flex border-t">
+                <button
+                  onClick={() => handleLikePost(currentPost._id)}
+                  className="flex-1 py-2 flex items-center justify-center gap-2 hover:bg-gray-100 transition duration-200 cursor-pointer"
+                >
+                  {currentPost.liked ? (
+                    <BiSolidLike className="text-blue-500" />
+                  ) : (
+                    <BiLike />
+                  )}
+                  <span>{currentPost.liked ? "Đã thích" : "Thích"}</span>
+                </button>
+
+                <button
+                  onClick={() => handleOpenModal(currentPost)}
+                  className="flex-1 py-2 flex items-center justify-center gap-2 hover:bg-gray-100 transition duration-200 cursor-pointer"
+                >
+                  <FaRegComment />
+                  <span>Bình luận</span>
+                </button>
+              </div>
               {/* Bình luận */}
               <div className="space-y-2 mt-4">
                 {currentPost.comments.map((c, idx) => (
                   <div key={idx} className="flex items-start gap-2">
-                    <img
-                      src={c?.userId.avatar || "/default-avatar.png"}
-                      alt="avatar"
-                      className="size-12 rounded-full object-cover"
-                    />
+                    {c?.userId?.avatar ? (
+                      <img
+                        src={c?.userId?.avatar}
+                        alt="avatar"
+                        className="w-10 h-10 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="p-1 text-3xl rounded-full">
+                        <CgProfile />
+                      </div>
+                    )}
                     <div className="bg-gray-100 p-2 rounded-xl flex flex-col gap-2 flex-1">
                       <span className="font-semibold text-sm">
                         {c.userId.name}

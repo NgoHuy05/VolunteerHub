@@ -7,8 +7,8 @@ const authMiddleware = require("../middleware/authMiddleware");
 // 🔹 CRUD thông báo người dùng
 // -------------------------
 router.get("/", authMiddleware, controllers.getNotifications);
-router.get("/my", authMiddleware, controllers.getNotificationsByIdUser);
-router.get("/admin", authMiddleware, controllers.getNotificationsByIdAdmin);
+router.get("/my", authMiddleware, controllers.getNotifications);
+router.get("/admin", authMiddleware, controllers.getNotificationsByAdmin);
 router.put("/:id/read", authMiddleware, controllers.markAsRead);
 router.delete("/:id", authMiddleware, controllers.deleteNotification);
 
@@ -23,6 +23,7 @@ router.post("/comment", authMiddleware, controllers.createCommentNotification);
 // -------------------------
 router.post("/new-event", authMiddleware, controllers.createEventNotification);
 router.post("/new-post", authMiddleware, controllers.createPostNotification);
+router.post("/new-user-register", authMiddleware, controllers.createUserRegisterNotification);
 
 // -------------------------
 // 🔹 Tạo thông báo duyệt (admin)
