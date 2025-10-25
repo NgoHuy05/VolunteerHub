@@ -1,8 +1,12 @@
 const express = require("express");
 const router = express.Router();
-const controllers = require("../controllers/auth.controller")
+const controllers = require("../controllers/auth.controller");
 
-router.post("/register", controllers.register);
-router.post("/login", controllers.login);
+// -------------------------
+// 🔹 Auth CRUD cơ bản
+// -------------------------
+router
+  .post("/register", controllers.register)
+  .post("/login", controllers.login);
 
 module.exports = router;
