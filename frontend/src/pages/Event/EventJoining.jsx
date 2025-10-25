@@ -51,7 +51,7 @@ const EventJoining = () => {
                   <img
                     src={event.banner}
                     alt={event._id}
-                    className="w-full h-auto rounded-xl object-cover"
+                    className="w-full h-[160px] rounded-xl object-cover"
                   />
                 ) : (
                   <div className="w-full h-40 flex items-center justify-center bg-gray-100 text-gray-400 rounded-xl">

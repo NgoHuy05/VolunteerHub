@@ -13,7 +13,7 @@ import { getProfileUser } from "../api/user.api";
 import { countLike, getLikedPosts } from "../api/like.api";
 import { getCommentByPostId } from "../api/comment.api";
 import { getEventById } from "../api/event.api";
-import { getEventByUserId } from "../api/userEvent.api";
+import { getEventByUserIdAndStatus } from "../api/userEvent.api";
 import { FaArrowUp } from "react-icons/fa";
 
 const sortCategories = [
@@ -55,7 +55,7 @@ const Layout = () => {
     const fetchEventJoing = async () => {
       try {
         setLoading(true);
-        const resEventJoining = await getEventByUserId();
+        const resEventJoining = await getEventByUserIdAndStatus("joining");
         setEventJoining(resEventJoining?.data?.events);
       } catch (error) {
         console.error(error?.response?.data?.message || error.message);

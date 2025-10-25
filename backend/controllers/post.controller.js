@@ -5,10 +5,18 @@ const Event = require("../models/Event.model");
 const createPost = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { eventId, content } = req.body;
+    const { eventId, content, images: bodyImages } = req.body;
 
-    // Lấy danh sách ảnh từ Cloudinary (multer-storage-cloudinary)
-    const images = req.files ? req.files.map(file => file.path) : [];
+    // Nếu có upload file thật thì lấy từ req.files, 
+    // còn không thì lấy từ body.images (link Cloudinary sẵn)
+    const images =
+      req.files && req.files.length > 0
+        ? req.files.map(file => file.path)
+        : Array.isArray(bodyImages)
+        ? bodyImages
+        : bodyImages
+        ? [bodyImages]
+        : [];
 
     const post = await Post.create({
       eventId,
@@ -30,8 +38,6 @@ const createPost = async (req, res) => {
     });
   }
 };
-
-
 
 // [PUT] /post/:id
 const updatePost = async (req, res) => {

@@ -138,11 +138,17 @@ const Header = () => {
           onClick={() => toggleDropdown("avatar")}
           className="rounded-full transition-all hover:scale-105 duration-300 cursor-pointer"
         >
-          <img
-            src={user?.avatar || "/default-avatar.png"}
-            alt="avatar"
-            className="size-15 rounded-full object-cover"
-          />
+          {user?.avatar ? (
+            <img
+              src={user.avatar}
+              alt="avatar"
+              className="w-10 h-10 rounded-full object-cover"
+            />
+          ) : (
+            <div className="p-1 text-3xl rounded-full">
+              <CgProfile />
+            </div>
+          )}
         </button>
         {openDropdown === "notification" && (
           <div className="absolute top-full w-[320px] right-0 mt-2 bg-white shadow-lg border border-gray-200 p-4 rounded-xl">

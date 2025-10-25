@@ -13,7 +13,7 @@ import { useState } from "react";
 import ScrollToTop from "../components/ScrollToTop";
 
 const ManageLayout = () => {
-  const [isOpenYourEvent, setIsOpenYourEvent] = useState(true);
+  const [isOpenYourEvent, setIsOpenYourEvent] = useState(false);
 
   const handleScrollToTop = () => {
     window.scrollTo({

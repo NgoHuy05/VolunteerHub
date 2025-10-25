@@ -10,8 +10,9 @@ const AdminListUser = () => {
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
   const [filteredUsers, setFilteredUsers] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const usersPerPage = 8;
 
-  // Model form đầy đủ field (email có nhưng sẽ readonly)
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -22,11 +23,9 @@ const AdminListUser = () => {
     status: "active",
   });
 
-  // Lấy danh sách người dùng
   const fetchUsers = async () => {
     try {
       setLoading(true);
-
       const res = await getAllUser();
       if (res.data.success) setUsers(res.data.users);
       else toast.error("Không thể lấy danh sách người dùng");
@@ -42,7 +41,6 @@ const AdminListUser = () => {
     fetchUsers();
   }, []);
 
-  // Mở modal chỉnh sửa
   const openEditModal = (user) => {
     setEditingUser(user);
     setForm({
@@ -71,15 +69,13 @@ const AdminListUser = () => {
     }
 
     setFilteredUsers(filtered);
+    setCurrentPage(1); // reset về trang đầu khi filter/search
   }, [search, filter, users]);
 
-  // Đóng modal
   const closeModal = () => setEditingUser(null);
 
-  // Lưu thay đổi (KHÔNG gửi email)
   const handleSave = async () => {
     try {
-      // build payload chỉ chứa những field được phép chỉnh
       const payload = {
         name: form.name,
         location: form.location,
@@ -107,7 +103,6 @@ const AdminListUser = () => {
     }
   };
 
-  // Xóa người dùng
   const handleDelete = async (id) => {
     setConfirmingId(id);
     toast((t) => (
@@ -146,7 +141,13 @@ const AdminListUser = () => {
       </div>
     ));
   };
-  // 🔹 Ẩn cuộn khi mở modal
+
+  // ✅ Tính phân trang
+  const indexOfLast = currentPage * usersPerPage;
+  const indexOfFirst = indexOfLast - usersPerPage;
+  const currentUsers = filteredUsers.slice(indexOfFirst, indexOfLast);
+  const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
+
   useEffect(() => {
     document.body.style.overflow = editingUser ? "hidden" : "auto";
   }, [editingUser]);
@@ -198,13 +199,12 @@ const AdminListUser = () => {
             </tr>
           </thead>
           <tbody>
-            {filteredUsers.length > 0 ? (
-              filteredUsers.map((user, index) => (
-                <tr
-                  key={user._id}
-                  className="border-b hover:bg-gray-50 transition"
-                >
-                  <td className="py-3 px-4">{index + 1}</td>
+            {currentUsers.length > 0 ? (
+              currentUsers.map((user, index) => (
+                <tr key={user._id} className="border-b hover:bg-gray-50 transition">
+                  <td className="py-3 px-4">
+                    {(currentPage - 1) * usersPerPage + index + 1}
+                  </td>
                   <td className="py-3 px-4">{user.name}</td>
                   <td className="py-3 px-4">{user.email}</td>
                   <td className="py-3 px-4 capitalize">{user.role}</td>
@@ -228,10 +228,7 @@ const AdminListUser = () => {
               ))
             ) : (
               <tr>
-                <td
-                  colSpan="6"
-                  className="text-center py-5 text-gray-500 italic"
-                >
+                <td colSpan="6" className="text-center py-5 text-gray-500 italic">
                   Không có người dùng nào.
                 </td>
               </tr>
@@ -240,22 +237,50 @@ const AdminListUser = () => {
         </table>
       </div>
 
+      {/* ✅ PHÂN TRANG */}
+      {totalPages > 1 && (
+        <div className="flex justify-center items-center gap-2 mt-5">
+          <button
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage((p) => p - 1)}
+            className="px-3 py-1 border rounded-md disabled:opacity-50 hover:bg-gray-100"
+          >
+            «
+          </button>
+          {Array.from({ length: totalPages }).map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setCurrentPage(i + 1)}
+              className={`px-3 py-1 border rounded-md ${
+                currentPage === i + 1
+                  ? "bg-blue-500 text-white"
+                  : "hover:bg-gray-100"
+              }`}
+            >
+              {i + 1}
+            </button>
+          ))}
+          <button
+            disabled={currentPage === totalPages}
+            onClick={() => setCurrentPage((p) => p + 1)}
+            className="px-3 py-1 border rounded-md disabled:opacity-50 hover:bg-gray-100"
+          >
+            »
+          </button>
+        </div>
+      )}
+
       {/* MODAL CHỈNH SỬA */}
       {editingUser && (
         <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="bg-white w-full max-w-lg rounded-2xl shadow-xl overflow-hidden">
-            {/* Header */}
             <div className="flex justify-between items-center px-5 py-3 border-b bg-gray-50">
               <h3 className="text-lg font-semibold">✏️ Chỉnh sửa người dùng</h3>
-              <button
-                onClick={closeModal}
-                className="text-2xl font-bold hover:text-gray-500"
-              >
+              <button onClick={closeModal} className="text-2xl font-bold hover:text-gray-500">
                 ×
               </button>
             </div>
 
-            {/* Form */}
             <div className="p-5 space-y-3">
               <Input
                 label="Họ tên"
@@ -263,11 +288,8 @@ const AdminListUser = () => {
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
               />
 
-              {/* Email hiển thị nhưng không chỉnh được */}
               <div>
-                <label className="block text-sm font-medium text-gray-600 mb-1">
-                  Email
-                </label>
+                <label className="block text-sm font-medium text-gray-600 mb-1">Email</label>
                 <input
                   type="email"
                   value={form.email}
@@ -275,9 +297,7 @@ const AdminListUser = () => {
                   disabled
                   className="w-full border rounded-lg px-3 py-2 bg-gray-100 text-gray-600 cursor-not-allowed"
                 />
-                <div className="text-xs text-gray-500 mt-1">
-                  Email không thể chỉnh sửa.
-                </div>
+                <div className="text-xs text-gray-500 mt-1">Email không thể chỉnh sửa.</div>
               </div>
 
               <Input
@@ -326,18 +346,11 @@ const AdminListUser = () => {
               />
             </div>
 
-            {/* Footer */}
             <div className="flex justify-end gap-3 px-5 py-3 border-t bg-gray-50">
-              <button
-                onClick={closeModal}
-                className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300"
-              >
+              <button onClick={closeModal} className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">
                 Hủy
               </button>
-              <button
-                onClick={handleSave}
-                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
-              >
+              <button onClick={handleSave} className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
                 Lưu thay đổi
               </button>
             </div>
@@ -348,12 +361,9 @@ const AdminListUser = () => {
   );
 };
 
-// Component Input tái sử dụng
 const Input = ({ label, type = "text", value, onChange }) => (
   <div>
-    <label className="block text-sm font-medium text-gray-600 mb-1">
-      {label}
-    </label>
+    <label className="block text-sm font-medium text-gray-600 mb-1">{label}</label>
     <input
       type={type}
       value={value}
@@ -363,12 +373,9 @@ const Input = ({ label, type = "text", value, onChange }) => (
   </div>
 );
 
-// Component Select tái sử dụng
 const Select = ({ label, value, onChange, options }) => (
   <div>
-    <label className="block text-sm font-medium text-gray-600 mb-1">
-      {label}
-    </label>
+    <label className="block text-sm font-medium text-gray-600 mb-1">{label}</label>
     <select
       value={value}
       onChange={onChange}

@@ -32,6 +32,8 @@ const EventRejected = () => {
       </div>
     );
   }
+  console.log(events);
+  
   return (
     <>
       <div>
@@ -46,11 +48,11 @@ const EventRejected = () => {
                 onClick={() => handleWatchDetail(event.eventId._id)}
                 className="relative flex flex-col gap-2 p-4 bg-white shadow rounded-lg border border-gray-200 hover:scale-105 hover:bg-gray-200 transition-all duration-300 cursor-pointer"
               >
-                {event?.banner ? (
+                {event?.eventId?.banner ? (
                   <img
-                    src={event.banner}
-                    alt={event._id}
-                    className="w-full h-auto rounded-xl object-cover"
+                    src={event.eventId.banner}
+                    alt={event.eventId._id}
+                    className="w-full h-[160px] rounded-xl object-cover"
                   />
                 ) : (
                   <div className="w-full h-40 flex items-center justify-center bg-gray-100 text-gray-400 rounded-xl">

@@ -19,7 +19,7 @@ const AdminListEvent = () => {
   const [confirmingId, setConfirmingId] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const eventsPerPage = 10;
+  const eventsPerPage = 8;
 
   useEffect(() => {
     fetchEvents();
@@ -130,7 +130,9 @@ const AdminListEvent = () => {
   const indexOfLast = currentPage * eventsPerPage;
   const indexOfFirst = indexOfLast - eventsPerPage;
   const currentEvents = filteredEvents.slice(indexOfFirst, indexOfLast);
+  
   const totalPages = Math.ceil(filteredEvents.length / eventsPerPage);
+  
   if (loading) {
     return (
       <div className="flex justify-center items-center h-[300px]">

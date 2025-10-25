@@ -46,7 +46,7 @@ const Profile = () => {
           age: data.age || "",
           gender: data.gender || "none",
           email: data.email || "",
-          avatar: data.avatar || "/default-avatar.png", // ← thêm dòng này
+          avatar: data.avatar || "", // ← thêm dòng này
         });
       } catch (error) {
         toast.error(
@@ -183,11 +183,17 @@ const Profile = () => {
             <>
               {/* Avatar */}
               <div className="flex items-center gap-5">
-                <img
-                  src={form.avatar || "/default-avatar.png"}
-                  alt="avatar"
-                  className="w-20 h-20 rounded-full object-cover"
-                />
+                {form.avatar ? (
+                  <img
+                    src={form.avatar}
+                    alt="avatar"
+                    className="w-20 h-20 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="p-1 text-3xl rounded-full">
+                                        <CgProfile />
+                  </div>
+                )}
 
                 <label className="flex gap-2 bg-sky-400 text-white p-2 rounded-2xl items-center cursor-pointer hover:bg-sky-600 transition duration-300">
                   <BsUpload />

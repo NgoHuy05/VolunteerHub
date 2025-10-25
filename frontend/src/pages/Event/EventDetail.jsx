@@ -17,6 +17,8 @@ import { FaUsers } from "react-icons/fa";
 import { FaUser } from "react-icons/fa";
 import { FaLocationDot } from "react-icons/fa6";
 import { MdDescription } from "react-icons/md";
+import { CgProfile } from "react-icons/cg";
+
 import {
   countAllUserByEventId,
   countJoiningUserByEventId,
@@ -582,7 +584,7 @@ const EvenDetail = () => {
                   {/* Header */}
                   <div className="p-4 flex gap-3 items-center border-b border-gray-200">
                     <img
-                      src={post?.userId?.avatar || "/default-avatar.png"}
+                      src={post?.event?.banner || "/default-banner.png"}
                       alt="avatar"
                       className="size-15 rounded-full object-cover"
                     />
@@ -591,7 +593,18 @@ const EvenDetail = () => {
                       <div className="font-bold text-[15px]">
                         {post.event?.title || "Chưa có nhóm"}
                       </div>
-                      <div className="flex gap-2 text-[13px] text-gray-600">
+                      <div className="flex gap-2 items-center text-[13px] text-gray-600">
+                        {post?.userId?.avatar ? (
+                          <img
+                            src={post?.userId?.avatar}
+                            alt="avatar"
+                            className="w-10 h-10 rounded-full object-cover"
+                          />
+                        ) : (
+                          <div className="p-1 text-3xl rounded-full">
+                            <CgProfile />
+                          </div>
+                        )}
                         <div>{post?.userId?.name}</div>
                         <div>{getPostTimeAgo(post)}</div>
                       </div>
@@ -608,7 +621,7 @@ const EvenDetail = () => {
                             key={idx}
                             src={img}
                             alt={`post-img-${idx}`}
-                            className="w-full h-auto object-cover rounded-xl"
+                            className="w-full h-[250px] object-cover rounded-xl"
                           />
                         ))}
                       </div>
