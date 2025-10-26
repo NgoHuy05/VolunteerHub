@@ -11,6 +11,7 @@ import { logout } from "../api/auth.api";
 import { getProfileUser } from "../api/user.api";
 import { BiEdit } from "react-icons/bi";
 import { getNotificationsById } from "../api/notification.api";
+import { FaCrown } from "react-icons/fa";
 
 const navItems = [
   { path: "/", label: "Dashboard", icon: <FaHome /> },
@@ -116,6 +117,25 @@ const handleClickNotification = (n) => {
             </div>
           </NavLink>
         )}
+        {( user?.role === "admin") && (
+          <NavLink
+            key="/admin"
+            to="/admin/dashboard"
+            className={({ isActive }) =>
+              `flex gap-2 items-center p-2 rounded hover:bg-gray-200 transition duration-300 cursor-pointer ${
+                isActive ? "border-b-3   rounded-none" : ""
+              }`
+            }
+          >
+            <div className="flex items-center gap-2">
+              <div>
+                <FaCrown className="text-yellow-400 text-2xl" />
+              
+              </div>
+              <div>Admin</div>
+            </div>
+          </NavLink>
+        )}
       </div>
 
       <div className="flex items-center justify-center gap-4 relative">
@@ -153,6 +173,21 @@ const handleClickNotification = (n) => {
                     <BiEdit />{" "}
                   </div>
                   <div>Quản lí</div>
+                </div>
+              </NavLink>
+            )}
+            {( user.role === "admin") && (
+              <NavLink
+                key="/admin"
+                to="/admin/dashboard"
+                onClick={() => setOpenDropdown(null)}
+                className="block py-2 px-3 hover:bg-gray-100 rounded"
+              >
+                <div className="flex items-center gap-2">
+                  <div>
+                <FaCrown className="text-yellow-400 text-2xl" />
+                  </div>
+                  <div>Admin</div>
                 </div>
               </NavLink>
             )}

@@ -71,6 +71,36 @@ const AdminLayout = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  const handleClickNotification = (n) => {
+    setOpenDropdown(null);  
+    if (n.type === "new_event") {
+      navigate(`/admin/list/events`, {
+      state: {
+        isModalOpen: n.eventId?._id,
+        eventId: n.eventId?._id || null, 
+      },
+      replace: true,
+    });
+    } else if (n.type === "new_post") {
+      navigate(`/admin/list/posts`, {
+      state: {
+        isWatchDetail: n.postId?._id,
+        postId: n.postId?._id || null, 
+      },
+      replace: true,
+      });
+    } else {
+      navigate(`/admin/list/users`, {
+      state: {
+        isWatchDetail: n.senderId?._id ,
+        senderId: n.senderId?._id || null, 
+        },
+        replace: true,
+      });
+    }
+  
+};
+
   useEffect(() => {
     if (user && user.role !== "admin") {
       navigate("/login");
@@ -194,7 +224,7 @@ const AdminLayout = () => {
               className="p-2 text-[20px] font-bold bg-gray-300 rounded-full transition-all hover:scale-105 hover:bg-gray-400 duration-300 cursor-pointer"
             >
               <IoMdNotifications />
-            </button>{" "}
+            </button>
             <div className="flex items-center gap-3"
             onClick={() => toggleDropdown("avatar")}>
               
@@ -215,6 +245,7 @@ const AdminLayout = () => {
                 <ul className="divide-y divide-gray-200">
                   {notification.map((n) => (
                     <li
+                      onClick={() => handleClickNotification(n)}
                       key={n._id}
                       className={`p-3 hover:bg-gray-100 transition-all cursor-pointer ${
                         !n.isRead ? "bg-gray-50" : ""

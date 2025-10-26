@@ -253,7 +253,7 @@ const getNotificationsByAdmin = async (req, res) => {
       $or: [{ type: "new_event" }, { type: "new_post" }, { type: "new_user_register" }],
     })
       .populate("userId")
-      .populate("senderId", "name avatar")
+      .populate("senderId")
       .populate("eventId")
       .populate("postId")
       .sort({ createdAt: -1 });

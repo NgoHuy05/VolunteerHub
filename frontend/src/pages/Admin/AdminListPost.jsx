@@ -3,6 +3,7 @@ import { getAllPost, deletePost, approvePost } from "../../api/post.api";
 import toast from "react-hot-toast";
 import { IoClose } from "react-icons/io5";
 import { convertDate } from "../../utils";
+import { useLocation } from "react-router-dom";
 
 const AdminListPost = () => {
   const [posts, setPosts] = useState([]);
@@ -15,6 +16,18 @@ const AdminListPost = () => {
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const postsPerPage = 8;
+ const location = useLocation(); // 🟢 nhận state
+  const { isWatchDetail: openFromNotify, postId } = location.state || {};
+  
+    useEffect(() => {
+    if (openFromNotify && postId) {
+      const post = posts.find((p) => p._id === postId);
+      if (post) {
+        setCurrentPost(post); // ✅ bây giờ currentPost là object hợp lệ
+        setIsWatchDetail(true);
+      }
+    }
+  }, [openFromNotify, postId, posts]);
 
   // Lấy danh sách bài viết
   const fetchPosts = async () => {
@@ -241,7 +254,7 @@ const AdminListPost = () => {
       </div>
 
       {/* Pagination */}
-      {totalPages > 1 && (
+      {totalPages > 0 && (
         <div className="flex justify-center items-center mt-5 gap-2">
           <button
             disabled={currentPage === 1}

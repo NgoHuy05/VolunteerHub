@@ -8,6 +8,7 @@ import {
 import toast from "react-hot-toast";
 import { IoClose } from "react-icons/io5";
 import { createApproveEventNotification } from "../../api/notification.api";
+import { useLocation } from "react-router-dom";
 
 const AdminListEvent = () => {
   const [events, setEvents] = useState([]);
@@ -19,8 +20,18 @@ const AdminListEvent = () => {
   const [search, setSearch] = useState("");
   const [confirmingId, setConfirmingId] = useState(null);
   const [loading, setLoading] = useState(true);
-
+ const location = useLocation(); // 🟢 nhận state
+  const { isModalOpen: openFromNotify, eventId } = location.state || {};
   const eventsPerPage = 8;
+  useEffect(() => {
+    if (openFromNotify && eventId) {
+      const event = events.find((e) => e._id === eventId);
+      if (event) {
+        setCurrentEvent(event); 
+        setIsModalOpen(true);
+      }
+    }
+  }, [openFromNotify, eventId, events]);
 
   useEffect(() => {
     fetchEvents();
@@ -221,7 +232,7 @@ const AdminListEvent = () => {
       )}
 
       {/* Pagination */}
-      {totalPages > 1 && (
+      {totalPages > 0 && (
         <div className="flex justify-center items-center mt-5 gap-2">
           <button
             disabled={currentPage === 1}

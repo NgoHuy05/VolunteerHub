@@ -134,27 +134,7 @@ const AdminDashboard = () => {
         </div>
       </div>
 
-      {/* Biểu đồ tổng quan */}
-      <div className="bg-white p-5 rounded-2xl shadow">
-        <h3 className="text-lg font-semibold text-gray-700 mb-4">
-          Biểu đồ thống kê
-        </h3>
-        <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={chartData}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
-            <YAxis />
-            <Tooltip />
-            <Line
-              type="monotone"
-              dataKey="value"
-              stroke="#3b82f6"
-              strokeWidth={2}
-              dot={{ r: 6 }}
-            />
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
+     
 
       <div className="bg-white p-5 rounded-2xl shadow">
         <h3 className="text-lg font-semibold text-gray-700 mb-4">
@@ -214,6 +194,28 @@ const AdminDashboard = () => {
             </div>
           </div>
         )}
+      </div>
+
+       {/* Biểu đồ tổng quan */}
+      <div className="bg-white p-5 rounded-2xl shadow">
+        <h3 className="text-lg font-semibold text-gray-700 mb-4">
+          Biểu đồ thống kê
+        </h3>
+        <ResponsiveContainer width="100%" height={300}>
+          <LineChart data={chartData}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="name" />
+            <YAxis />
+            <Tooltip />
+            <Line
+              type="monotone"
+              dataKey="value"
+              stroke="#3b82f6"
+              strokeWidth={2}
+              dot={{ r: 6 }}
+            />
+          </LineChart>
+        </ResponsiveContainer>
       </div>
     </div>
   );
