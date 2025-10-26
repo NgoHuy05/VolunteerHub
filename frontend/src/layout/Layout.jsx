@@ -15,6 +15,7 @@ import { getCommentByPostId } from "../api/comment.api";
 import { getEventById } from "../api/event.api";
 import { getEventByUserIdAndStatus } from "../api/userEvent.api";
 import { FaArrowUp } from "react-icons/fa";
+import { CgProfile } from "react-icons/cg";
 
 const sortCategories = [
   { id: 1, title: "Tất cả" },
@@ -152,11 +153,17 @@ const Layout = () => {
               to="profile"
               className="flex items-center ml-1 mr-1 p-4 rounded gap-2 transition-all hover:bg-gray-300 duration-300 cursor-pointer"
             >
-              <img
-                src={user?.avatar ? user.avatar : "/default-avatar.png"}
-                alt="avatar"
-                className="size-12 rounded-full object-cover"
-              />
+              {user?.avatar ? (
+                          <img
+                            src={user.avatar}
+                            alt="avatar"
+                            className="w-10 h-10 rounded-full object-cover"
+                          />
+                        ) : (
+                          <div className="p-1 text-3xl rounded-full">
+                            <CgProfile />
+                          </div>
+                        )}
 
               <div className="text-[18px]">{user?.name || "Huy"} </div>
             </NavLink>

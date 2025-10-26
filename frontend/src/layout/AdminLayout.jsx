@@ -1,51 +1,33 @@
-import {Link, Outlet, useNavigate, NavLink } from "react-router-dom";
+import { Link, Outlet, useNavigate, NavLink } from "react-router-dom";
 import {
   MdSpaceDashboard,
   MdOutlineEventNote,
   MdMenu,
   MdArticle,
   MdSettings,
+  MdOutlineContactPage,
 } from "react-icons/md";
 import { IoMdNotifications } from "react-icons/io";
 import { FaUser, FaCrown } from "react-icons/fa";
+import { CgProfile } from "react-icons/cg";
+import { CiLogout } from "react-icons/ci";
 import { useEffect, useState } from "react";
 import { getProfileUser } from "../api/user.api";
-import { getNotificationsByIdAdmin } from "../api/notification.api";
 import { logout } from "../api/auth.api";
-import { CgProfile } from "react-icons/cg";
-import { MdOutlineContactPage } from "react-icons/md";
-import { CiLogout } from "react-icons/ci";
+import { getNotificationsByIdAdmin } from "../api/notification.api";
+import { markAsRead } from "../api/notification.api"; // ✅ hàm đánh dấu đã đọc
 
 const AdminLayout = () => {
   const [openDropdown, setOpenDropdown] = useState(null);
-  const [notification, setNotification] = useState([]);
+  const [notificationUnread, setNotificationUnread] = useState([]);
+  const [notificationRead, setNotificationRead] = useState([]);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [user, setUser] = useState(null);
-  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("unread"); // unread, read, all
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    fetchUser();
-  }, []);
-  useEffect(() => {
-    const fetchNotification = async () => {
-      try {
-        const resNotification = await getNotificationsByIdAdmin();
-
-        setNotification(resNotification.data.notifications);
-      } catch (error) {
-        console.error(error?.response?.data?.message || error);
-      }
-    };
-
-    fetchNotification();
-  }, []);
-  const toggleDropdown = (type) => {
-    setOpenDropdown(openDropdown === type ? null : type);
-  };
-
-  console.log(notification);
-  
+  // Fetch user profile
   const fetchUser = async () => {
     try {
       setLoading(true);
@@ -57,147 +39,111 @@ const AdminLayout = () => {
       setLoading(false);
     }
   };
+
+  // Fetch notifications
+  const fetchNotification = async () => {
+    try {
+      const res = await getNotificationsByIdAdmin();
+      const unread = res.data.notifications.filter((n) => !n.isRead);
+      const read = res.data.notifications.filter((n) => n.isRead);
+      setNotificationUnread(unread);
+      setNotificationRead(read);
+    } catch (error) {
+      console.error(error?.response?.data?.message || error);
+    }
+  };
+
+  useEffect(() => {
+    fetchUser();
+    fetchNotification();
+  }, []);
+
+  // Redirect nếu không phải admin
+  useEffect(() => {
+    if (user && user.role !== "admin") navigate("/login");
+  }, [user, navigate]);
+
+  // Tự động ẩn sidebar khi màn hình nhỏ
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth < 1024) {
-        setSidebarOpen(false);
-      } else {
-        setSidebarOpen(true);
-      }
+      setSidebarOpen(window.innerWidth >= 1024);
     };
-
-    handleResize(); // chạy 1 lần khi load
+    handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const handleClickNotification = (n) => {
-    setOpenDropdown(null);  
+  const toggleDropdown = (type) => {
+    setOpenDropdown(openDropdown === type ? null : type);
+  };
+
+  const handleClickNotification = async (n) => {
+    setOpenDropdown(null);
+
+    // Nếu chưa đọc, gọi API markAsRead
+    if (!n.isRead) {
+      try {
+        await markAsRead(n._id);
+        // cập nhật state local
+        setNotificationUnread((prev) => prev.filter((item) => item._id !== n._id));
+        setNotificationRead((prev) => [n, ...prev]);
+        n.isRead = true; // cập nhật tạm thời item hiện tại
+      } catch (err) {
+        console.error(err?.response?.data?.message || err);
+      }
+    }
+
+    // Điều hướng
     if (n.type === "new_event") {
       navigate(`/admin/list/events`, {
-      state: {
-        isModalOpen: n.eventId?._id,
-        eventId: n.eventId?._id || null, 
-      },
-      replace: true,
-    });
-    } else if (n.type === "new_post") {
-      navigate(`/admin/list/posts`, {
-      state: {
-        isWatchDetail: n.postId?._id,
-        postId: n.postId?._id || null, 
-      },
-      replace: true,
-      });
-    } else {
-      navigate(`/admin/list/users`, {
-      state: {
-        isWatchDetail: n.senderId?._id ,
-        senderId: n.senderId?._id || null, 
-        },
+        state: { isModalOpen: n.eventId?._id, eventId: n.eventId?._id || null },
         replace: true,
       });
-    }
-  
-};
-
-  useEffect(() => {
-    if (user && user.role !== "admin") {
-      navigate("/login");
-    }
-  }, [user, navigate]);
+    } else if (n.type === "new_post") {
+      navigate(`/admin/list/posts`, {
+        state: { isWatchDetail: n.postId?._id, postId: n.postId?._id || null },
+        replace: true,
+      });
+    } 
+  };
 
   if (!user) return null;
-  if (loading) {
+
+  if (loading)
     return (
       <div className="flex justify-center items-center h-[300px]">
         <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-gray-800"></div>
       </div>
     );
-  }
+
   return (
     <div className="flex bg-gray-200 min-h-screen">
       {/* SIDEBAR */}
-      <div
-        className={`${
-          sidebarOpen ? "w-[18%]" : "w-[80px]"
-        } transition-all duration-300 bg-[#0F1A34] text-white flex flex-col`}
-      >
-        {/* Logo */}
-        <div
-          onClick={() => navigate("/admin/dashboard")}
-          className="bg-[#182444] flex items-center gap-3 justify-center py-6 cursor-pointer"
-        >
+      <div className={`${sidebarOpen ? "w-[18%]" : "w-[80px]"} transition-all duration-300 bg-[#0F1A34] text-white flex flex-col`}>
+        <div onClick={() => navigate("/admin/dashboard")} className="bg-[#182444] flex items-center gap-3 justify-center py-6 cursor-pointer">
           <FaCrown className="text-yellow-400 text-2xl" />
           {sidebarOpen && <span className="text-2xl font-semibold">Admin</span>}
         </div>
 
-        {/* NAVIGATION */}
         <div className="flex flex-col text-[17px]">
-          {/* Dashboard */}
-          <NavLink
-            to="/admin/dashboard"
-            className={({ isActive }) =>
-              `flex gap-3 py-4 px-8 items-center cursor-pointer transition duration-200 hover:bg-[#0c1324] ${
-                isActive ? "bg-[#0c1324]" : ""
-              }`
-            }
-          >
-            <MdSpaceDashboard className="text-xl" />
-            {sidebarOpen && <span>Dashboard</span>}
-          </NavLink>
-
-          {/* Quản lý người dùng */}
-          <NavLink
-            to="/admin/list/users"
-            className={({ isActive }) =>
-              `flex gap-3 py-4 px-8 items-center cursor-pointer transition duration-200 hover:bg-[#0c1324] ${
-                isActive ? "bg-[#0c1324]" : ""
-              }`
-            }
-          >
-            <FaUser className="text-xl" />
-            {sidebarOpen && <span>Quản lý người dùng</span>}
-          </NavLink>
-
-          {/* Quản lý sự kiện */}
-          <NavLink
-            to="/admin/list/events"
-            className={({ isActive }) =>
-              `flex gap-3 py-4 px-8 items-center cursor-pointer transition duration-200 hover:bg-[#0c1324] ${
-                isActive ? "bg-[#0c1324]" : ""
-              }`
-            }
-          >
-            <MdOutlineEventNote className="text-xl" />
-            {sidebarOpen && <span>Quản lý sự kiện</span>}
-          </NavLink>
-
-          {/* Quản lý bài đăng */}
-          <NavLink
-            to="/admin/list/posts"
-            className={({ isActive }) =>
-              `flex gap-3 py-4 px-8 items-center cursor-pointer transition duration-200 hover:bg-[#0c1324] ${
-                isActive ? "bg-[#0c1324]" : ""
-              }`
-            }
-          >
-            <MdArticle className="text-xl" />
-            {sidebarOpen && <span>Quản lý bài đăng</span>}
-          </NavLink>
-
-          {/* Cấu hình hệ thống */}
-          <NavLink
-            to="/admin/settings"
-            className={({ isActive }) =>
-              `flex gap-3 py-4 px-8 items-center cursor-pointer transition duration-200 hover:bg-[#0c1324] ${
-                isActive ? "bg-[#0c1324]" : ""
-              }`
-            }
-          >
-            <MdSettings className="text-xl" />
-            {sidebarOpen && <span>Cài đặt</span>}
-          </NavLink>
+          {[
+            { to: "/admin/dashboard", icon: MdSpaceDashboard, label: "Dashboard" },
+            { to: "/admin/list/users", icon: FaUser, label: "Quản lý người dùng" },
+            { to: "/admin/list/events", icon: MdOutlineEventNote, label: "Quản lý sự kiện" },
+            { to: "/admin/list/posts", icon: MdArticle, label: "Quản lý bài đăng" },
+            { to: "/admin/settings", icon: MdSettings, label: "Cài đặt" },
+          ].map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              className={({ isActive }) =>
+                `flex gap-3 py-4 px-8 items-center cursor-pointer transition duration-200 hover:bg-[#0c1324] ${isActive ? "bg-[#0c1324]" : ""}`
+              }
+            >
+              <item.icon className="text-xl" />
+              {sidebarOpen && <span>{item.label}</span>}
+            </NavLink>
+          ))}
         </div>
       </div>
 
@@ -206,10 +152,7 @@ const AdminLayout = () => {
         {/* HEADER */}
         <div className="relative flex justify-between items-center bg-white shadow p-4">
           <div className="flex items-center gap-4">
-            <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="text-2xl text-gray-600 hover:text-black cursor-pointer"
-            >
+            <button onClick={() => setSidebarOpen(!sidebarOpen)} className="text-2xl text-gray-600 hover:text-black cursor-pointer">
               <MdMenu />
             </button>
             <h1 className="text-xl font-semibold text-gray-700 flex items-center gap-2">
@@ -218,85 +161,107 @@ const AdminLayout = () => {
             </h1>
           </div>
 
-          <div className=" flex items-center gap-6 transition-all hover:scale-105 duration-300 cursor-pointer">
+          <div className="flex items-center gap-6">
+            {/* Notification Button */}
             <button
               onClick={() => toggleDropdown("notification")}
-              className="p-2 text-[20px] font-bold bg-gray-300 rounded-full transition-all hover:scale-105 hover:bg-gray-400 duration-300 cursor-pointer"
+              className="p-2 text-[20px] font-bold bg-gray-300 rounded-full hover:scale-105 hover:bg-gray-400 transition-all cursor-pointer relative"
             >
               <IoMdNotifications />
+              {notificationUnread.length > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full animate-pulse">
+                  {notificationUnread.length}
+                </span>
+              )}
             </button>
-            <div className="flex items-center gap-3"
-            onClick={() => toggleDropdown("avatar")}>
-              
+
+            {/* Avatar */}
+            <div className="flex items-center gap-3" onClick={() => toggleDropdown("avatar")}>
               <img
-                src={
-                  user.avatar ||
-                  "https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
-                }
+                src={user.avatar || "https://cdn-icons-png.flaticon.com/512/3135/3135715.png"}
                 alt="avatar"
                 className="w-10 h-10 rounded-full object-cover border"
               />
               <span className="font-medium text-gray-700">{user.name}</span>
             </div>
           </div>
-          {openDropdown === "notification" && (
-            <div className="absolute top-full w-[340px] right-0 mt-2 bg-white shadow-lg border border-gray-200 rounded-xl max-h-[400px] overflow-y-auto">
-              {Array.isArray(notification) && notification.length > 0 ? (
-                <ul className="divide-y divide-gray-200">
-                  {notification.map((n) => (
-                    <li
-                      onClick={() => handleClickNotification(n)}
-                      key={n._id}
-                      className={`p-3 hover:bg-gray-100 transition-all cursor-pointer ${
-                        !n.isRead ? "bg-gray-50" : ""
-                      }`}
-                    >
-                      <div className="flex items-start gap-3">
-                        {n.senderId?.avatar ? (
-                          <img
-                            src={n.senderId.avatar}
-                            alt="avatar"
-                            className="w-10 h-10 rounded-full object-cover"
-                          />
-                        ) : (
-                          <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
-                            <CgProfile className="text-gray-600 text-2xl" />
-                          </div>
-                        )}
 
-                        <div className="flex-1">
-                          <p className="text-sm text-gray-800">{n.content}</p>
-                          <p className="text-xs text-gray-400 mt-1">
-                            {new Date(n.createdAt).toLocaleString("vi-VN")}
-                          </p>
+          {/* DROPDOWN THÔNG BÁO */}
+          {openDropdown === "notification" && (
+            <div className="absolute top-full right-0 mt-2 w-[340px] bg-white shadow-lg border border-gray-200 rounded-xl max-h-[400px] overflow-hidden">
+              <div className="px-4 py-2 border-b flex justify-between">
+                <span className="font-semibold text-gray-700">Thông báo</span>
+                <span className="text-xs text-gray-400">Mới nhất</span>
+              </div>
+
+              {/* TAB */}
+              <div className="flex border-b border-gray-200">
+                <button
+                  onClick={() => setActiveTab("unread")}
+                  className={`flex-1 py-2 text-center font-medium ${activeTab === "unread" ? "border-b-2 border-blue-500 text-blue-600" : "text-gray-500"}`}
+                >
+                  Chưa đọc ({notificationUnread.length})
+                </button>
+                <button
+                  onClick={() => setActiveTab("read")}
+                  className={`flex-1 py-2 text-center font-medium ${activeTab === "read" ? "border-b-2 border-blue-500 text-blue-600" : "text-gray-500"}`}
+                >
+                  Đã đọc ({notificationRead.length})
+                </button>
+                <button
+                  onClick={() => setActiveTab("all")}
+                  className={`flex-1 py-2 text-center font-medium ${activeTab === "all" ? "border-b-2 border-blue-500 text-blue-600" : "text-gray-500"}`}
+                >
+                  Tất cả
+                </button>
+              </div>
+
+              {/* LIST */}
+              <ul className="divide-y divide-gray-200 max-h-[300px] overflow-y-auto">
+                {(() => {
+                  let list = [];
+                  if (activeTab === "unread") list = notificationUnread;
+                  else if (activeTab === "read") list = notificationRead;
+                  else list = [...notificationUnread, ...notificationRead];
+                  if (list.length === 0)
+                    return <p className="text-gray-500 text-sm text-center py-3">Chưa có thông báo</p>;
+                  return list.map((n) => (
+                    <li
+                      key={n._id}
+                      onClick={() => handleClickNotification(n)}
+                      className={`p-3 flex items-start gap-3 cursor-pointer ${n.isRead ? "opacity-60 hover:bg-gray-100" : "bg-white hover:bg-gray-50"}`}
+                    >
+                      {n.senderId?.avatar ? (
+                        <img src={n.senderId.avatar} alt="avatar" className="w-10 h-10 rounded-full object-cover" />
+                      ) : (
+                        <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
+                          <CgProfile className="text-gray-600 text-2xl" />
                         </div>
+                      )}
+                      <div className="flex-1">
+                        <p className={`text-sm ${n.isRead ? "text-gray-500 " : "text-gray-800"}`}>{n.content}</p>
+                        <p className="text-xs text-gray-400 mt-1">{new Date(n.createdAt).toLocaleString("vi-VN")}</p>
                       </div>
                     </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-gray-500 text-sm text-center py-3">
-                  Chưa có thông báo mới
-                </p>
-              )}
+                  ));
+                })()}
+              </ul>
             </div>
           )}
+
+          {/* DROPDOWN AVATAR */}
           {openDropdown === "avatar" && (
-            <div className="absolute top-full right-0 mt-2 bg-white shadow-lg border border-gray-200 p-3 rounded-xl w-[200px]">
-              <Link
-                to="/profile"
-                className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 transition duration-200"
-              >
+            <div className="absolute top-full right-0 mt-2 w-[200px] bg-white shadow-lg border border-gray-200 p-3 rounded-xl">
+              <Link to="/profile" className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 transition">
                 <MdOutlineContactPage className="text-green-600" />
                 <span className="text-gray-800 font-medium">Profile</span>
               </Link>
-
               <button
                 onClick={logout}
-                className="w-full mt-2 flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-red-50 transition duration-200 text-red-600 cursor-pointer"
+                className="w-full mt-2 flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-red-50 text-red-600 transition"
               >
-                <CiLogout className="text-red-500 cursor-pointer" />
-                <div className="w-full text-left">Logout</div>
+                <CiLogout className="text-red-500" />
+                <span>Logout</span>
               </button>
             </div>
           )}

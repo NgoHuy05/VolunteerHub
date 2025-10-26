@@ -8,7 +8,7 @@ import {
 import toast from "react-hot-toast";
 import { IoClose } from "react-icons/io5";
 import { createApproveEventNotification } from "../../api/notification.api";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const AdminListEvent = () => {
   const [events, setEvents] = useState([]);
@@ -20,19 +20,23 @@ const AdminListEvent = () => {
   const [search, setSearch] = useState("");
   const [confirmingId, setConfirmingId] = useState(null);
   const [loading, setLoading] = useState(true);
- const location = useLocation(); // 🟢 nhận state
+ const location = useLocation(); 
   const { isModalOpen: openFromNotify, eventId } = location.state || {};
   const eventsPerPage = 8;
-  useEffect(() => {
-    if (openFromNotify && eventId) {
-      const event = events.find((e) => e._id === eventId);
-      if (event) {
-        setCurrentEvent(event); 
-        setIsModalOpen(true);
-      }
-    }
-  }, [openFromNotify, eventId, events]);
+const navigate = useNavigate();
 
+useEffect(() => {
+  if (openFromNotify && eventId) {
+    const event = events.find((e) => e._id === eventId);
+    if (event) {
+      setCurrentEvent(event); 
+      setIsModalOpen(true);
+
+      // reset state để không mở lại khi reload
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }
+}, [openFromNotify, eventId, events, navigate, location.pathname]);
   useEffect(() => {
     fetchEvents();
   }, []);
@@ -91,7 +95,12 @@ const AdminListEvent = () => {
           ? "Duyệt sự kiện thành công!"
           : "Từ chối sự kiện thành công!"
       );
-      fetchEvents();
+          // cập nhật state local trước để modal đóng liền
+    setEvents((prev) =>
+      prev.map((e) => (e._id === id ? { ...e, status } : e))
+    );
+
+    setIsModalOpen(false); // modal sẽ đóng ngay
       setIsModalOpen(false);
     } catch {
       toast.error("Không thể cập nhật trạng thái sự kiện");

@@ -6,7 +6,6 @@ const authMiddleware = require("../middleware/authMiddleware");
 // -------------------------
 // 🔹 CRUD thông báo người dùng
 // -------------------------
-router.get("/", authMiddleware, controllers.getNotifications);
 router.get("/my", authMiddleware, controllers.getNotifications);
 router.get("/admin", authMiddleware, controllers.getNotificationsByAdmin);
 router.put("/:id/read", authMiddleware, controllers.markAsRead);

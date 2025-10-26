@@ -14,8 +14,9 @@ const createLikeNotification = async (req, res) => {
 
     if (post.userId._id.toString() === senderId)
       return res.status(200).json({ success: true, message: "Không tạo thông báo cho chính mình" });
+const sender = await User.findById(senderId).select("name");
 
-    const content = `${req.user.name} đã thích bài viết của bạn.`;
+    const content = `${sender.name} đã thích bài viết của bạn.`;
     const notification = await Notification.create({
       userId: post.userId._id,
       senderId,
@@ -36,6 +37,7 @@ const createCommentNotification = async (req, res) => {
   try {
     const { postId } = req.body;
     const senderId = req.user.id;
+const sender = await User.findById(senderId).select("name");
 
     const post = await Post.findById(postId).populate("userId", "name");
     if (!post) return res.status(404).json({ success: false, message: "Không tìm thấy bài viết" });
@@ -43,7 +45,7 @@ const createCommentNotification = async (req, res) => {
     if (post.userId._id.toString() === senderId)
       return res.status(200).json({ success: true, message: "Không tạo thông báo cho chính mình" });
 
-    const content = `${req.user.name} đã bình luận bài viết của bạn.`;
+    const content = `${sender.name} đã bình luận bài viết của bạn.`;
     const notification = await Notification.create({
       userId: post.userId._id,
       senderId,
@@ -250,7 +252,7 @@ const getNotifications = async (req, res) => {
 const getNotificationsByAdmin = async (req, res) => {
   try {
     const notifications = await Notification.find({
-      $or: [{ type: "new_event" }, { type: "new_post" }, { type: "new_user_register" }],
+      $or: [{ type: "new_event" }, { type: "new_post" }],
     })
       .populate("userId")
       .populate("senderId")

@@ -3,7 +3,8 @@ import { getAllPost, deletePost, approvePost } from "../../api/post.api";
 import toast from "react-hot-toast";
 import { IoClose } from "react-icons/io5";
 import { convertDate } from "../../utils";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import { createApprovePostNotification } from "../../api/notification.api";
 
 const AdminListPost = () => {
   const [posts, setPosts] = useState([]);
@@ -18,16 +19,19 @@ const AdminListPost = () => {
   const postsPerPage = 8;
  const location = useLocation(); // 🟢 nhận state
   const { isWatchDetail: openFromNotify, postId } = location.state || {};
-  
+  const navigate = useNavigate();
+
     useEffect(() => {
     if (openFromNotify && postId) {
       const post = posts.find((p) => p._id === postId);
       if (post) {
         setCurrentPost(post); // ✅ bây giờ currentPost là object hợp lệ
         setIsWatchDetail(true);
+              navigate(location.pathname, { replace: true, state: {} });
+
       }
     }
-  }, [openFromNotify, postId, posts]);
+  }, [openFromNotify, postId, posts, navigate, location.pathname]);
 
   // Lấy danh sách bài viết
   const fetchPosts = async () => {
@@ -59,9 +63,12 @@ const AdminListPost = () => {
         );
         toast.success(
           status === "approved"
-            ? "✅ Đã duyệt bài viết"
-            : "❌ Đã từ chối bài viết"
+            ? "Đã duyệt bài viết"
+            : "Đã từ chối bài viết"
         );
+        await createApprovePostNotification(id);
+                setIsWatchDetail(false);
+
       } else toast.error("Không thể cập nhật trạng thái bài viết");
     } catch {
       toast.error("Lỗi khi cập nhật trạng thái");
