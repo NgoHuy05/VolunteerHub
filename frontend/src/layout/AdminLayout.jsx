@@ -16,6 +16,8 @@ import { getProfileUser } from "../api/user.api";
 import { logout } from "../api/auth.api";
 import { getNotificationsByIdAdmin } from "../api/notification.api";
 import { markAsRead } from "../api/notification.api"; // ✅ hàm đánh dấu đã đọc
+import { socket } from "../socket/index";
+import toast from "react-hot-toast";
 
 const AdminLayout = () => {
   const [openDropdown, setOpenDropdown] = useState(null);
@@ -26,6 +28,37 @@ const AdminLayout = () => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("unread"); // unread, read, all
   const navigate = useNavigate();
+
+  // ✅ Khi socket connect hoặc user có id → đăng ký
+  useEffect(() => {
+    if (!user?._id) return;
+
+    // 1️⃣ connect
+    if (!socket.connected) socket.connect();
+
+    // 2️⃣ khi connect xong mới register
+    socket.on("connect", () => {
+      console.log("✅ Socket connected:", socket.id);
+      socket.emit("register", user._id);
+      console.log("📡 Đã register user:", user._id);
+    });
+
+    // 3️⃣ nhận thông báo realtime
+    socket.on("new_notification", (noti) => {
+      console.log("📨 Nhận noti realtime:", noti);
+      if (noti.userId === user._id) {
+        // ⚠ dùng noti.userId chứ không phải receiverId
+        setNotificationUnread((prev) => [noti, ...prev]);
+        toast.success("🔔 Bạn có thông báo mới!");
+      }
+    });
+
+    // 4️⃣ cleanup
+    return () => {
+      socket.off("connect");
+      socket.off("new_notification");
+    };
+  }, [user?._id]);
 
   // Fetch user profile
   const fetchUser = async () => {
@@ -85,7 +118,9 @@ const AdminLayout = () => {
       try {
         await markAsRead(n._id);
         // cập nhật state local
-        setNotificationUnread((prev) => prev.filter((item) => item._id !== n._id));
+        setNotificationUnread((prev) =>
+          prev.filter((item) => item._id !== n._id)
+        );
         setNotificationRead((prev) => [n, ...prev]);
         n.isRead = true; // cập nhật tạm thời item hiện tại
       } catch (err) {
@@ -104,7 +139,7 @@ const AdminLayout = () => {
         state: { isWatchDetail: n.postId?._id, postId: n.postId?._id || null },
         replace: true,
       });
-    } 
+    }
   };
 
   if (!user) return null;
@@ -119,25 +154,50 @@ const AdminLayout = () => {
   return (
     <div className="flex bg-gray-200 min-h-screen">
       {/* SIDEBAR */}
-      <div className={`${sidebarOpen ? "w-[18%]" : "w-[80px]"} transition-all duration-300 bg-[#0F1A34] text-white flex flex-col`}>
-        <div onClick={() => navigate("/admin/dashboard")} className="bg-[#182444] flex items-center gap-3 justify-center py-6 cursor-pointer">
+      <div
+        className={`${
+          sidebarOpen ? "w-[18%]" : "w-[80px]"
+        } transition-all duration-300 bg-[#0F1A34] text-white flex flex-col`}
+      >
+        <div
+          onClick={() => navigate("/admin/dashboard")}
+          className="bg-[#182444] flex items-center gap-3 justify-center py-6 cursor-pointer"
+        >
           <FaCrown className="text-yellow-400 text-2xl" />
           {sidebarOpen && <span className="text-2xl font-semibold">Admin</span>}
         </div>
 
         <div className="flex flex-col text-[17px]">
           {[
-            { to: "/admin/dashboard", icon: MdSpaceDashboard, label: "Dashboard" },
-            { to: "/admin/list/users", icon: FaUser, label: "Quản lý người dùng" },
-            { to: "/admin/list/events", icon: MdOutlineEventNote, label: "Quản lý sự kiện" },
-            { to: "/admin/list/posts", icon: MdArticle, label: "Quản lý bài đăng" },
+            {
+              to: "/admin/dashboard",
+              icon: MdSpaceDashboard,
+              label: "Dashboard",
+            },
+            {
+              to: "/admin/list/users",
+              icon: FaUser,
+              label: "Quản lý người dùng",
+            },
+            {
+              to: "/admin/list/events",
+              icon: MdOutlineEventNote,
+              label: "Quản lý sự kiện",
+            },
+            {
+              to: "/admin/list/posts",
+              icon: MdArticle,
+              label: "Quản lý bài đăng",
+            },
             { to: "/admin/settings", icon: MdSettings, label: "Cài đặt" },
           ].map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
               className={({ isActive }) =>
-                `flex gap-3 py-4 px-8 items-center cursor-pointer transition duration-200 hover:bg-[#0c1324] ${isActive ? "bg-[#0c1324]" : ""}`
+                `flex gap-3 py-4 px-8 items-center cursor-pointer transition duration-200 hover:bg-[#0c1324] ${
+                  isActive ? "bg-[#0c1324]" : ""
+                }`
               }
             >
               <item.icon className="text-xl" />
@@ -152,7 +212,10 @@ const AdminLayout = () => {
         {/* HEADER */}
         <div className="relative flex justify-between items-center bg-white shadow p-4">
           <div className="flex items-center gap-4">
-            <button onClick={() => setSidebarOpen(!sidebarOpen)} className="text-2xl text-gray-600 hover:text-black cursor-pointer">
+            <button
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="text-2xl text-gray-600 hover:text-black cursor-pointer"
+            >
               <MdMenu />
             </button>
             <h1 className="text-xl font-semibold text-gray-700 flex items-center gap-2">
@@ -176,9 +239,15 @@ const AdminLayout = () => {
             </button>
 
             {/* Avatar */}
-            <div className="flex items-center gap-3" onClick={() => toggleDropdown("avatar")}>
+            <div
+              className="flex items-center gap-3"
+              onClick={() => toggleDropdown("avatar")}
+            >
               <img
-                src={user.avatar || "https://cdn-icons-png.flaticon.com/512/3135/3135715.png"}
+                src={
+                  user.avatar ||
+                  "https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
+                }
                 alt="avatar"
                 className="w-10 h-10 rounded-full object-cover border"
               />
@@ -198,19 +267,31 @@ const AdminLayout = () => {
               <div className="flex border-b border-gray-200">
                 <button
                   onClick={() => setActiveTab("unread")}
-                  className={`flex-1 py-2 text-center font-medium ${activeTab === "unread" ? "border-b-2 border-blue-500 text-blue-600" : "text-gray-500"}`}
+                  className={`flex-1 py-2 text-center font-medium ${
+                    activeTab === "unread"
+                      ? "border-b-2 border-blue-500 text-blue-600"
+                      : "text-gray-500"
+                  }`}
                 >
                   Chưa đọc ({notificationUnread.length})
                 </button>
                 <button
                   onClick={() => setActiveTab("read")}
-                  className={`flex-1 py-2 text-center font-medium ${activeTab === "read" ? "border-b-2 border-blue-500 text-blue-600" : "text-gray-500"}`}
+                  className={`flex-1 py-2 text-center font-medium ${
+                    activeTab === "read"
+                      ? "border-b-2 border-blue-500 text-blue-600"
+                      : "text-gray-500"
+                  }`}
                 >
                   Đã đọc ({notificationRead.length})
                 </button>
                 <button
                   onClick={() => setActiveTab("all")}
-                  className={`flex-1 py-2 text-center font-medium ${activeTab === "all" ? "border-b-2 border-blue-500 text-blue-600" : "text-gray-500"}`}
+                  className={`flex-1 py-2 text-center font-medium ${
+                    activeTab === "all"
+                      ? "border-b-2 border-blue-500 text-blue-600"
+                      : "text-gray-500"
+                  }`}
                 >
                   Tất cả
                 </button>
@@ -224,23 +305,43 @@ const AdminLayout = () => {
                   else if (activeTab === "read") list = notificationRead;
                   else list = [...notificationUnread, ...notificationRead];
                   if (list.length === 0)
-                    return <p className="text-gray-500 text-sm text-center py-3">Chưa có thông báo</p>;
+                    return (
+                      <p className="text-gray-500 text-sm text-center py-3">
+                        Chưa có thông báo
+                      </p>
+                    );
                   return list.map((n) => (
                     <li
                       key={n._id}
                       onClick={() => handleClickNotification(n)}
-                      className={`p-3 flex items-start gap-3 cursor-pointer ${n.isRead ? "opacity-60 hover:bg-gray-100" : "bg-white hover:bg-gray-50"}`}
+                      className={`p-3 flex items-start gap-3 cursor-pointer ${
+                        n.isRead
+                          ? "opacity-60 hover:bg-gray-100"
+                          : "bg-white hover:bg-gray-50"
+                      }`}
                     >
                       {n.senderId?.avatar ? (
-                        <img src={n.senderId.avatar} alt="avatar" className="w-10 h-10 rounded-full object-cover" />
+                        <img
+                          src={n.senderId.avatar}
+                          alt="avatar"
+                          className="w-10 h-10 rounded-full object-cover"
+                        />
                       ) : (
                         <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
                           <CgProfile className="text-gray-600 text-2xl" />
                         </div>
                       )}
                       <div className="flex-1">
-                        <p className={`text-sm ${n.isRead ? "text-gray-500 " : "text-gray-800"}`}>{n.content}</p>
-                        <p className="text-xs text-gray-400 mt-1">{new Date(n.createdAt).toLocaleString("vi-VN")}</p>
+                        <p
+                          className={`text-sm ${
+                            n.isRead ? "text-gray-500 " : "text-gray-800"
+                          }`}
+                        >
+                          {n.content}
+                        </p>
+                        <p className="text-xs text-gray-400 mt-1">
+                          {new Date(n.createdAt).toLocaleString("vi-VN")}
+                        </p>
                       </div>
                     </li>
                   ));
@@ -252,7 +353,10 @@ const AdminLayout = () => {
           {/* DROPDOWN AVATAR */}
           {openDropdown === "avatar" && (
             <div className="absolute top-full right-0 mt-2 w-[200px] bg-white shadow-lg border border-gray-200 p-3 rounded-xl">
-              <Link to="/profile" className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 transition">
+              <Link
+                to="/profile"
+                className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 transition"
+              >
                 <MdOutlineContactPage className="text-green-600" />
                 <span className="text-gray-800 font-medium">Profile</span>
               </Link>

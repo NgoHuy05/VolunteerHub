@@ -12,6 +12,8 @@ import { getProfileUser } from "../api/user.api";
 import { BiEdit } from "react-icons/bi";
 import { FaCrown } from "react-icons/fa";
 import { getNotificationsById, markAsRead } from "../api/notification.api";
+import toast from "react-hot-toast";
+import { socket } from "../socket/index";
 
 const navItems = [
   { path: "/", label: "Dashboard", icon: <FaHome /> },
@@ -22,18 +24,49 @@ const Header = () => {
   const [openDropdown, setOpenDropdown] = useState(null);
   const [user, setUser] = useState(null);
   const [activeTab, setActiveTab] = useState("unread"); // unread, read, all
-const [notificationUnread, setNotificationUnread] = useState([]);
+  const [notificationUnread, setNotificationUnread] = useState([]);
   const [notificationRead, setNotificationRead] = useState([]);
   const navigate = useNavigate();
   const fetchData = async () => {
-      try {
-        const resUser = await getProfileUser();
-        setUser(resUser.data.user);
-      } catch (error) {
-        console.error(error?.response?.data?.message || error);
+    try {
+      const resUser = await getProfileUser();
+      setUser(resUser.data.user);
+    } catch (error) {
+      console.error(error?.response?.data?.message || error);
+    }
+  };
+  // ✅ Khi socket connect hoặc user có id → đăng ký
+  useEffect(() => {
+    if (!user?._id) return;
+
+    // 1️⃣ connect
+    if (!socket.connected) socket.connect();
+
+    // 2️⃣ khi connect xong mới register
+    socket.on("connect", () => {
+      console.log("✅ Socket connected:", socket.id);
+      socket.emit("register", user._id);
+      console.log("📡 Đã register user:", user._id);
+    });
+
+    // 3️⃣ nhận thông báo realtime
+    socket.on("new_notification", (noti) => {
+      console.log("📨 Nhận noti realtime:", noti);
+      if (noti.userId === user._id) {
+        // ⚠ dùng noti.userId chứ không phải receiverId
+        setNotificationUnread((prev) => [noti, ...prev]);
+        toast.success("🔔 Bạn có thông báo mới!");
       }
+    });
+
+    // 4️⃣ cleanup
+    return () => {
+      socket.off("connect");
+      socket.off("new_notification");
     };
-const handleClickNotification = async (n) => {
+  }, [user?._id]);
+
+  const handleClickNotification = async (n) => {
     setOpenDropdown(null);
 
     // Nếu chưa đọc, gọi API markAsRead
@@ -55,37 +88,35 @@ const handleClickNotification = async (n) => {
       navigate(`/manage/user`, {
         state: {
           isWatchDetail: !!n.userId,
-          senderId: n.senderId?._id || null, 
+          senderId: n.senderId?._id || null,
         },
       });
     } else if (n.type === "approve_post") {
       navigate(`/event/detail/${n.postId.eventId}`, {
         state: {
           openCommentModal: !!n.postId,
-          postId: n.postId?._id || null, 
+          postId: n.postId?._id || null,
         },
       });
-   
     } else if (n.type === "approve_event") {
       navigate(`/event/detail/${n.postId.eventId}`, {
         state: {
           openCommentModal: !!n.postId,
-          postId: n.postId?._id || null, 
+          postId: n.postId?._id || null,
         },
       });
     } else if (n.type === "new_post") {
       navigate(`/manage/post`, {
         state: {
           openCommentModal: !!n.postId,
-          postId: n.postId?._id || null, 
+          postId: n.postId?._id || null,
         },
       });
-    } 
-    else {
+    } else {
       navigate(`/event/detail/${n.postId.eventId}`, {
         state: {
           openCommentModal: !!n.postId,
-          postId: n.postId?._id || null, 
+          postId: n.postId?._id || null,
         },
       });
     }
@@ -93,7 +124,6 @@ const handleClickNotification = async (n) => {
 
   console.log("notificationRead", notificationRead);
   console.log("notificationUnread", notificationUnread);
-  
 
   // Fetch notifications
   const fetchNotification = async () => {
@@ -109,10 +139,9 @@ const handleClickNotification = async (n) => {
   };
 
   useEffect(() => {
-fetchData();
+    fetchData();
     fetchNotification();
   }, []);
-
 
   const toggleDropdown = (type) => {
     setOpenDropdown(openDropdown === type ? null : type);
@@ -166,7 +195,7 @@ fetchData();
             </div>
           </NavLink>
         )}
-        {( user?.role === "admin") && (
+        {user?.role === "admin" && (
           <NavLink
             key="/admin"
             to="/admin/dashboard"
@@ -179,7 +208,6 @@ fetchData();
             <div className="flex items-center gap-2">
               <div>
                 <FaCrown className="text-yellow-400 text-2xl" />
-              
               </div>
               <div>Admin</div>
             </div>
@@ -225,7 +253,7 @@ fetchData();
                 </div>
               </NavLink>
             )}
-            {( user.role === "admin") && (
+            {user.role === "admin" && (
               <NavLink
                 key="/admin"
                 to="/admin/dashboard"
@@ -234,7 +262,7 @@ fetchData();
               >
                 <div className="flex items-center gap-2">
                   <div>
-          <FaCrown className="text-yellow-400 text-2xl" />
+                    <FaCrown className="text-yellow-400 text-2xl" />
                   </div>
                   <div>Admin</div>
                 </div>
@@ -244,16 +272,16 @@ fetchData();
         )}
 
         <button
-              onClick={() => toggleDropdown("notification")}
-              className="p-2 text-[20px] font-bold bg-gray-300 rounded-full hover:scale-105 hover:bg-gray-400 transition-all cursor-pointer relative"
-            >
-              <IoMdNotifications />
-              {notificationUnread.length > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full animate-pulse">
-                  {notificationUnread.length}
-                </span>
-              )}
-            </button>
+          onClick={() => toggleDropdown("notification")}
+          className="p-2 text-[20px] font-bold bg-gray-300 rounded-full hover:scale-105 hover:bg-gray-400 transition-all cursor-pointer relative"
+        >
+          <IoMdNotifications />
+          {notificationUnread.length > 0 && (
+            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full animate-pulse">
+              {notificationUnread.length}
+            </span>
+          )}
+        </button>
 
         <button
           onClick={() => toggleDropdown("avatar")}
@@ -272,67 +300,99 @@ fetchData();
           )}
         </button>
         {/* DROPDOWN THÔNG BÁO */}
-          {openDropdown === "notification" && (
-            <div className="absolute top-full right-0 mt-2 w-[340px] bg-white shadow-lg border border-gray-200 rounded-xl max-h-[400px] overflow-hidden">
-              <div className="px-4 py-2 border-b flex justify-between">
-                <span className="font-semibold text-gray-700">Thông báo</span>
-                <span className="text-xs text-gray-400">Mới nhất</span>
-              </div>
-
-              {/* TAB */}
-              <div className="flex border-b border-gray-200">
-                <button
-                  onClick={() => setActiveTab("unread")}
-                  className={`flex-1 py-2 text-center font-medium ${activeTab === "unread" ? "border-b-2 border-blue-500 text-blue-600" : "text-gray-500"}`}
-                >
-                  Chưa đọc ({notificationUnread.length})
-                </button>
-                <button
-                  onClick={() => setActiveTab("read")}
-                  className={`flex-1 py-2 text-center font-medium ${activeTab === "read" ? "border-b-2 border-blue-500 text-blue-600" : "text-gray-500"}`}
-                >
-                  Đã đọc ({notificationRead.length})
-                </button>
-                <button
-                  onClick={() => setActiveTab("all")}
-                  className={`flex-1 py-2 text-center font-medium ${activeTab === "all" ? "border-b-2 border-blue-500 text-blue-600" : "text-gray-500"}`}
-                >
-                  Tất cả
-                </button>
-              </div>
-
-              {/* LIST */}
-              <ul className="divide-y divide-gray-200 max-h-[300px] overflow-y-auto">
-                {(() => {
-                  let list = [];
-                  if (activeTab === "unread") list = notificationUnread;
-                  else if (activeTab === "read") list = notificationRead;
-                  else list = [...notificationUnread, ...notificationRead];
-                  if (list.length === 0)
-                    return <p className="text-gray-500 text-sm text-center py-3">Chưa có thông báo</p>;
-                  return list.map((n) => (
-                    <li
-                      key={n._id}
-                      onClick={() => handleClickNotification(n)}
-                      className={`p-3 flex items-start gap-3 cursor-pointer ${n.isRead ? "opacity-60 hover:bg-gray-100" : "bg-white hover:bg-gray-50"}`}
-                    >
-                      {n.senderId?.avatar ? (
-                        <img src={n.senderId.avatar} alt="avatar" className="w-10 h-10 rounded-full object-cover" />
-                      ) : (
-                        <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
-                          <CgProfile className="text-gray-600 text-2xl" />
-                        </div>
-                      )}
-                      <div className="flex-1">
-                        <p className={`text-sm ${n.isRead ? "text-gray-500 " : "text-gray-800"}`}>{n.content}</p>
-                        <p className="text-xs text-gray-400 mt-1">{new Date(n.createdAt).toLocaleString("vi-VN")}</p>
-                      </div>
-                    </li>
-                  ));
-                })()}
-              </ul>
+        {openDropdown === "notification" && (
+          <div className="absolute top-full right-0 mt-2 w-[340px] bg-white shadow-lg border border-gray-200 rounded-xl max-h-[400px] overflow-hidden">
+            <div className="px-4 py-2 border-b flex justify-between">
+              <span className="font-semibold text-gray-700">Thông báo</span>
+              <span className="text-xs text-gray-400">Mới nhất</span>
             </div>
-          )}
+
+            {/* TAB */}
+            <div className="flex border-b border-gray-200">
+              <button
+                onClick={() => setActiveTab("unread")}
+                className={`flex-1 py-2 text-center font-medium ${
+                  activeTab === "unread"
+                    ? "border-b-2 border-blue-500 text-blue-600"
+                    : "text-gray-500"
+                }`}
+              >
+                Chưa đọc ({notificationUnread.length})
+              </button>
+              <button
+                onClick={() => setActiveTab("read")}
+                className={`flex-1 py-2 text-center font-medium ${
+                  activeTab === "read"
+                    ? "border-b-2 border-blue-500 text-blue-600"
+                    : "text-gray-500"
+                }`}
+              >
+                Đã đọc ({notificationRead.length})
+              </button>
+              <button
+                onClick={() => setActiveTab("all")}
+                className={`flex-1 py-2 text-center font-medium ${
+                  activeTab === "all"
+                    ? "border-b-2 border-blue-500 text-blue-600"
+                    : "text-gray-500"
+                }`}
+              >
+                Tất cả
+              </button>
+            </div>
+
+            {/* LIST */}
+            <ul className="divide-y divide-gray-200 max-h-[300px] overflow-y-auto">
+              {(() => {
+                let list = [];
+                if (activeTab === "unread") list = notificationUnread;
+                else if (activeTab === "read") list = notificationRead;
+                else list = [...notificationUnread, ...notificationRead];
+                if (list.length === 0)
+                  return (
+                    <p className="text-gray-500 text-sm text-center py-3">
+                      Chưa có thông báo
+                    </p>
+                  );
+                return list.map((n) => (
+                  <li
+                    key={n._id}
+                    onClick={() => handleClickNotification(n)}
+                    className={`p-3 flex items-start gap-3 cursor-pointer ${
+                      n.isRead
+                        ? "opacity-60 hover:bg-gray-100"
+                        : "bg-white hover:bg-gray-50"
+                    }`}
+                  >
+                    {n.senderId?.avatar ? (
+                      <img
+                        src={n.senderId.avatar}
+                        alt="avatar"
+                        className="w-10 h-10 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
+                        <CgProfile className="text-gray-600 text-2xl" />
+                      </div>
+                    )}
+                    <div className="flex-1">
+                      <p
+                        className={`text-sm ${
+                          n.isRead ? "text-gray-500 " : "text-gray-800"
+                        }`}
+                      >
+                        {n.content}
+                      </p>
+                      <p className="text-xs text-gray-400 mt-1">
+                        {new Date(n.createdAt).toLocaleString("vi-VN")}
+                      </p>
+                    </div>
+                  </li>
+                ));
+              })()}
+            </ul>
+          </div>
+        )}
 
         {openDropdown === "avatar" && (
           <div className="absolute top-full right-0 mt-2 bg-white shadow-lg border border-gray-200 p-3 rounded-xl w-[200px]">

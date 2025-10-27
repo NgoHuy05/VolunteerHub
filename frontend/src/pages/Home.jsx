@@ -27,6 +27,7 @@ const Home = () => {
     setOpenCommentModal(true);
   };
 
+  
   const handleLikePost = async (postId) => {
     try {
       // 1️⃣ Like hoặc Unlike bài viết
@@ -106,7 +107,6 @@ const Home = () => {
   useEffect(() => {
     document.body.style.overflow = openCommentModal ? "hidden" : "auto";
   }, [openCommentModal]);
-  console.log(posts);
   if (loading) {
     return (
       <div className="flex justify-center items-center h-[300px]">

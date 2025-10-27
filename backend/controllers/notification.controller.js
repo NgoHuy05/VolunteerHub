@@ -9,14 +9,15 @@ const createLikeNotification = async (req, res) => {
     const { postId } = req.body;
     const senderId = req.user.id;
 
-    const post = await Post.findById(postId).populate("userId", "name");
+    const post = await Post.findById(postId).populate("userId");
     if (!post) return res.status(404).json({ success: false, message: "Không tìm thấy bài viết" });
 
     if (post.userId._id.toString() === senderId)
       return res.status(200).json({ success: true, message: "Không tạo thông báo cho chính mình" });
-const sender = await User.findById(senderId).select("name");
 
+    const sender = await User.findById(senderId).select("name");
     const content = `${sender.name} đã thích bài viết của bạn.`;
+
     const notification = await Notification.create({
       userId: post.userId._id,
       senderId,
@@ -26,6 +27,8 @@ const sender = await User.findById(senderId).select("name");
     });
 
     res.status(201).json({ success: true, notification });
+
+    global.sendToUser(post.userId._id.toString(),"new_notification", notification);
   } catch (err) {
     console.error("❌ Lỗi tạo thông báo like:", err);
     res.status(500).json({ success: false, message: "Lỗi server" });
@@ -37,9 +40,9 @@ const createCommentNotification = async (req, res) => {
   try {
     const { postId } = req.body;
     const senderId = req.user.id;
-const sender = await User.findById(senderId).select("name");
+    const sender = await User.findById(senderId).select("name");
 
-    const post = await Post.findById(postId).populate("userId", "name");
+    const post = await Post.findById(postId).populate("userId");
     if (!post) return res.status(404).json({ success: false, message: "Không tìm thấy bài viết" });
 
     if (post.userId._id.toString() === senderId)
@@ -55,19 +58,21 @@ const sender = await User.findById(senderId).select("name");
     });
 
     res.status(201).json({ success: true, notification });
+
+    global.sendToUser(post.userId._id.toString(),"new_notification", notification);
   } catch (err) {
     console.error("❌ Lỗi tạo thông báo comment:", err);
     res.status(500).json({ success: false, message: "Lỗi server" });
   }
 };
 
-// ✅ [POST] /notification/approve-user
+// 🟩 Duyệt người tham gia sự kiện
 const createApproveUserNotification = async (req, res) => {
   try {
     const managerId = req.user.id;
     const { eventId, userId } = req.body;
 
-    const event = await Event.findById(eventId).populate("createBy", "name");
+    const event = await Event.findById(eventId);
     if (!event)
       return res.status(404).json({ success: false, message: "Không tìm thấy sự kiện" });
 
@@ -85,17 +90,11 @@ const createApproveUserNotification = async (req, res) => {
       content,
     });
 
-    return res.status(201).json({
-      success: true,
-      message: "Tạo thông báo duyệt người tham gia thành công",
-      notification,
-    });
+    res.status(201).json({ success: true, notification });
+    global.sendToUser(userId.toString(),"new_notification", notification);
   } catch (error) {
     console.error("❌ Lỗi tạo thông báo duyệt người tham gia:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Lỗi server khi tạo thông báo duyệt người tham gia",
-    });
+    res.status(500).json({ success: false, message: "Lỗi server khi tạo thông báo duyệt người tham gia" });
   }
 };
 
@@ -105,7 +104,7 @@ const createApprovePostNotification = async (req, res) => {
     const { postId } = req.body;
     const adminId = req.user.id;
 
-    const post = await Post.findById(postId).populate("userId", "name");
+    const post = await Post.findById(postId).populate("userId");
     if (!post) return res.status(404).json({ success: false, message: "Không tìm thấy bài viết" });
 
     const content = `Bài viết của bạn "${post.content.slice(0, 30)}..." đã được duyệt.`;
@@ -118,6 +117,7 @@ const createApprovePostNotification = async (req, res) => {
     });
 
     res.status(201).json({ success: true, notification });
+    global.sendToUser(post.userId._id.toString(),"new_notification", notification);
   } catch (err) {
     console.error("❌ Lỗi tạo thông báo duyệt bài:", err);
     res.status(500).json({ success: false, message: "Lỗi server" });
@@ -130,7 +130,7 @@ const createApproveEventNotification = async (req, res) => {
     const { eventId } = req.body;
     const adminId = req.user.id;
 
-    const event = await Event.findById(eventId).populate("createBy", "name");
+    const event = await Event.findById(eventId).populate("createBy");
     if (!event) return res.status(404).json({ success: false, message: "Không tìm thấy sự kiện" });
 
     const content = `Sự kiện "${event.title}" của bạn đã được duyệt.`;
@@ -143,31 +143,31 @@ const createApproveEventNotification = async (req, res) => {
     });
 
     res.status(201).json({ success: true, notification });
+    global.sendToUser(event.createBy._id.toString(),"new_notification", notification);
   } catch (err) {
     console.error("❌ Lỗi tạo thông báo duyệt sự kiện:", err);
     res.status(500).json({ success: false, message: "Lỗi server" });
   }
 };
 
-// 🟩 User đăng ký sự kiện → gửi thông báo cho manager hoặc admin
+// 🟩 User đăng ký sự kiện
 const createUserRegisterNotification = async (req, res) => {
   try {
     const userId = req.user.id;
     const { eventId } = req.body;
 
-    const event = await Event.findById(eventId).populate("createBy", "name");
+    const event = await Event.findById(eventId).populate("createBy");
     if (!event)
       return res.status(404).json({ success: false, message: "Không tìm thấy sự kiện" });
 
-    const user = await User.findById(userId); // 👉 lấy thông tin user từ DB
-
+    const user = await User.findById(userId);
     let receiver = await User.findOne({ role: "manager" });
     if (!receiver) receiver = await User.findOne({ role: "admin" });
 
     if (!receiver)
       return res.status(404).json({ success: false, message: "Không tìm thấy người nhận thông báo" });
 
-    const content = `${user.name} đã đăng ký tham gia sự kiện "${event.title}".`; // ✅ dùng user.name
+    const content = `${user.name} đã đăng ký tham gia sự kiện "${event.title}".`;
 
     const notification = await Notification.create({
       userId: receiver._id,
@@ -178,18 +178,18 @@ const createUserRegisterNotification = async (req, res) => {
     });
 
     res.status(201).json({ success: true, notification });
+    global.sendToUser(receiver._id.toString(),"new_notification", notification);
   } catch (err) {
     console.error("❌ Lỗi tạo thông báo user đăng ký:", err);
     res.status(500).json({ success: false, message: "Lỗi server" });
   }
 };
 
-
 // 🟩 Sự kiện mới → gửi admin
 const createEventNotification = async (req, res) => {
   try {
     const { eventId } = req.body;
-    const event = await Event.findById(eventId).populate("createBy", "name");
+    const event = await Event.findById(eventId).populate("createBy");
     const admin = await User.findOne({ role: "admin" });
 
     const content = `Sự kiện "${event.title}" của ${event.createBy.name} đang chờ duyệt.`;
@@ -202,6 +202,7 @@ const createEventNotification = async (req, res) => {
     });
 
     res.status(201).json({ success: true, notification });
+    global.sendToUser(admin._id.toString(),"new_notification", notification);
   } catch (err) {
     console.error("❌ Lỗi tạo thông báo sự kiện mới:", err);
     res.status(500).json({ success: false, message: "Lỗi server" });
@@ -212,7 +213,7 @@ const createEventNotification = async (req, res) => {
 const createPostNotification = async (req, res) => {
   try {
     const { postId } = req.body;
-    const post = await Post.findById(postId).populate("userId", "name");
+    const post = await Post.findById(postId).populate("userId");
     const admin = await User.findOne({ role: "admin" });
 
     const content = `Bài viết của ${post.userId.name} đang chờ duyệt.`;
@@ -225,13 +226,14 @@ const createPostNotification = async (req, res) => {
     });
 
     res.status(201).json({ success: true, notification });
+    global.sendToUser(admin._id.toString(),"new_notification", notification);
   } catch (err) {
     console.error("❌ Lỗi tạo thông báo bài viết mới:", err);
     res.status(500).json({ success: false, message: "Lỗi server" });
   }
 };
 
-// 🟩 User xem thông báo của mình
+// 🟩 Lấy thông báo của user
 const getNotifications = async (req, res) => {
   try {
     const userId = req.user.id;
