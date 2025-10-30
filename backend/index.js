@@ -18,8 +18,7 @@ app.use(
     origin: [
     "http://localhost:5173",
     "https://volunteer-hub-uet-kdqb.vercel.app"
-    ],
-    credentials: true,
+    ]
   })
 );
 app.use(express.json());
