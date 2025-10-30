@@ -31,7 +31,7 @@ const Layout = () => {
   const [user, setUser] = useState(null);
   const [eventJoining, setEventJoining] = useState([]);
   const [loading, setLoading] = useState(true);
-
+  
   const navigate = useNavigate();
   const ref = useRef(null);
   useClickOutside(ref, () => {
@@ -134,13 +134,6 @@ const Layout = () => {
     fetchUser();
   }, [navigate]);
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-[300px]">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-gray-800"></div>
-      </div>
-    );
-  }
 
   return (
     <>

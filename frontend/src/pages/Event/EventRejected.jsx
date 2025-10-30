@@ -32,7 +32,6 @@ const EventRejected = () => {
       </div>
     );
   }
-  console.log(events);
   
   return (
     <>

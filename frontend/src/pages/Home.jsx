@@ -36,7 +36,6 @@ const Home = () => {
       // 2️⃣ Nếu là "Like" → tạo thông báo
       if (resLike.data.liked) {
         await createLikeNotification(postId);
-        console.log("like thanh cong");
       }
 
       // 3️⃣ Cập nhật lại số lượt like trong state
@@ -118,9 +117,9 @@ const Home = () => {
     <div className="px-4 py-6 bg-gray-100 min-h-screen flex flex-col gap-6">
       {/* 🔹 Nếu không có bài viết */}
       {posts.length === 0 ? (
-        <div className="text-center text-gray-600 text-lg font-medium mt-10">
-          Bạn chưa tham gia sự kiện nào
-        </div>
+        <div className="flex justify-center items-center h-[300px]">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-gray-800"></div>
+      </div>
       ) : (
         posts.map((post) => (
           <div

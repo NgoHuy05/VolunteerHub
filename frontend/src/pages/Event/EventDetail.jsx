@@ -77,7 +77,6 @@ const EvenDetail = () => {
 
     fetchEvent();
   }, [eventId]);
-  console.log(posts);
 
   useEffect(() => {
     if (openFromNotify && postId) {
@@ -102,7 +101,6 @@ const EvenDetail = () => {
     setBannerPreview([]);
   };
 
-  console.log(posts);
 
   useEffect(() => {
     const fetchUserEvents = async () => {
@@ -146,7 +144,6 @@ const EvenDetail = () => {
     };
   }, []);
 
-  // nếu muốn cleanup mỗi khi bannerPreview thay đổi (giữ logic nếu bạn thay previews)
   useEffect(() => {
     return () => {
       bannerPreview.forEach((url) => URL.revokeObjectURL(url));
@@ -262,7 +259,6 @@ const EvenDetail = () => {
       // 2️⃣ Nếu là "Like" → tạo thông báo
       if (resLike.data.liked) {
         await createLikeNotification(postId);
-        console.log("like thanh cong");
       }
 
       // 3️⃣ Cập nhật lại số lượt like trong state

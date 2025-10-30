@@ -69,7 +69,6 @@ const Profile = () => {
   const handleChangeAvt = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    console.log(e.target.files);
 
     const formData = new FormData();
     formData.append("avatar", file);

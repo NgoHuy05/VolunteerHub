@@ -30,9 +30,7 @@ const ManageUser = () => {
     }
   };
 
-  const handleOpenModal = (item) => {
-    console.log("item", item);
-    
+  const handleOpenModal = (item) => {    
     setCurrent(item);
     setIsWatchDetail(true);
   };

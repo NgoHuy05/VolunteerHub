@@ -68,8 +68,8 @@ useEffect(() => {
 
       const res = await getAllEvent();
       setEvents(res.data.events || []);
+    // eslint-disable-next-line no-unused-vars
     } catch (error) {
-      console.log(error.message);
       toast.error("Lỗi khi tải danh sách sự kiện");
     } finally {
       setLoading(false);

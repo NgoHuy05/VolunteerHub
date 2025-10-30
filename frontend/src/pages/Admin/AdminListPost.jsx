@@ -140,7 +140,7 @@ const AdminListPost = () => {
     setCurrentPage(1);
   }, [search, filter, posts]);
 
-  // Pagination logic
+  // Pagination 
   const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
   const currentPosts = filteredPosts.slice(
     (currentPage - 1) * postsPerPage,

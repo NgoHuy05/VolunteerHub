@@ -38,14 +38,11 @@ const AdminLayout = () => {
 
     // 2️⃣ khi connect xong mới register
     socket.on("connect", () => {
-      console.log("✅ Socket connected:", socket.id);
       socket.emit("register", user._id);
-      console.log("📡 Đã register user:", user._id);
     });
 
     // 3️⃣ nhận thông báo realtime
     socket.on("new_notification", (noti) => {
-      console.log("📨 Nhận noti realtime:", noti);
       if (noti.userId === user._id) {
         // ⚠ dùng noti.userId chứ không phải receiverId
         setNotificationUnread((prev) => [noti, ...prev]);

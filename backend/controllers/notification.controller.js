@@ -237,8 +237,11 @@ const createPostNotification = async (req, res) => {
 const getNotifications = async (req, res) => {
   try {
     const userId = req.user.id;
-    const notifications = await Notification.find({ userId })
-      .populate("senderId", "name avatar")
+const notifications = await Notification.find({
+  userId,
+  type: { $ne: "new_event" }
+})
+     .populate("senderId", "name avatar")
       .populate("eventId")
       .populate("postId")
       .sort({ createdAt: -1 });
