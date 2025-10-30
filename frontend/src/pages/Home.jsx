@@ -21,24 +21,23 @@ const Home = () => {
 
   const navigate = useNavigate();
 
-  // 🔹 Mở modal bình luận
+  //  Mở modal bình luận
   const handleOpenModal = (post) => {
     setCurrentPost(post);
     setOpenCommentModal(true);
   };
 
-  
   const handleLikePost = async (postId) => {
     try {
-      // 1️⃣ Like hoặc Unlike bài viết
+      //  Like hoặc Unlike bài viết
       const resLike = await LikeUnLike(postId);
 
-      // 2️⃣ Nếu là "Like" → tạo thông báo
+      //  Nếu là "Like" → tạo thông báo
       if (resLike.data.liked) {
         await createLikeNotification(postId);
       }
 
-      // 3️⃣ Cập nhật lại số lượt like trong state
+      //  Cập nhật lại số lượt like trong state
       const resCount = await countLike(postId);
       setPosts((prev) =>
         prev.map((p) =>
@@ -53,7 +52,7 @@ const Home = () => {
       );
     } catch (error) {
       console.error(
-        "❌ Lỗi khi like hoặc tạo thông báo:",
+        " Lỗi khi like hoặc tạo thông báo:",
         error.response?.data?.message || error.message
       );
     }
@@ -68,14 +67,14 @@ const Home = () => {
     }
 
     try {
-      // 1️⃣ Gửi bình luận
+      //  Gửi bình luận
       const res = await createComment({ content, postId });
       toast.success(res?.data?.message || "Bình luận thành công");
 
-      // 2️⃣ Sau khi bình luận thành công → tạo notification
+      //  Sau khi bình luận thành công → tạo notification
       await createCommentNotification(postId);
 
-      // 3️⃣ Cập nhật lại danh sách comment
+      //  Cập nhật lại danh sách comment
       setPosts((prev) =>
         prev.map((p) =>
           p._id === postId
@@ -92,7 +91,7 @@ const Home = () => {
         comments: [...prev.comments, { content, userId: user }],
       }));
 
-      // 4️⃣ Reset ô nhập
+      //  Reset ô nhập
       setContent("");
     } catch (error) {
       console.error("❌ Lỗi khi bình luận:", error);
@@ -102,7 +101,7 @@ const Home = () => {
     }
   };
 
-  // 🔹 Ẩn cuộn khi mở modal
+  //  Ẩn cuộn khi mở modal
   useEffect(() => {
     document.body.style.overflow = openCommentModal ? "hidden" : "auto";
   }, [openCommentModal]);
@@ -115,11 +114,10 @@ const Home = () => {
   }
   return (
     <div className="px-4 py-6 bg-gray-100 min-h-screen flex flex-col gap-6">
-      {/* 🔹 Nếu không có bài viết */}
       {posts.length === 0 ? (
         <div className="flex justify-center items-center h-[300px]">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-gray-800"></div>
-      </div>
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-gray-800"></div>
+        </div>
       ) : (
         posts.map((post) => (
           <div

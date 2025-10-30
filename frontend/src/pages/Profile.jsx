@@ -32,7 +32,7 @@ const Profile = () => {
     confirmPassword: "",
   });
 
-  // 🔹 Lấy thông tin user
+  //  Lấy thông tin user
   useEffect(() => {
     const fetchProfileUser = async () => {
       try {
@@ -46,7 +46,7 @@ const Profile = () => {
           age: data.age || "",
           gender: data.gender || "none",
           email: data.email || "",
-          avatar: data.avatar || "", // ← thêm dòng này
+          avatar: data.avatar || "",
         });
       } catch (error) {
         toast.error(
@@ -59,7 +59,7 @@ const Profile = () => {
     fetchProfileUser();
   }, []);
 
-  // 🔹 Xử lý thay đổi form
+  //  Xử lý thay đổi form
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
@@ -73,7 +73,6 @@ const Profile = () => {
     const formData = new FormData();
     formData.append("avatar", file);
 
-    // Gọi API update avatar
     updateUserAvatar(formData)
       .then((res) => {
         setUser(res.data.user);
@@ -86,7 +85,7 @@ const Profile = () => {
       });
   };
 
-  // 🔹 Cập nhật thông tin người dùng
+  //  Cập nhật thông tin người dùng
   const handleSave = async () => {
     try {
       await updateUser(form);
@@ -100,7 +99,7 @@ const Profile = () => {
     }
   };
 
-  // 🔹 Hủy chỉnh sửa
+  //  Hủy chỉnh sửa
   const handleCancel = () => {
     setIsDisabled(true);
     setForm({
@@ -112,7 +111,7 @@ const Profile = () => {
     });
   };
 
-  // 🔹 Đổi mật khẩu
+  //  Đổi mật khẩu
   const handlePasswordChange = (e) => {
     const { name, value } = e.target;
     setPasswordForm((prev) => ({ ...prev, [name]: value }));
@@ -190,7 +189,7 @@ const Profile = () => {
                   />
                 ) : (
                   <div className="p-1 text-3xl rounded-full">
-                                        <CgProfile />
+                    <CgProfile />
                   </div>
                 )}
 
