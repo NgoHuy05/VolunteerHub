@@ -4,12 +4,12 @@ const NotificationSchema = new mongoose.Schema(
   {
     userId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User", // người nhận thông báo
+      ref: "User", 
       required: true,
     },
     senderId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User", // người tạo ra hành động (vd: admin duyệt bài, ai đó like)
+      ref: "User", 
     },
     eventId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -36,11 +36,11 @@ const NotificationSchema = new mongoose.Schema(
     },
     content: {
       type: String,
-      required: true, // nội dung hiển thị
+      required: true, 
     },
     isRead: {
       type: Boolean,
-      default: false, // đã đọc hay chưa
+      default: false, 
     },
   },
   {

@@ -17,7 +17,7 @@ const AdminListPost = () => {
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const postsPerPage = 8;
- const location = useLocation(); // 🟢 nhận state
+ const location = useLocation(); 
   const { isWatchDetail: openFromNotify, postId } = location.state || {};
   const navigate = useNavigate();
 
@@ -25,7 +25,7 @@ const AdminListPost = () => {
     if (openFromNotify && postId) {
       const post = posts.find((p) => p._id === postId);
       if (post) {
-        setCurrentPost(post); // ✅ bây giờ currentPost là object hợp lệ
+        setCurrentPost(post); 
         setIsWatchDetail(true);
               navigate(location.pathname, { replace: true, state: {} });
 

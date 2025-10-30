@@ -1,7 +1,7 @@
 import axios from "axios";
 import { getAuthHeader } from "./auth.api";
 
-const BASE_URL = "http://localhost:5555/post";
+const BASE_URL = `${import.meta.env.VITE_API_URL}/post`;
 
 export const getAllPost = () => {
     return axios.get(`${BASE_URL}/all`, getAuthHeader())

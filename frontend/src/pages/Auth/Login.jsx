@@ -41,7 +41,6 @@ const Login = () => {
           Chào mừng trở lại! Hãy đăng nhập để tiếp tục
         </p>
 
-        {/* form có autoComplete */}
         <form className="space-y-5" onSubmit={handleSubmit} autoComplete="on">
           <div>
             <label className="block text-sm text-gray-300 mb-2">Email</label>

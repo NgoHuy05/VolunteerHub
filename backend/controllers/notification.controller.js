@@ -3,7 +3,6 @@ const User = require("../models/User.model");
 const Event = require("../models/Event.model");
 const Post = require("../models/Post.model");
 
-// 🟩 Tạo thông báo Like
 const createLikeNotification = async (req, res) => {
   try {
     const { postId } = req.body;
@@ -35,7 +34,6 @@ const createLikeNotification = async (req, res) => {
   }
 };
 
-// 🟩 Tạo thông báo Comment
 const createCommentNotification = async (req, res) => {
   try {
     const { postId } = req.body;
@@ -66,7 +64,6 @@ const createCommentNotification = async (req, res) => {
   }
 };
 
-// 🟩 Duyệt người tham gia sự kiện
 const createApproveUserNotification = async (req, res) => {
   try {
     const managerId = req.user.id;
@@ -98,7 +95,6 @@ const createApproveUserNotification = async (req, res) => {
   }
 };
 
-// 🟩 Duyệt bài viết
 const createApprovePostNotification = async (req, res) => {
   try {
     const { postId } = req.body;
@@ -124,7 +120,6 @@ const createApprovePostNotification = async (req, res) => {
   }
 };
 
-// 🟩 Duyệt sự kiện
 const createApproveEventNotification = async (req, res) => {
   try {
     const { eventId } = req.body;
@@ -150,7 +145,6 @@ const createApproveEventNotification = async (req, res) => {
   }
 };
 
-// 🟩 User đăng ký sự kiện
 const createUserRegisterNotification = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -180,12 +174,11 @@ const createUserRegisterNotification = async (req, res) => {
     res.status(201).json({ success: true, notification });
     global.sendToUser(receiver._id.toString(),"new_notification", notification);
   } catch (err) {
-    console.error("❌ Lỗi tạo thông báo user đăng ký:", err);
+    console.error(" Lỗi tạo thông báo user đăng ký:", err);
     res.status(500).json({ success: false, message: "Lỗi server" });
   }
 };
 
-// 🟩 Sự kiện mới → gửi admin
 const createEventNotification = async (req, res) => {
   try {
     const { eventId } = req.body;
@@ -204,12 +197,11 @@ const createEventNotification = async (req, res) => {
     res.status(201).json({ success: true, notification });
     global.sendToUser(admin._id.toString(),"new_notification", notification);
   } catch (err) {
-    console.error("❌ Lỗi tạo thông báo sự kiện mới:", err);
+    console.error(" Lỗi tạo thông báo sự kiện mới:", err);
     res.status(500).json({ success: false, message: "Lỗi server" });
   }
 };
 
-// 🟩 Bài viết mới → gửi admin
 const createPostNotification = async (req, res) => {
   try {
     const { postId } = req.body;
@@ -228,12 +220,11 @@ const createPostNotification = async (req, res) => {
     res.status(201).json({ success: true, notification });
     global.sendToUser(admin._id.toString(),"new_notification", notification);
   } catch (err) {
-    console.error("❌ Lỗi tạo thông báo bài viết mới:", err);
+    console.error(" Lỗi tạo thông báo bài viết mới:", err);
     res.status(500).json({ success: false, message: "Lỗi server" });
   }
 };
 
-// 🟩 Lấy thông báo của user
 const getNotifications = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -248,12 +239,11 @@ const notifications = await Notification.find({
 
     res.status(200).json({ success: true, notifications });
   } catch (err) {
-    console.error("❌ Lỗi lấy danh sách thông báo:", err);
+    console.error(" Lỗi lấy danh sách thông báo:", err);
     res.status(500).json({ success: false, message: "Lỗi server" });
   }
 };
 
-// 🟩 Admin xem thông báo (sự kiện/bài viết chờ duyệt)
 const getNotificationsByAdmin = async (req, res) => {
   try {
     const notifications = await Notification.find({
@@ -272,7 +262,6 @@ const getNotificationsByAdmin = async (req, res) => {
   }
 };
 
-// 🟩 Đánh dấu đã đọc
 const markAsRead = async (req, res) => {
   try {
     await Notification.findByIdAndUpdate(req.params.id, { isRead: true });
@@ -283,13 +272,12 @@ const markAsRead = async (req, res) => {
   }
 };
 
-// 🟩 Xóa thông báo
 const deleteNotification = async (req, res) => {
   try {
     await Notification.findByIdAndDelete(req.params.id);
     res.status(200).json({ success: true, message: "Xóa thông báo thành công" });
   } catch (err) {
-    console.error("❌ Lỗi xóa thông báo:", err);
+    console.error(" Lỗi xóa thông báo:", err);
     res.status(500).json({ success: false, message: "Lỗi server" });
   }
 };

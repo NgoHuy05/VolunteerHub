@@ -104,7 +104,6 @@ const adminUpdateUser = async (req, res) => {
     const { id } = req.params;
     const { name, role, status, location, age, gender } = req.body;
 
-    // Update toàn bộ các trường được phép sửa
     const updateFields = {
       name,
       role,

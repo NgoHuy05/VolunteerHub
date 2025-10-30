@@ -41,13 +41,13 @@ const EvenDetail = () => {
   const [isJoined, setIsJoined] = useState(false);
   const [isPending, setIsPending] = useState(false);
   const eventId = useParams();
-  const location = useLocation(); // 🟢 nhận state
+  const location = useLocation(); 
   const { openCommentModal: openFromNotify, postId } = location.state || {};
   const [loading, setLoading] = useState(true);
-  const [bannerPreview, setBannerPreview] = useState([]); // mảng url preview
+  const [bannerPreview, setBannerPreview] = useState([]); 
   const [form, setForm] = useState({
     content: "",
-    images: [], // mảng File
+    images: [], 
   });
   const [openCreateModel, setOpenCreateModel] = useState(false);
   useEffect(() => {
@@ -82,7 +82,7 @@ const EvenDetail = () => {
     if (openFromNotify && postId) {
       const post = posts.find((p) => p._id === postId);
       if (post) {
-        setCurrentPost(post); // ✅ bây giờ currentPost là object hợp lệ
+        setCurrentPost(post); 
         setOpenCommentModal(true);
       }
     }
@@ -96,7 +96,7 @@ const EvenDetail = () => {
     setOpenCreateModel(true);
     setForm({
       content: "",
-      images: [], // mảng File
+      images: [], 
     });
     setBannerPreview([]);
   };
@@ -115,33 +115,28 @@ const EvenDetail = () => {
     };
     fetchUserEvents();
   }, []);
-  // state
 
-  // handle file change: append (không ghi đè) và tạo preview
+
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
 
-    // append files (để người dùng có thể chọn nhiều lần)
     setForm((prev) => ({
       ...prev,
       images: [...(prev.images || []), ...files],
     }));
 
-    // tạo preview cho các file mới rồi ghép vào preview hiện tại
     const newPreviews = files.map((f) => URL.createObjectURL(f));
     setBannerPreview((prev) => [...prev, ...newPreviews]);
 
-    // reset input để người dùng có thể chọn lại cùng file (optional but useful)
     e.target.value = null;
   };
 
-  // dọn object URLs khi component unmount hoặc khi previews thay đổi
   useEffect(() => {
     return () => {
-      // cleanup khi component unmount
       bannerPreview.forEach((url) => URL.revokeObjectURL(url));
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -180,7 +175,7 @@ const EvenDetail = () => {
 
       await createPostNotification(res.data.post._id);
       setOpenCreateModel(false);
-      setBannerPreview([]); // ✅ phải là mảng trống, KHÔNG dùng null
+      setBannerPreview([]);
       setForm({
         content: "",
         images: [],
@@ -245,7 +240,7 @@ const EvenDetail = () => {
     fetchData();
   }, [eventId]);
 
-  // 🔹 Mở modal bình luận
+  //  Mở modal bình luận
   const handleOpenModal = (post) => {
     setCurrentPost(post);
     setOpenCommentModal(true);
@@ -253,15 +248,15 @@ const EvenDetail = () => {
 
   const handleLikePost = async (postId) => {
     try {
-      // 1️⃣ Like hoặc Unlike bài viết
+      //  Like hoặc Unlike bài viết
       const resLike = await LikeUnLike(postId);
 
-      // 2️⃣ Nếu là "Like" → tạo thông báo
+      //  Nếu là "Like" → tạo thông báo
       if (resLike.data.liked) {
         await createLikeNotification(postId);
       }
 
-      // 3️⃣ Cập nhật lại số lượt like trong state
+      //  Cập nhật lại số lượt like trong state
       const resCount = await countLike(postId);
       setPosts((prev) =>
         prev.map((p) =>
@@ -276,7 +271,7 @@ const EvenDetail = () => {
       );
     } catch (error) {
       console.error(
-        "❌ Lỗi khi like hoặc tạo thông báo:",
+        "Lỗi khi like hoặc tạo thông báo:",
         error.response?.data?.message || error.message
       );
     }
@@ -315,7 +310,6 @@ const EvenDetail = () => {
       const res = await createUserEvent(data);
       toast.success(res.data.message || "Đăng ký tham gia thành công!");
       await createUserRegisterNotification(eventId)
-      // Cập nhật lại danh sách userEvents
       const resUserEvent = await getUserEvent();
       setUserEvents(resUserEvent.data.userEvents);
     } catch (error) {
@@ -333,7 +327,6 @@ const EvenDetail = () => {
       const res = await createComment({ content, postId });
       toast.success(res?.message || "Tạo bình luận thành công");
 
-      // Update posts state để hiển thị comment mới
       setPosts((prev) =>
         prev.map((p) =>
           p._id === postId
@@ -357,7 +350,7 @@ const EvenDetail = () => {
     }
   };
 
-  // 🔹 Ẩn cuộn khi mở modal
+  //  Ẩn cuộn khi mở modal
   useEffect(() => {
     document.body.style.overflow = openCommentModal ? "hidden" : "auto";
   }, [openCommentModal]);

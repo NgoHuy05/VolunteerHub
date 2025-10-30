@@ -69,7 +69,7 @@ const AdminListUser = () => {
     }
 
     setFilteredUsers(filtered);
-    setCurrentPage(1); // reset về trang đầu khi filter/search
+    setCurrentPage(1); 
   }, [search, filter, users]);
 
   const closeModal = () => setEditingUser(null);

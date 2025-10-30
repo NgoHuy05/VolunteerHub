@@ -4,7 +4,6 @@ const createUserEvent = async (req, res) => {
   try {
     const { userId, eventId, role, status } = req.body;
 
-    // 🔒 Kiểm tra user đã đăng ký sự kiện này chưa
     const existing = await UserEvent.findOne({ userId, eventId });
     if (existing) {
       return res.status(400).json({
@@ -13,7 +12,6 @@ const createUserEvent = async (req, res) => {
       });
     }
 
-    // ✅ Tạo mới
     const userEvent = await UserEvent.create({
       userId,
       eventId,
@@ -37,9 +35,8 @@ const createUserEvent = async (req, res) => {
 
 const getUserEvent = async (req, res) => {
   try {
-    const userId = req.user.id; // Lấy từ token
+    const userId = req.user.id; 
 
-    // Tìm tất cả event mà user tham gia
     const userEvents = await UserEvent.find({ userId: userId })
       .populate("eventId")
       .sort({ createdAt: -1 });
@@ -91,7 +88,6 @@ const getEventByUserId = async (req, res) => {
   try {
     const userId = req.user.id;
 
-    // 1️⃣ Lấy các sự kiện mà user tham gia
     const joinedEvents = await UserEvent.find({ userId })
       .populate("eventId")
       .populate("userId", "-password");
@@ -207,8 +203,8 @@ const countJoiningUserByEventId = async (req, res) => {
 
 const approveUserJoinEvent = async (req, res) => {
   try {
-    const { id } = req.params; // id của document trong UserEvent
-    const { status } = req.body; // joining | rejected
+    const { id } = req.params; 
+    const { status } = req.body; 
 
     if (!["joining", "rejected"].includes(status)) {
       return res.status(400).json({
@@ -221,7 +217,6 @@ const approveUserJoinEvent = async (req, res) => {
     if (status === "joining") updateData.approvedAt = new Date();
     if (status === "rejected") updateData.rejectedAt = new Date();
 
-    // Cập nhật trạng thái trong UserEvent
     const userEvent = await UserEvent.findByIdAndUpdate(id, updateData, { new: true })
       .populate("userId", "-password")
       .populate("eventId");

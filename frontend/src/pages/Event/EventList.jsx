@@ -145,7 +145,7 @@ const EventList = () => {
       
       toast.success(res.data.message || "Đăng ký tham gia thành công!");
       await createUserRegisterNotification(eventId)
-      fetchEventApproved(); // 🔄 Cập nhật lại danh sách
+      fetchEventApproved(); 
     } catch (error) {
       toast.error(error?.response?.data?.message || "Lỗi khi đăng ký sự kiện");
     }

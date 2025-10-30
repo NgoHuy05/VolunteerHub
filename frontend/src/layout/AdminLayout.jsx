@@ -4,7 +4,6 @@ import {
   MdOutlineEventNote,
   MdMenu,
   MdArticle,
-  MdSettings,
   MdOutlineContactPage,
 } from "react-icons/md";
 import { IoMdNotifications } from "react-icons/io";
@@ -15,7 +14,7 @@ import { useEffect, useState } from "react";
 import { getProfileUser } from "../api/user.api";
 import { logout } from "../api/auth.api";
 import { getNotificationsByIdAdmin } from "../api/notification.api";
-import { markAsRead } from "../api/notification.api"; // ✅ hàm đánh dấu đã đọc
+import { markAsRead } from "../api/notification.api";
 import { socket } from "../socket/index";
 import toast from "react-hot-toast";
 
@@ -26,31 +25,30 @@ const AdminLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("unread"); // unread, read, all
+  const [activeTab, setActiveTab] = useState("unread");
   const navigate = useNavigate();
 
-  // ✅ Khi socket connect hoặc user có id → đăng ký
+  //  Khi socket connect hoặc user có id → đăng ký
   useEffect(() => {
     if (!user?._id) return;
 
-    // 1️⃣ connect
+    // connect
     if (!socket.connected) socket.connect();
 
-    // 2️⃣ khi connect xong mới register
+    //  khi connect xong mới register
     socket.on("connect", () => {
       socket.emit("register", user._id);
     });
 
-    // 3️⃣ nhận thông báo realtime
+    //  nhận thông báo realtime
     socket.on("new_notification", (noti) => {
       if (noti.userId === user._id) {
-        // ⚠ dùng noti.userId chứ không phải receiverId
         setNotificationUnread((prev) => [noti, ...prev]);
         toast.success("🔔 Bạn có thông báo mới!");
       }
     });
 
-    // 4️⃣ cleanup
+    // cleanup
     return () => {
       socket.off("connect");
       socket.off("new_notification");
@@ -88,12 +86,10 @@ const AdminLayout = () => {
     fetchNotification();
   }, []);
 
-  // Redirect nếu không phải admin
   useEffect(() => {
     if (user && user.role !== "admin") navigate("/login");
   }, [user, navigate]);
 
-  // Tự động ẩn sidebar khi màn hình nhỏ
   useEffect(() => {
     const handleResize = () => {
       setSidebarOpen(window.innerWidth >= 1024);
@@ -110,16 +106,14 @@ const AdminLayout = () => {
   const handleClickNotification = async (n) => {
     setOpenDropdown(null);
 
-    // Nếu chưa đọc, gọi API markAsRead
     if (!n.isRead) {
       try {
         await markAsRead(n._id);
-        // cập nhật state local
         setNotificationUnread((prev) =>
           prev.filter((item) => item._id !== n._id)
         );
         setNotificationRead((prev) => [n, ...prev]);
-        n.isRead = true; // cập nhật tạm thời item hiện tại
+        n.isRead = true;
       } catch (err) {
         console.error(err?.response?.data?.message || err);
       }
@@ -186,7 +180,6 @@ const AdminLayout = () => {
               icon: MdArticle,
               label: "Quản lý bài đăng",
             },
-            { to: "/admin/settings", icon: MdSettings, label: "Cài đặt" },
           ].map((item) => (
             <NavLink
               key={item.to}

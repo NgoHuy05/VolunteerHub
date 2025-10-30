@@ -149,11 +149,9 @@ const getAllEventCreatedByAndStatus = async (req, res) => {
 
     let events = [];
 
-    // Nếu có status thì lọc theo status
     if (status) {
       events = await Event.find({ createBy: userId, status });
     } else {
-      // Nếu không có status => lấy tất cả sự kiện của người tạo
       events = await Event.find({ createBy: userId });
     }
 

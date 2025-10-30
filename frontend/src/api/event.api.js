@@ -1,6 +1,6 @@
 import axios from "axios";
 import { getAuthHeader } from "./auth.api";
-const BASE_URL = "http://localhost:5555/event";
+const BASE_URL = `${import.meta.env.VITE_API_URL}/event`;
 
 export const getAllEvent = () => {
     return axios.get(`${BASE_URL}/all`, getAuthHeader());

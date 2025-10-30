@@ -2,7 +2,7 @@ import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import toast from "react-hot-toast";
 
-const BASE_URL = "http://localhost:5555/auth";
+const BASE_URL = `${import.meta.env.VITE_API_URL}/auth`;
 
 export const login = (data) => {
     return axios.post(`${BASE_URL}/login`, data);

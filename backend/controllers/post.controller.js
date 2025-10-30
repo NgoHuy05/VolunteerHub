@@ -1,7 +1,6 @@
 const Post = require("../models/Post.model");
 const Like = require("../models/Like.model");
 const Event = require("../models/Event.model");
-// [POST] /post
 const createPost = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -39,7 +38,6 @@ const createPost = async (req, res) => {
   }
 };
 
-// [PUT] /post/:id
 const updatePost = async (req, res) => {
   try {
     const { id } = req.params;
@@ -67,7 +65,6 @@ const updatePost = async (req, res) => {
   }
 };
 
-// [DELETE] /post/:id
 const deletePost = async (req, res) => {
   try {
     const { id } = req.params;
@@ -90,7 +87,6 @@ const deletePost = async (req, res) => {
   }
 };
 
-// [GET] /post/:id
 const getPostById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -104,7 +100,6 @@ const getPostById = async (req, res) => {
   }
 };
 
-// [GET] /post/event/:eventId
 const getPostByIdEvent = async (req, res) => {
   try {
     const { eventId } = req.params;
@@ -115,7 +110,6 @@ const getPostByIdEvent = async (req, res) => {
   }
 };
 
-// [GET] /post/event/approved/:eventId
 const getPostByIdEventApproved = async (req, res) => {
   try {
     const { eventId } = req.params;
@@ -156,7 +150,6 @@ const getEventApprovedWithPostByIdEventPending = async (req, res) => {
   }
 };
 
-// [GET] /post/user/:userId
 const getPostByIdUser = async (req, res) => {
   try {
     const { userId } = req.params;
@@ -167,7 +160,6 @@ const getPostByIdUser = async (req, res) => {
   }
 };
 
-// [GET] /post
 const getAllPost = async (req, res) => {
   try {
     const posts = await Post.find().populate("userId", "name").populate("eventId").populate("userId", "avatar name");
@@ -177,7 +169,6 @@ const getAllPost = async (req, res) => {
   }
 };
 
-// [GET] /post/approved
 const getAllPostApproved = async (req, res) => {
   try {
     const posts = await Post.find({ status: "approved", approvedAt: { $exists: true } }).populate("userId", "name avatar");
@@ -217,7 +208,6 @@ const approvePost = async (req, res) => {
 };
 
 
-// [POST] /post/filter
 const filterPost = async (req, res) => {
   try {
     const { title } = req.body;

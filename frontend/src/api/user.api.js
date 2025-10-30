@@ -1,7 +1,7 @@
 import axios from "axios";
 import { getAuthHeader } from "./auth.api";
 
-const BASE_URL = "http://localhost:5555/user";
+const BASE_URL = `${import.meta.env.VITE_API_URL}/user`;
 
 export const getAllUser = () => {
     return axios.get(`${BASE_URL}/all`, getAuthHeader())

@@ -1,7 +1,7 @@
 import axios from "axios";
 import { getAuthHeader } from "./auth.api";
 
-const BASE_URL = "http://localhost:5555/like";
+const BASE_URL = `${import.meta.env.VITE_API_URL}/like`;
 
 export const LikeUnLike = (postId) => {
   return axios.post(`${BASE_URL}/LikeUnLike`, {postId} , getAuthHeader());

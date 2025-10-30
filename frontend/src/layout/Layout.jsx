@@ -115,7 +115,7 @@ const Layout = () => {
     };
 
     fetchData();
-  }, [selectedSort]); // 🔹 mỗi lần đổi category sort sẽ fetch lại posts
+  }, [selectedSort]); 
 
   useEffect(() => {
     const fetchUser = async () => {

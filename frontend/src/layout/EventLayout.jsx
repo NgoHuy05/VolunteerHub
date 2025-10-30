@@ -28,7 +28,7 @@ const EventLayout = () => {
 
       <div className="bg-gray-200 min-h-screen">
         <div className="grid grid-cols-1 lg:grid-cols-[25%_70%] text-black gap-4">
-          {/* 🧭 Sidebar (desktop) */}
+          {/*  Sidebar (desktop) */}
           <div>
             <div className="hidden lg:flex flex-col bg-white min-h-screen fixed w-[25%]">
               <div className="font-bold text-2xl pl-4 mt-2">Sự kiện</div>

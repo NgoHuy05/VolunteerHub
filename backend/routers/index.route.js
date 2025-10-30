@@ -8,9 +8,6 @@ const userEventRoutes = require("../routers/userEvent.route");
 const notificationRoutes = require("../routers/notification.route");
 
 module.exports = (app) => {
-  // ------------------------------------
-  // 🎯 API Route Mapping
-  // ------------------------------------
   app.use("/auth", authRoutes);               // Đăng nhập, đăng ký
   app.use("/user", userRoutes);               // Quản lý người dùng
   app.use("/event", eventRoutes);             // Quản lý sự kiện

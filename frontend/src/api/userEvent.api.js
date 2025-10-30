@@ -1,6 +1,6 @@
 import axios from "axios"
 import { getAuthHeader } from "./auth.api";
-const BASE_URL = "http://localhost:5555/userEvent";
+const BASE_URL = `${import.meta.env.VITE_API_URL}/userEvent`;
 
 export const approveUserJoinEvent = (id, status) => {
     return axios.post(`${BASE_URL}/approve/${id}`, { status }, getAuthHeader());

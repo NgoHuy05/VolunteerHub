@@ -35,19 +35,19 @@ const Header = () => {
       console.error(error?.response?.data?.message || error);
     }
   };
-  // ✅ Khi socket connect hoặc user có id → đăng ký
+  //  Khi socket connect hoặc user có id → đăng ký
   useEffect(() => {
     if (!user?._id) return;
 
-    // 1️⃣ connect
+    //  connect
     if (!socket.connected) socket.connect();
 
-    // 2️⃣ khi connect xong mới register
+    //  khi connect xong mới register
     socket.on("connect", () => {
       socket.emit("register", user._id);
     });
 
-    // 3️⃣ nhận thông báo realtime
+    //  nhận thông báo realtime
     socket.on("new_notification", (noti) => {
       if (noti.userId === user._id) {
         // ⚠ dùng noti.userId chứ không phải receiverId
@@ -56,7 +56,7 @@ const Header = () => {
       }
     });
 
-    // 4️⃣ cleanup
+    //  cleanup
     return () => {
       socket.off("connect");
       socket.off("new_notification");
@@ -66,16 +66,14 @@ const Header = () => {
   const handleClickNotification = async (n) => {
     setOpenDropdown(null);
 
-    // Nếu chưa đọc, gọi API markAsRead
     if (!n.isRead) {
       try {
         await markAsRead(n._id);
-        // cập nhật state local
         setNotificationUnread((prev) =>
           prev.filter((item) => item._id !== n._id)
         );
         setNotificationRead((prev) => [n, ...prev]);
-        n.isRead = true; // cập nhật tạm thời item hiện tại
+        n.isRead = true; 
       } catch (err) {
         console.error(err?.response?.data?.message || err);
       }
