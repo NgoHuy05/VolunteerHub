@@ -7,7 +7,6 @@ import EvenDetail from "../pages/Event/EventDetail";
 import EventJoining from "../pages/Event/EventJoining";
 import EventPendingJoin from "../pages/Event/EventPendingJoin";
 import EventCompleted from "../pages/Event/EventCompleted";
-import EventNotifications from "../pages/Event/EventNotifications";
 import EventYour from "../pages/Event/EventYour";
 import EventRejected from "../pages/Event/EventRejected";
 import EventLayout from "../layout/EventLayout";
@@ -17,7 +16,6 @@ import Profile from "../pages/Profile";
 import ManageLayout from "../layout/ManageLayout";
 import ManageYourEvent from "../pages/Manager/ManageYourEvent";
 import ManagePost from "../pages/Manager/ManagePost";
-import ManageNotification from "../pages/Manager/ManageNotification";
 import ManageApproved from "../pages/Manager/ManageApproved";
 import ManagePending from "../pages/Manager/ManagePending";
 import ManageRejected from "../pages/Manager/ManageRejected";
@@ -25,11 +23,9 @@ import ManageCompleted from "../pages/Manager/ManageCompleted";
 import ManageUser from "../pages/Manager/ManageUser";
 import AdminLayout from "../layout/AdminLayout";
 import AdminDashboard from "../pages/Admin/AdminDashboard";
-
 import AdminListEvent from "../pages/Admin/AdminListEvent";
 import AdminListUser from "../pages/Admin/AdminListUser";
 import AdminListPost from "../pages/Admin/AdminListPost";
-import AdminSetting from "../pages/Admin/AdminSetting";
 import ManageCreateEvent from "../pages/Manager/ManageCreateEvent";
 
 export const routers = createBrowserRouter([
@@ -72,10 +68,6 @@ export const routers = createBrowserRouter([
         element: <EventCompleted />,
       },
       {
-        path: "notification",
-        element: <EventNotifications />,
-      },
-      {
         path: "your-event",
         element: <EventYour />,
       },
@@ -114,10 +106,6 @@ export const routers = createBrowserRouter([
         element: <ManageUser />,
       },
       {
-        path: "notification",
-        element: <ManageNotification />,
-      },
-      {
         path: "approved",
         element: <ManageApproved />,
       },
@@ -154,11 +142,7 @@ export const routers = createBrowserRouter([
       {
         path: "list/users",
         element: <AdminListUser />,
-      },
-      {
-        path: "settings",
-        element: <AdminSetting />,
-      },
+      }
     ],
   },
 ]);
