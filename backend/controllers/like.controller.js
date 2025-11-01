@@ -1,41 +1,46 @@
 const Like = require("../models/Like.model");
+const mongoose = require("mongoose");
+
 
 const LikeUnLike = async (req, res) => {
-    try {
-        const userId = req.user.id; 
-        const { postId } = req.body;
-        if (!postId) {
-            return res.status(400).json({
-                success: false,
-                message: "Thiếu postId"
-            });
-        }
-        const existing = await Like.findOne({ userId, postId });
-        if (existing) {
-            const like = await Like.findOneAndDelete({ userId, postId });
-            return res.status(201).json({
-                success: true,
-                message: "Bỏ thích thành công",
-                liked: false,
-                like
-            });
-        } else {
-            const like = await Like.create({ userId, postId });
-            return res.status(201).json({
-                success: true,
-                message: "Thích thành công",
-                                liked: true,
-                like
-            });
-        }
-    } catch (error) {
-        return res.status(500).json({
-            success: false,
-            message: error.message
-        });
-    }
-};
+  try {
+    const userId = req.user.id;
+    const { postId } = req.body;
 
+    if (!postId) {
+      return res.status(400).json({
+        success: false,
+        message: "Thiếu postId",
+      });
+    }
+
+    const existing = await Like.findOne({ userId, postId });
+
+    // Nếu đã like → unlike
+    if (existing) {
+      await Like.findOneAndDelete({ userId, postId });
+    } else {
+      await Like.create({ userId, postId });
+    }
+
+    // ✅ Đếm lại số like của post sau khi toggle
+    const likeCount = await Like.countDocuments({
+      postId: new mongoose.Types.ObjectId(postId),
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: existing ? "Bỏ thích thành công" : "Thích thành công",
+      liked: !existing,
+      likeCount, // 👉 trả luôn về cho frontend
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
 const countLike = async (req, res) => {
     try {
         const { postId } = req.body;

@@ -1,5 +1,6 @@
 const Post = require("../models/Post.model");
 const Like = require("../models/Like.model");
+const Comment = require("../models/Comment.model");
 const Event = require("../models/Event.model");
 const createPost = async (req, res) => {
   try {
@@ -37,6 +38,83 @@ const createPost = async (req, res) => {
     });
   }
 };
+const getAllPostFull = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { sort } = req.query; // 🟢 nhận loại sort từ client: "Tất cả" | "Mới nhất" | "Cũ nhất" | "Top"
+
+    // 1️⃣ Lấy bài viết theo điều kiện sort
+    let sortOption = { approvedAt: -1 }; // mặc định: mới nhất
+
+    if (sort === "Cũ nhất") sortOption = { approvedAt: 1 };
+    else if (sort === "Top") sortOption = { likeCount: -1 }; // tạm thời sort theo số like
+    else if (sort === "Tất cả" || !sort) sortOption = { approvedAt: -1 };
+
+    // 2️⃣ Query bài viết
+    const posts = await Post.find({ status: "approved" })
+      .populate("userId", "name avatar")
+      .sort(sortOption)
+      .lean();
+
+    if (!posts.length)
+      return res.status(200).json({ success: true, posts: [] });
+
+    // 3️⃣ Gom id
+    const postIds = posts.map((p) => p._id);
+    const eventIds = posts.map((p) => p.eventId).filter(Boolean);
+
+    // 4️⃣ Chạy song song
+    const [likes, comments, events, likedDocs] = await Promise.all([
+      Like.aggregate([
+        { $match: { postId: { $in: postIds } } },
+        { $group: { _id: "$postId", count: { $sum: 1 } } },
+      ]),
+      Comment.find({ postId: { $in: postIds } })
+        .populate("userId", "name avatar")
+        .lean(),
+      Event.find({ _id: { $in: eventIds } }).lean(),
+      Like.find({ userId }).select("postId").lean(),
+    ]);
+
+    // 5️⃣ Map nhanh
+    const likeCountMap = new Map(likes.map((l) => [l._id.toString(), l.count]));
+    const commentMap = new Map();
+    comments.forEach((c) => {
+      const pid = c.postId.toString();
+      if (!commentMap.has(pid)) commentMap.set(pid, []);
+      commentMap.get(pid).push(c);
+    });
+    const eventMap = new Map(events.map((e) => [e._id.toString(), e]));
+    const likedIds = new Set(likedDocs.map((l) => l.postId.toString()));
+
+    // 6️⃣ Merge
+    const fullPosts = posts.map((p) => ({
+      ...p,
+      likeCount: likeCountMap.get(p._id.toString()) || 0,
+      liked: likedIds.has(p._id.toString()),
+      comments: commentMap.get(p._id.toString()) || [],
+      event: eventMap.get(p.eventId?.toString()) || null,
+    }));
+
+    // 7️⃣ Nếu sort === "Top", sort lại theo likeCount
+    if (sort === "Top") {
+      fullPosts.sort((a, b) => b.likeCount - a.likeCount);
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Lấy danh sách bài đăng đầy đủ thành công",
+      posts: fullPosts,
+    });
+  } catch (err) {
+    console.error("❌ Lỗi khi lấy toàn bộ bài đăng đầy đủ:", err);
+    res.status(500).json({
+      success: false,
+      message: err.message || "Lỗi server khi lấy danh sách bài đăng",
+    });
+  }
+};
+
 
 const updatePost = async (req, res) => {
   try {
@@ -235,6 +313,7 @@ const filterPost = async (req, res) => {
 
 module.exports = {
   createPost,
+  getAllPostFull, 
   updatePost,
   deletePost,
   getPostById,

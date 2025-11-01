@@ -235,8 +235,8 @@ const notifications = await Notification.find({
      .populate("senderId", "name avatar")
       .populate("eventId")
       .populate("postId")
-      .sort({ createdAt: -1 });
-
+      .sort({ createdAt: -1 })
+      .lean();
     res.status(200).json({ success: true, notifications });
   } catch (err) {
     console.error(" Lỗi lấy danh sách thông báo:", err);
@@ -253,8 +253,8 @@ const getNotificationsByAdmin = async (req, res) => {
       .populate("senderId")
       .populate("eventId")
       .populate("postId")
-      .sort({ createdAt: -1 });
-
+      .sort({ createdAt: -1 })
+.lean();
     res.status(200).json({ success: true, notifications });
   } catch (err) {
     console.error("❌ Lỗi lấy thông báo admin:", err);

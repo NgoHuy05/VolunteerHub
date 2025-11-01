@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { CgProfile } from "react-icons/cg";
 import { createComment } from "../api/comment.api";
-import { countLike, LikeUnLike } from "../api/like.api";
+import {  LikeUnLike } from "../api/like.api";
 import { getPostTimeAgo } from "../utils";
 import toast from "react-hot-toast";
 import {
@@ -26,37 +26,25 @@ const Home = () => {
     setCurrentPost(post);
     setOpenCommentModal(true);
   };
+const handleLikePost = async (postId) => {
+  try {
+    const res = await LikeUnLike(postId);
 
-  const handleLikePost = async (postId) => {
-    try {
-      //  Like hoặc Unlike bài viết
-      const resLike = await LikeUnLike(postId);
-
-      //  Nếu là "Like" → tạo thông báo
-      if (resLike.data.liked) {
-        await createLikeNotification(postId);
-      }
-
-      //  Cập nhật lại số lượt like trong state
-      const resCount = await countLike(postId);
-      setPosts((prev) =>
-        prev.map((p) =>
-          p._id === postId
-            ? {
-                ...p,
-                likeCount: resCount.data.likeCount,
-                liked: resLike.data.liked,
-              }
-            : p
-        )
-      );
-    } catch (error) {
-      console.error(
-        " Lỗi khi like hoặc tạo thông báo:",
-        error.response?.data?.message || error.message
-      );
+    if (res.data.liked) {
+      createLikeNotification(postId); // không cần await, cho chạy song song
     }
-  };
+
+    setPosts((prev) =>
+      prev.map((p) =>
+        p._id === postId
+          ? { ...p, liked: res.data.liked, likeCount: res.data.likeCount }
+          : p
+      )
+    );
+  } catch (error) {
+    console.error("Lỗi khi like:", error.response?.data?.message || error.message);
+  }
+};
 
   const handleSubmitComment = async (e, postId) => {
     e.preventDefault();

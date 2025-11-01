@@ -6,6 +6,11 @@ const BASE_URL = `${import.meta.env.VITE_API_URL}/post`;
 export const getAllPost = () => {
     return axios.get(`${BASE_URL}/all`, getAuthHeader())
 };
+export const getAllPostFull = (sort) => {
+  const encodedSort = encodeURIComponent(sort || "Tất cả");
+  return axios.get(`${BASE_URL}/all/full?sort=${encodedSort}`, getAuthHeader());
+};
+
 export const getAllPostApproved = () => {
     return axios.get(`${BASE_URL}/all/approved`, getAuthHeader())
 };

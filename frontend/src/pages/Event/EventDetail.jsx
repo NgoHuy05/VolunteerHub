@@ -7,10 +7,10 @@ import { BiLike, BiSolidLike } from "react-icons/bi";
 import { FaRegComment } from "react-icons/fa";
 import { IoClose } from "react-icons/io5";
 import { useEffect } from "react";
-import { countLike, getLikedPosts, LikeUnLike } from "../../api/like.api";
-import { createComment, getCommentByPostId } from "../../api/comment.api";
+import { LikeUnLike } from "../../api/like.api";
+import { createComment } from "../../api/comment.api";
 import { getProfileUser } from "../../api/user.api";
-import { createPost, getPostByIdEventApproved } from "../../api/post.api";
+import { createPost, getAllPostFull } from "../../api/post.api";
 import { getEventById } from "../../api/event.api";
 import { FaPlus } from "react-icons/fa";
 import { FaUsers } from "react-icons/fa";
@@ -203,42 +203,27 @@ const EvenDetail = () => {
     fetchUser();
   }, []);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const resPost = await getPostByIdEventApproved(eventId.id);
-        const postsData = resPost.data?.posts;
-        const resLiked = await getLikedPosts();
-        const likedPostIds = resLiked.data.likedPostIds;
-        const postsWithDetails = await Promise.all(
-          postsData.map(async (p) => {
-            try {
-              const resCountLike = await countLike(p._id);
-              const resCmt = await getCommentByPostId(p._id);
-              const resEvent = await getEventById(p.eventId);
+useEffect(() => {
+  const fetchData = async () => {
+    try {
+      setLoading(true);
 
-              return {
-                ...p,
-                event: resEvent.data.event,
-                comments: resCmt.data.comments,
-                likeCount: resCountLike.data.likeCount,
-                liked: likedPostIds.includes(p._id),
-              };
-            } catch {
-              return { ...p, event: null, comments: [], likeCount: 0 };
-            }
-          })
-        );
+      const resUser = await getProfileUser();
+      setUser(resUser.data.user);
 
-        setPosts(postsWithDetails);
-      } catch (error) {
-        console.error(error?.response?.data?.message || error);
-      }
-    };
+      const resPost = await getAllPostFull();
 
-    fetchData();
-  }, [eventId]);
+      const postsData = resPost.data?.posts || [];
+      setPosts(postsData);
+    } catch (error) {
+      console.error(error?.response?.data?.message || error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchData();
+}, [eventId]);
 
   //  Mở modal bình luận
   const handleOpenModal = (post) => {
@@ -246,37 +231,25 @@ const EvenDetail = () => {
     setOpenCommentModal(true);
   };
 
-  const handleLikePost = async (postId) => {
-    try {
-      //  Like hoặc Unlike bài viết
-      const resLike = await LikeUnLike(postId);
+ const handleLikePost = async (postId) => {
+  try {
+    const res = await LikeUnLike(postId);
 
-      //  Nếu là "Like" → tạo thông báo
-      if (resLike.data.liked) {
-        await createLikeNotification(postId);
-      }
-
-      //  Cập nhật lại số lượt like trong state
-      const resCount = await countLike(postId);
-      setPosts((prev) =>
-        prev.map((p) =>
-          p._id === postId
-            ? {
-                ...p,
-                likeCount: resCount.data.likeCount,
-                liked: resLike.data.liked,
-              }
-            : p
-        )
-      );
-    } catch (error) {
-      console.error(
-        "Lỗi khi like hoặc tạo thông báo:",
-        error.response?.data?.message || error.message
-      );
+    if (res.data.liked) {
+      createLikeNotification(postId); // không cần await, cho chạy song song
     }
-  };
 
+    setPosts((prev) =>
+      prev.map((p) =>
+        p._id === postId
+          ? { ...p, liked: res.data.liked, likeCount: res.data.likeCount }
+          : p
+      )
+    );
+  } catch (error) {
+    console.error("Lỗi khi like:", error.response?.data?.message || error.message);
+  }
+};
   useEffect(() => {
     if (!userEvents || !event || !user?._id) return;
 

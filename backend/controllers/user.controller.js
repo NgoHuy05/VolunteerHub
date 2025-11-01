@@ -3,7 +3,7 @@ const bcrypt = require("bcryptjs");
 
 const getProfileUser = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).select("-password");
+    const user = await User.findById(req.user.id).select("name email location age gender avatar").lean();;
     if (!user) {
       return res
         .status(404)

@@ -8,7 +8,6 @@ import logo from "../assets/logo.png";
 import { CiLogout } from "react-icons/ci";
 import { MdOutlineContactPage } from "react-icons/md";
 import { logout } from "../api/auth.api";
-import { getProfileUser } from "../api/user.api";
 import { BiEdit } from "react-icons/bi";
 import { FaCrown } from "react-icons/fa";
 import { getNotificationsById, markAsRead } from "../api/notification.api";
@@ -20,43 +19,26 @@ const navItems = [
   { path: "/event/home", label: "Sự kiện", icon: <MdEventNote /> },
 ];
 
-const Header = () => {
+const Header = ({ user }) => {
   const [openDropdown, setOpenDropdown] = useState(null);
-  const [user, setUser] = useState(null);
   const [activeTab, setActiveTab] = useState("unread"); // unread, read, all
   const [notificationUnread, setNotificationUnread] = useState([]);
   const [notificationRead, setNotificationRead] = useState([]);
   const navigate = useNavigate();
-  const fetchData = async () => {
-    try {
-      const resUser = await getProfileUser();
-      setUser(resUser.data.user);
-    } catch (error) {
-      console.error(error?.response?.data?.message || error);
-    }
-  };
-  //  Khi socket connect hoặc user có id → đăng ký
+
   useEffect(() => {
     if (!user?._id) return;
 
-    //  connect
     if (!socket.connected) socket.connect();
-
-    //  khi connect xong mới register
     socket.on("connect", () => {
       socket.emit("register", user._id);
     });
-
-    //  nhận thông báo realtime
     socket.on("new_notification", (noti) => {
       if (noti.userId === user._id) {
-        // ⚠ dùng noti.userId chứ không phải receiverId
         setNotificationUnread((prev) => [noti, ...prev]);
         toast.success("🔔 Bạn có thông báo mới!");
       }
     });
-
-    //  cleanup
     return () => {
       socket.off("connect");
       socket.off("new_notification");
@@ -73,7 +55,7 @@ const Header = () => {
           prev.filter((item) => item._id !== n._id)
         );
         setNotificationRead((prev) => [n, ...prev]);
-        n.isRead = true; 
+        n.isRead = true;
       } catch (err) {
         console.error(err?.response?.data?.message || err);
       }
@@ -117,21 +99,18 @@ const Header = () => {
     }
   };
 
-  // Fetch notifications
-  const fetchNotification = async () => {
-    try {
-      const res = await getNotificationsById();
-      const unread = res.data.notifications.filter((n) => !n.isRead);
-      const read = res.data.notifications.filter((n) => n.isRead);
-      setNotificationUnread(unread);
-      setNotificationRead(read);
-    } catch (error) {
-      console.error(error?.response?.data?.message || error);
-    }
-  };
-
   useEffect(() => {
-    fetchData();
+    const fetchNotification = async () => {
+      try {
+        const res = await getNotificationsById();
+        const unread = res.data.notifications.filter((n) => !n.isRead);
+        const read = res.data.notifications.filter((n) => n.isRead);
+        setNotificationUnread(unread);
+        setNotificationRead(read);
+      } catch (error) {
+        console.error(error?.response?.data?.message || error);
+      }
+    };
     fetchNotification();
   }, []);
 

@@ -7,6 +7,7 @@ const upload = require("../middleware/upload");
 
 
 router.get("/all", authMiddleware, controllers.getAllPost);
+router.get("/all/full", authMiddleware, controllers.getAllPostFull);
 router.get("/all/approved", authMiddleware, controllers.getAllPostApproved);
 router.get("/event/approved/:eventId", authMiddleware, controllers.getPostByIdEventApproved);
 router.get("/event/post-pending", authMiddleware, controllers.getEventApprovedWithPostByIdEventPending);

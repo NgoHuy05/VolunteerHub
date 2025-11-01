@@ -8,11 +8,9 @@ import { IoIosArrowUp } from "react-icons/io";
 import { useClickOutside } from "../hook";
 import { MdEventNote } from "react-icons/md";
 import { useEffect } from "react";
-import { filterPost, getAllPostApproved } from "../api/post.api";
+import { getAllPostFull } from "../api/post.api";
 import { getProfileUser } from "../api/user.api";
-import { countLike, getLikedPosts } from "../api/like.api";
-import { getCommentByPostId } from "../api/comment.api";
-import { getEventById } from "../api/event.api";
+
 import { getEventByUserIdAndStatus } from "../api/userEvent.api";
 import { FaArrowUp } from "react-icons/fa";
 import { CgProfile } from "react-icons/cg";
@@ -67,61 +65,32 @@ const Layout = () => {
     fetchEventJoing();
   }, []);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
+useEffect(() => {
+  const fetchData = async () => {
+    try {
+      setLoading(true);
 
-        const resUser = await getProfileUser();
-        setUser(resUser.data.user);
+      const resUser = await getProfileUser();
+      setUser(resUser.data.user);
 
-        let resPost;
-        if (selectedSort === "Tất cả") {
-          resPost = await getAllPostApproved();
-        } else {
-          resPost = await filterPost(selectedSort);
-        }
-        const postsData = resPost.data?.posts || resPost.posts;
+const resPost = await getAllPostFull(selectedSort);
 
-        const resLiked = await getLikedPosts();
-        const likedPostIds = resLiked.data.likedPostIds;
+      const postsData = resPost.data?.posts || [];
+      setPosts(postsData);
+    } catch (error) {
+      console.error(error?.response?.data?.message || error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-        const postsWithDetails = await Promise.all(
-          postsData.map(async (p) => {
-            try {
-              const resCountLike = await countLike(p._id);
-              const resCmt = await getCommentByPostId(p._id);
-              const resEvent = await getEventById(p.eventId);
-
-              return {
-                ...p,
-                event: resEvent.data.event,
-                comments: resCmt.data.comments,
-                likeCount: resCountLike.data.likeCount,
-                liked: likedPostIds.includes(p._id),
-              };
-            } catch {
-              return { ...p, event: null, comments: [], likeCount: 0 };
-            }
-          })
-        );
-
-        setPosts(postsWithDetails);
-      } catch (error) {
-        console.error(error?.response?.data?.message || error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [selectedSort]); 
+  fetchData();
+}, [selectedSort]);
 
   useEffect(() => {
     const fetchUser = async () => {
       try {
         setLoading(true);
-
         const res = await getProfileUser();
         setUser(res.data.user);
       } catch (error) {
@@ -138,7 +107,7 @@ const Layout = () => {
   return (
     <>
       <ScrollToTop />
-      <Header />
+      <Header user={user} />
       <div className="grid grid-cols-1 lg:grid-cols-[20%_60%_20%] text-gray-900 bg-gray-200">
         <div>
           <div className="hidden lg:flex flex-col min-h-screen overflow-y px-2 py-4">

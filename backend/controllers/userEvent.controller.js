@@ -113,7 +113,6 @@ const getEventByUserId = async (req, res) => {
   }
 };
 
-
 const getEventByUserIdAndStatus = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -121,20 +120,20 @@ const getEventByUserIdAndStatus = async (req, res) => {
     let events = [];
 
     if (status) {
-
       if (status === "joining") {
-        const eventsUserJoined = await UserEvent.find({ userId, status: "joining" })
-          .populate("eventId")
-          .populate("userId", "-password");
-
-        const eventsUserCreated = await Event.find({ createBy: userId, status: "approved" });
+        // chạy song song hai truy vấn thay vì đợi tuần tự
+        const [eventsUserJoined, eventsUserCreated] = await Promise.all([
+          UserEvent.find({ userId, status: "joining" })
+            .populate("eventId")
+            .populate("userId", "-password"),
+          Event.find({ createBy: userId, status: "approved" }),
+        ]);
 
         events = [
-          ...eventsUserJoined.map(item => item.eventId), 
+          ...eventsUserJoined.map(item => item.eventId),
           ...eventsUserCreated,
         ];
       } else {
- 
         events = await UserEvent.find({ userId, status })
           .populate("eventId")
           .populate("userId", "-password");
@@ -157,6 +156,7 @@ const getEventByUserIdAndStatus = async (req, res) => {
     });
   }
 };
+
 
 
 const countAllUserByEventId = async (req, res) => {
