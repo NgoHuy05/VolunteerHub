@@ -13,18 +13,33 @@ import { FaCrown } from "react-icons/fa";
 import { getNotificationsById, markAsRead } from "../api/notification.api";
 import toast from "react-hot-toast";
 import { socket } from "../socket/index";
+import { getProfileUser } from "../api/user.api";
 
 const navItems = [
   { path: "/", label: "Dashboard", icon: <FaHome /> },
   { path: "/event/home", label: "Sự kiện", icon: <MdEventNote /> },
 ];
 
-const Header = ({ user }) => {
+const Header = () => {
   const [openDropdown, setOpenDropdown] = useState(null);
   const [activeTab, setActiveTab] = useState("unread"); // unread, read, all
   const [notificationUnread, setNotificationUnread] = useState([]);
   const [notificationRead, setNotificationRead] = useState([]);
+  const [user, setUser] = useState();
   const navigate = useNavigate();
+  
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const res = await getProfileUser();
+        setUser(res.data.user);
+      } catch (error) {
+        console.error(error.message || "Chưa login hoặc token hết hạn");
+      } 
+    };
+    fetchUser();
+  }, [navigate]);
+
 
   useEffect(() => {
     if (!user?._id) return;
@@ -42,6 +57,8 @@ const Header = ({ user }) => {
     return () => {
       socket.off("connect");
       socket.off("new_notification");
+          socket.disconnect();
+
     };
   }, [user?._id]);
 

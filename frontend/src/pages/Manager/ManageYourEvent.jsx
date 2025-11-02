@@ -1,28 +1,12 @@
-import { useEffect, useState } from "react";
 import { FaArrowRightLong } from "react-icons/fa6";
 import { convertDate } from "../../utils";
-import { useNavigate } from "react-router-dom";
-import { getAllEventCreatedBy } from "../../api/event.api";
+import { useNavigate, useOutletContext } from "react-router-dom";
 
 const ManageYourEvent = () => {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
 
-  const [events, setEvents] = useState([]);
-  useEffect(() => {
-    const fetchEvent = async () => {
-      try {
-        setLoading(true);
-        const res = await getAllEventCreatedBy();
-        setEvents(res.data.events);
-      } catch (error) {
-        console.error(error.response.data.message || error.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchEvent();
-  }, []);
+  const {events, loading} = useOutletContext();
+
   const handleWatchDetail = (id) => {
     navigate(`/event/detail/${id}`);
   };

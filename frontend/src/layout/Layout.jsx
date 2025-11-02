@@ -10,10 +10,10 @@ import { MdEventNote } from "react-icons/md";
 import { useEffect } from "react";
 import { getAllPostFull } from "../api/post.api";
 import { getProfileUser } from "../api/user.api";
-
 import { getEventByUserIdAndStatus } from "../api/userEvent.api";
 import { FaArrowUp } from "react-icons/fa";
 import { CgProfile } from "react-icons/cg";
+import { FaSearch } from "react-icons/fa";
 
 const sortCategories = [
   { id: 1, title: "Tất cả" },
@@ -29,7 +29,9 @@ const Layout = () => {
   const [user, setUser] = useState(null);
   const [eventJoining, setEventJoining] = useState([]);
   const [loading, setLoading] = useState(true);
-  
+  const [search, setSearch] = useState("");
+  const [filteredPosts, setFilteredPosts] = useState([]);
+
   const navigate = useNavigate();
   const ref = useRef(null);
   useClickOutside(ref, () => {
@@ -64,28 +66,36 @@ const Layout = () => {
     };
     fetchEventJoing();
   }, []);
+  useEffect(() => {
+    const keyword = search.toLowerCase().trim();
+    let filtered = posts;
 
-useEffect(() => {
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-
-      const resUser = await getProfileUser();
-      setUser(resUser.data.user);
-
-const resPost = await getAllPostFull(selectedSort);
-
-      const postsData = resPost.data?.posts || [];
-      setPosts(postsData);
-    } catch (error) {
-      console.error(error?.response?.data?.message || error);
-    } finally {
-      setLoading(false);
+    if (keyword) {
+      filtered = filtered.filter(
+        (p) =>
+          p.content?.toLowerCase().includes(keyword) ||
+          p.event.title?.toLowerCase().includes(keyword)
+      );
     }
-  };
+    setFilteredPosts(filtered);
+  }, [search, posts]);
 
-  fetchData();
-}, [selectedSort]);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const resPost = await getAllPostFull(selectedSort);
+        const postsData = resPost.data?.posts || [];
+        setPosts(postsData);
+      } catch (error) {
+        console.error(error?.response?.data?.message || error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [selectedSort]);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -104,11 +114,10 @@ const resPost = await getAllPostFull(selectedSort);
     fetchUser();
   }, [navigate]);
 
-
   return (
     <>
       <ScrollToTop />
-      <Header user={user} />
+      <Header />
       <div className="grid grid-cols-1 lg:grid-cols-[20%_60%_20%] text-gray-900 bg-gray-200">
         <div>
           <div className="hidden lg:flex flex-col min-h-screen overflow-y px-2 py-4">
@@ -117,16 +126,16 @@ const resPost = await getAllPostFull(selectedSort);
               className="flex items-center ml-1 mr-1 p-4 rounded gap-2 transition-all hover:bg-gray-300 duration-300 cursor-pointer"
             >
               {user?.avatar ? (
-                          <img
-                            src={user.avatar}
-                            alt="avatar"
-                            className="w-10 h-10 rounded-full object-cover"
-                          />
-                        ) : (
-                          <div className="p-1 text-3xl rounded-full">
-                            <CgProfile />
-                          </div>
-                        )}
+                <img
+                  src={user.avatar}
+                  alt="avatar"
+                  className="w-10 h-10 rounded-full object-cover"
+                />
+              ) : (
+                <div className="p-1 text-3xl rounded-full">
+                  <CgProfile />
+                </div>
+              )}
 
               <div className="text-[18px]">{user?.name || "Huy"} </div>
             </NavLink>
@@ -167,7 +176,7 @@ const resPost = await getAllPostFull(selectedSort);
           </div>
         </div>
         <div className="px-[32px] py-4 min-h-screen">
-          <Outlet context={{ posts, setPosts, user, loading }} />
+          <Outlet context={{ posts: filteredPosts, setPosts, user, loading }} />
           <button
             onClick={handleScrollToTop}
             className="hidden md:block fixed bottom-5 right-5 text-[25px] border rounded-full p-2 z-50 hover:bg-white transition duration-300 cursor-pointer"
@@ -176,7 +185,17 @@ const resPost = await getAllPostFull(selectedSort);
           </button>
         </div>
         <div className="p-4 ">
-          <div className="fixed w-[20%]">
+          <div className="fixed flex flex-col gap-5 w-[20%]">
+              <div className="relative w-full max-w-sm items-center">
+                <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Tìm kiếm"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-[200px] pl-10 bg-white border border-gray-300 rounded-2xl px-3 py-2 focus:ring focus:ring-blue-200 outline-none"
+              />
+            </div>
             <div className="relative " ref={ref}>
               <button
                 onClick={() => handleToggle("category")}

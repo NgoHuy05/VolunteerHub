@@ -61,7 +61,7 @@ const deleteEvent = async (req, res) => {
 const getEventById = async (req, res) => {
   try {
     const { id } = req.params;
-    const event = await Event.findById(id).populate("createBy", "name");
+    const event = await Event.findById(id).populate("createBy", "name avatar");
 
     if (!event)
       return res
@@ -83,7 +83,7 @@ const getEventById = async (req, res) => {
 
 const getAllEvent = async (req, res) => {
   try {
-    const events = await Event.find().populate("createBy", "name");
+    const events = await Event.find().populate("createBy", "name avatar");
     return res.status(200).json({
       success: true,
       message: "Lấy danh sách sự kiện thành công.",

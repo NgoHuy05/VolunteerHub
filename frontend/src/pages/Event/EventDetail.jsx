@@ -202,6 +202,7 @@ const EvenDetail = () => {
     };
     fetchUser();
   }, []);
+console.log(event);
 
 useEffect(() => {
   const fetchData = async () => {
@@ -444,13 +445,13 @@ useEffect(() => {
           <div className="flex flex-col gap-4 p-5 border border-gray-300 rounded-2xl">
             <div className="font-bold text-2xl">Số lượng người</div>
             <div className="flex justify-around items-center">
-              <div className="flex flex-col gap-2 items-center">
+              <div className="flex flex-col gap-2 items-center  text-center">
                 <div className="text-2xl font-bold">
                   {event.numOfPendingUser}
                 </div>
                 <div className="text-[18px]">Người chờ duyệt tham gia</div>
               </div>
-              <div className="flex flex-col gap-2 items-center">
+              <div className="flex flex-col items-center text-center gap-2 ">
                 <div className="text-2xl font-bold">
                   <div>{(event.numOfJoiningUser || 0) + 1}</div>
                 </div>
@@ -458,8 +459,18 @@ useEffect(() => {
               </div>
             </div>
             <div className="font-bold text-2xl">Người tổ chức sự kiện</div>
-            <div className="flex gap-2 text-[18px]">
-              <div>avt</div>
+            <div className="flex items-center gap-2 text-[18px]">
+              {event?.createBy?.avatar ? (
+                      <img
+                        src={event?.createBy?.avatar}
+                        alt="avatar"
+                        className="w-10 h-10 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="p-1 text-3xl rounded-full">
+                        <CgProfile />
+                      </div>
+                    )}
               <div> {event?.createBy?.name} </div>
             </div>
           </div>

@@ -9,12 +9,42 @@ import {
 import { MdCancel } from "react-icons/md";
 import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 import { NavLink, Outlet } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ScrollToTop from "../components/ScrollToTop";
+import { getAllEventCreatedBy } from "../api/event.api";
 
 const ManageLayout = () => {
   const [isOpenYourEvent, setIsOpenYourEvent] = useState(false);
+  const [search, setSearch] = useState("");
+  const [filteredEvents, setFilteredEvents] = useState([]);
+  const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
 
+  useEffect(() => {
+    const fetchEvent = async () => {
+      try {
+        setLoading(true);
+        const res = await getAllEventCreatedBy();
+        setEvents(res.data.events);
+      } catch (error) {
+        console.error(error.response.data.message || error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchEvent();
+  }, []);
+  
+    useEffect(() => {
+      const keyword = search.toLowerCase().trim();
+      if (!keyword) return setFilteredEvents(events);
+  
+      const filtered = events.filter((e) =>
+        e.title?.toLowerCase().includes(keyword)
+      );
+      setFilteredEvents(filtered);
+    }, [search, events]);
+  
   const handleScrollToTop = () => {
     window.scrollTo({
       top: 0,
@@ -25,9 +55,7 @@ const ManageLayout = () => {
   return (
     <>
       <ScrollToTop />
-
       <Header />
-
       <div className="bg-gray-200 min-h-screen">
         <div className="grid grid-cols-1 lg:grid-cols-[25%_70%] text-black gap-4">
           {/* Sidebar desktop */}
@@ -42,11 +70,12 @@ const ManageLayout = () => {
                 <FaSearch className="absolute left-7 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input
                   type="text"
-                  placeholder="Tìm kiếm sự kiện"
+                  placeholder="Tìm kiếm"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
                   className="w-full pl-10 p-2 border rounded-2xl focus:outline-none bg-gray-200"
                 />
               </div>
-
               {/* Tạo sự kiện */}
               <NavLink
                 to="/manage/create"
@@ -93,7 +122,7 @@ const ManageLayout = () => {
               </NavLink>
 
               {/* Sự kiện của bạn */}
-              <div>
+              <NavLink to="/manage/your-event">
                 <div
                   onClick={() => setIsOpenYourEvent(!isOpenYourEvent)}
                   className="flex items-center justify-between ml-1 mr-1 p-4 rounded gap-2 hover:bg-gray-200 duration-300 cursor-pointer"
@@ -160,13 +189,13 @@ const ManageLayout = () => {
                     </NavLink>
                   </div>
                 )}
-              </div>
+              </NavLink>
             </div>
           </div>
 
           {/* 📄 Nội dung chính */}
           <div className="bg-white p-5 m-5 mr-10 rounded-2xl min-h-screen relative">
-            <Outlet />
+            <Outlet context={{events: filteredEvents, loading}} />
             <button
               onClick={handleScrollToTop}
               className="hidden lg:block fixed bottom-5 right-5 text-[25px] border rounded-full p-2 z-50 hover:bg-white transition duration-300 cursor-pointer"
