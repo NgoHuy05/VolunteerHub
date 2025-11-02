@@ -42,7 +42,7 @@ const ManageYourEvent = () => {
                     Không có ảnh
                   </div>
                 )}
-                <div className="flex gap-5 font-bold items-center justify-center">
+                <div className="flex flex-wrap gap-5 font-bold items-center ">
                   <div>{convertDate(event.startDate)}</div>
                   <div>
                     <FaArrowRightLong />

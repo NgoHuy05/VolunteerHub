@@ -123,7 +123,7 @@ const Layout = () => {
           <div className="hidden lg:flex flex-col min-h-screen overflow-y px-2 py-4">
             <NavLink
               to="profile"
-              className="flex items-center ml-1 mr-1 p-4 rounded gap-2 transition-all hover:bg-gray-300 duration-300 cursor-pointer"
+              className="flex flex-wrap items-center ml-1 mr-1 p-4 rounded gap-2 transition-all hover:bg-gray-300 duration-300 cursor-pointer"
             >
               {user?.avatar ? (
                 <img

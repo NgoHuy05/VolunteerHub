@@ -3,7 +3,6 @@ import Home from "../pages/Home";
 
 import Layout from "../layout/Layout";
 import EventList from "../pages/Event/EventList";
-import EvenDetail from "../pages/Event/EventDetail";
 import EventJoining from "../pages/Event/EventJoining";
 import EventPendingJoin from "../pages/Event/EventPendingJoin";
 import EventCompleted from "../pages/Event/EventCompleted";
@@ -27,6 +26,7 @@ import AdminListEvent from "../pages/Admin/AdminListEvent";
 import AdminListUser from "../pages/Admin/AdminListUser";
 import AdminListPost from "../pages/Admin/AdminListPost";
 import ManageCreateEvent from "../pages/Manager/ManageCreateEvent";
+import EventDetail from "../pages/Event/EventDetail";
 
 export const routers = createBrowserRouter([
   {
@@ -49,7 +49,7 @@ export const routers = createBrowserRouter([
       },
       {
         path: "detail/:id",
-        element: <EvenDetail />,
+        element: <EventDetail />,
       },
       {
         path: "joining",

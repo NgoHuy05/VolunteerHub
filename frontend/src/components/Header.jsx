@@ -27,7 +27,7 @@ const Header = () => {
   const [notificationRead, setNotificationRead] = useState([]);
   const [user, setUser] = useState();
   const navigate = useNavigate();
-  
+
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -35,11 +35,10 @@ const Header = () => {
         setUser(res.data.user);
       } catch (error) {
         console.error(error.message || "Chưa login hoặc token hết hạn");
-      } 
+      }
     };
     fetchUser();
   }, [navigate]);
-
 
   useEffect(() => {
     if (!user?._id) return;
@@ -57,8 +56,7 @@ const Header = () => {
     return () => {
       socket.off("connect");
       socket.off("new_notification");
-          socket.disconnect();
-
+      socket.disconnect();
     };
   }, [user?._id]);
 
@@ -150,7 +148,7 @@ const Header = () => {
         </div>
       </Link>
 
-      <div className="hidden md:flex items-center gap-10">
+      <div className="hidden md:flex items-center gap-3">
         {navItems.map((item) => (
           <NavLink
             key={item.path}

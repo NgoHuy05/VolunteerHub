@@ -27,9 +27,13 @@ import {
   getUserEvent,
 } from "../../api/userEvent.api";
 import { convertDate, getPostTimeAgo } from "../../utils";
-import { createLikeNotification, createPostNotification, createUserRegisterNotification } from "../../api/notification.api";
+import {
+  createLikeNotification,
+  createPostNotification,
+  createUserRegisterNotification,
+} from "../../api/notification.api";
 
-const EvenDetail = () => {
+const EventDetail = () => {
   const [isSelectIntrodution, setIsSelectIntrodution] = useState(false);
   const [openCommentModal, setOpenCommentModal] = useState(false);
   const [currentPost, setCurrentPost] = useState(null);
@@ -41,48 +45,77 @@ const EvenDetail = () => {
   const [isJoined, setIsJoined] = useState(false);
   const [isPending, setIsPending] = useState(false);
   const eventId = useParams();
-  const location = useLocation(); 
+  const location = useLocation();
   const { openCommentModal: openFromNotify, postId } = location.state || {};
   const [loading, setLoading] = useState(true);
-  const [bannerPreview, setBannerPreview] = useState([]); 
+  const [bannerPreview, setBannerPreview] = useState([]);
   const [form, setForm] = useState({
     content: "",
-    images: [], 
+    images: [],
   });
   const [openCreateModel, setOpenCreateModel] = useState(false);
+  const [search, setSearch] = useState("");
+  const [filteredPosts, setFilteredPosts] = useState([]);
   useEffect(() => {
-    const fetchEvent = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true);
-        const [resEvent, cntAllUser, cntAllPendingUser, cntAllJoiningUser] =
-          await Promise.all([
-            getEventById(eventId.id),
-            countAllUserByEventId(eventId.id),
-            countPendingUserByEventId(eventId.id),
-            countJoiningUserByEventId(eventId.id),
-          ]);
+        const [
+          resUser,
+          resEvent,
+          cntAllUser,
+          cntPending,
+          cntJoining,
+          resPost,
+          resUserEvent,
+        ] = await Promise.all([
+          getProfileUser(),
+          getEventById(eventId.id),
+          countAllUserByEventId(eventId.id),
+          countPendingUserByEventId(eventId.id),
+          countJoiningUserByEventId(eventId.id),
+          getAllPostFull(),
+          getUserEvent(),
+        ]);
 
+        setUser(resUser.data.user);
+        setPosts(resPost.data?.posts || []);
+        setFilteredPosts(resPost.data?.posts || []);
+        setUserEvents(resUserEvent.data.userEvents);
         setEvent({
           ...resEvent.data.event,
           numOfUser: cntAllUser.data.numOfAllUser,
-          numOfPendingUser: cntAllPendingUser.data.numOfPendingUser,
-          numOfJoiningUser: cntAllJoiningUser.data.numOfJoiningUser,
+          numOfPendingUser: cntPending.data.numOfPendingUser,
+          numOfJoiningUser: cntJoining.data.numOfJoiningUser,
         });
-      } catch (error) {
-        console.error(error?.response?.data?.message || error.message);
+      } catch (err) {
+        console.error(err?.response?.data?.message || err.message);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchEvent();
+    fetchData();
   }, [eventId]);
 
+  useEffect(() => {
+    const keyword = search.toLowerCase().trim();
+    if (!keyword) {
+      setFilteredPosts(posts);
+      return;
+    }
+    const filtered = posts.filter(
+      (p) =>
+        p.content?.toLowerCase().includes(keyword) ||
+        p.event?.title?.toLowerCase().includes(keyword)
+    );
+    setFilteredPosts(filtered);
+  }, [search, posts]);
   useEffect(() => {
     if (openFromNotify && postId) {
       const post = posts.find((p) => p._id === postId);
       if (post) {
-        setCurrentPost(post); 
+        setCurrentPost(post);
         setOpenCommentModal(true);
       }
     }
@@ -96,26 +129,10 @@ const EvenDetail = () => {
     setOpenCreateModel(true);
     setForm({
       content: "",
-      images: [], 
+      images: [],
     });
     setBannerPreview([]);
   };
-
-
-  useEffect(() => {
-    const fetchUserEvents = async () => {
-      try {
-        const res = await getUserEvent();
-        setUserEvents(res.data.userEvents);
-      } catch (error) {
-        console.error(error?.message || "");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchUserEvents();
-  }, []);
-
 
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files || []);
@@ -136,7 +153,7 @@ const EvenDetail = () => {
     return () => {
       bannerPreview.forEach((url) => URL.revokeObjectURL(url));
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -202,29 +219,7 @@ const EvenDetail = () => {
     };
     fetchUser();
   }, []);
-console.log(event);
-
-useEffect(() => {
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-
-      const resUser = await getProfileUser();
-      setUser(resUser.data.user);
-
-      const resPost = await getAllPostFull();
-
-      const postsData = resPost.data?.posts || [];
-      setPosts(postsData);
-    } catch (error) {
-      console.error(error?.response?.data?.message || error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  fetchData();
-}, [eventId]);
+  console.log(event);
 
   //  Mở modal bình luận
   const handleOpenModal = (post) => {
@@ -232,25 +227,28 @@ useEffect(() => {
     setOpenCommentModal(true);
   };
 
- const handleLikePost = async (postId) => {
-  try {
-    const res = await LikeUnLike(postId);
+  const handleLikePost = async (postId) => {
+    try {
+      const res = await LikeUnLike(postId);
 
-    if (res.data.liked) {
-      createLikeNotification(postId); // không cần await, cho chạy song song
+      if (res.data.liked) {
+        createLikeNotification(postId); // không cần await, cho chạy song song
+      }
+
+      setPosts((prev) =>
+        prev.map((p) =>
+          p._id === postId
+            ? { ...p, liked: res.data.liked, likeCount: res.data.likeCount }
+            : p
+        )
+      );
+    } catch (error) {
+      console.error(
+        "Lỗi khi like:",
+        error.response?.data?.message || error.message
+      );
     }
-
-    setPosts((prev) =>
-      prev.map((p) =>
-        p._id === postId
-          ? { ...p, liked: res.data.liked, likeCount: res.data.likeCount }
-          : p
-      )
-    );
-  } catch (error) {
-    console.error("Lỗi khi like:", error.response?.data?.message || error.message);
-  }
-};
+  };
   useEffect(() => {
     if (!userEvents || !event || !user?._id) return;
 
@@ -283,7 +281,7 @@ useEffect(() => {
 
       const res = await createUserEvent(data);
       toast.success(res.data.message || "Đăng ký tham gia thành công!");
-      await createUserRegisterNotification(eventId)
+      await createUserRegisterNotification(eventId);
       const resUserEvent = await getUserEvent();
       setUserEvents(resUserEvent.data.userEvents);
     } catch (error) {
@@ -341,7 +339,7 @@ useEffect(() => {
       {event && (
         <div className="flex flex-col gap-2 ">
           <div className="flex flex-col gap-5">
-            <div className="flex gap-5 items-center text-xl text-red-600">
+            <div className="flex flex-wrap gap-5 items-center text-xl text-red-600">
               <div>{convertDate(event.startDate)}</div>
               <div>
                 <FaArrowRightLong />
@@ -352,7 +350,7 @@ useEffect(() => {
             <div className="text-xl text-gray-500">{event.location}</div>
           </div>
           <div className="h-[1px] bg-gray-300 w-full"></div>
-          <div className="flex justify-between items-center">
+          <div className="flex flex-wrap justify-between items-center">
             <div className="flex gap-2">
               <div
                 onClick={() => setIsSelectIntrodution(true)}
@@ -375,31 +373,34 @@ useEffect(() => {
                 Thảo luận
               </div>
             </div>
-            <div className="flex gap-4 items-center">
+            <div className="flex flex-wrap gap-4 items-center">
               {!isJoined ? (
                 isPending ? (
-                  <div className="px-4 py-2 w-[180px] text-center bg-amber-200 rounded-2xl hover:bg-amber-300 cursor-pointer transition duration-300">
+                  <div className="ml-4 px-4 py-2 w-[220px] text-center bg-amber-200 rounded-2xl hover:bg-amber-300 cursor-pointer transition duration-300">
                     Đang chờ duyệt
                   </div>
                 ) : (
                   <div
                     onClick={() => handleRegisterJoinEvent(eventId.id)}
-                    className="px-4 py-2 w-[180px] text-center bg-gray-200 rounded-2xl hover:bg-gray-300 cursor-pointer transition duration-300"
+                    className="ml-4 px-4 py-2 w-[200px] text-center bg-gray-200 rounded-2xl hover:bg-gray-300 cursor-pointer transition duration-300"
                   >
                     Đăng kí tham gia
                   </div>
                 )
               ) : (
-                <div className="px-4 py-2 w-[180px] text-center bg-green-400 rounded-2xl hover:bg-green-500 cursor-pointer transition duration-300">
+                <div className="ml-4 px-4 py-2 w-[190px] text-center bg-green-400 rounded-2xl hover:bg-green-500 cursor-pointer transition duration-300">
                   Đang tham gia
                 </div>
               )}
 
-              <div className="relative w-[250px] max-w-sm p-4 items-center">
+              {/* Tìm kiếm */}
+              <div className="relative w-[220px] max-w-sm p-4 items-center">
                 <FaSearch className="absolute left-7 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input
                   type="text"
                   placeholder="Tìm kiếm"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
                   className="w-full pl-10 p-2 border rounded-2xl focus:outline-none bg-gray-200"
                 />
               </div>
@@ -461,16 +462,16 @@ useEffect(() => {
             <div className="font-bold text-2xl">Người tổ chức sự kiện</div>
             <div className="flex items-center gap-2 text-[18px]">
               {event?.createBy?.avatar ? (
-                      <img
-                        src={event?.createBy?.avatar}
-                        alt="avatar"
-                        className="w-10 h-10 rounded-full object-cover"
-                      />
-                    ) : (
-                      <div className="p-1 text-3xl rounded-full">
-                        <CgProfile />
-                      </div>
-                    )}
+                <img
+                  src={event?.createBy?.avatar}
+                  alt="avatar"
+                  className="w-10 h-10 rounded-full object-cover"
+                />
+              ) : (
+                <div className="p-1 text-3xl rounded-full">
+                  <CgProfile />
+                </div>
+              )}
               <div> {event?.createBy?.name} </div>
             </div>
           </div>
@@ -570,12 +571,12 @@ useEffect(() => {
 
           <div className="px-4 py-6 min-h-screen flex flex-col gap-6">
             {/* 🔹 Nếu không có bài viết */}
-            {posts.length === 0 ? (
+            {filteredPosts.length === 0 ? (
               <div className="text-center text-gray-600 text-lg font-medium mt-10">
                 Hiện chưa có bài viết nào
               </div>
             ) : (
-              posts.map((post) => (
+              filteredPosts.map((post) => (
                 <div
                   key={post._id}
                   className="flex flex-col bg-white rounded-xl border border-gray-300 shadow-md shadow-gray-200"
@@ -805,4 +806,4 @@ useEffect(() => {
   );
 };
 
-export default EvenDetail;
+export default EventDetail;
