@@ -94,6 +94,7 @@ const resPost = await getAllPostFull(selectedSort);
         const res = await getProfileUser();
         setUser(res.data.user);
       } catch (error) {
+        localStorage.removeItem("token");
         console.error(error.message || "Chưa login hoặc token hết hạn");
         navigate("/login");
       } finally {
