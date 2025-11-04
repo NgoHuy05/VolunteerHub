@@ -25,7 +25,7 @@ const sortCategories = [
 const Layout = () => {
   const [posts, setPosts] = useState([]);
   const [openDropdown, setOpenDropdown] = useState(null);
-  const [selectedSort, setSelectedSort] = useState("Tất cả");
+  const [selectedSort, setSelectedSort] = useState("Mới nhất");
   const [user, setUser] = useState(null);
   const [eventJoining, setEventJoining] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -123,7 +123,7 @@ const Layout = () => {
           <div className="hidden lg:flex flex-col min-h-screen overflow-y px-2 py-4">
             <NavLink
               to="profile"
-              className="flex flex-wrap items-center ml-1 mr-1 p-4 rounded gap-2 transition-all hover:bg-gray-300 duration-300 cursor-pointer"
+              className="flex flex-wrap items-center justify-center ml-1 mr-1 p-2 rounded gap-2 transition-all hover:bg-gray-300 duration-300 cursor-pointer"
             >
               {user?.avatar ? (
                 <img
@@ -137,11 +137,11 @@ const Layout = () => {
                 </div>
               )}
 
-              <div className="text-[18px]">{user?.name || "Huy"} </div>
+              <div className="text-[18px]">{user?.name || "Default name"} </div>
             </NavLink>
             <NavLink
               to="/event/home"
-              className="flex items-center ml-1 mr-1 p-4 rounded gap-2 transition-all hover:bg-gray-300 duration-300 cursor-pointer"
+              className="flex items-center ml-4 mr-1 p-4 rounded gap-2 transition-all hover:bg-gray-300 duration-300 cursor-pointer"
             >
               <div className="text-[25px] p-2">
                 <MdEventNote />
