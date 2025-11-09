@@ -152,6 +152,43 @@ const AdminListUser = () => {
     document.body.style.overflow = editingUser ? "hidden" : "auto";
   }, [editingUser]);
 
+  
+  // ======= ✅ Thêm 2 hàm export =======
+  const exportJSON = () => {
+    const blob = new Blob([JSON.stringify(filteredUsers, null, 2)], {
+      type: "application/json",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "users.json";
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const exportCSV = () => {
+    if (filteredUsers.length === 0) return toast.error("Không có dữ liệu");
+    const headers = Object.keys(filteredUsers[0])
+      .filter((key) => key !== "__v")
+      .join(",");
+    const rows = filteredUsers
+      .map((e) =>
+        Object.values(e)
+          .map((v) => `"${String(v).replace(/"/g, '""')}"`)
+          .join(",")
+      )
+      .join("\n");
+
+    const csv = headers + "\n" + rows;
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "users.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-[300px]">
@@ -184,6 +221,21 @@ const AdminListUser = () => {
           <option value="manager">Manager</option>
           <option value="user">User</option>
         </select>
+         {/* ✅ Nút xuất file */}
+        <div className="ml-auto flex gap-2">
+          <button
+            onClick={exportJSON}
+            className="px-3 py-2 rounded-lg bg-blue-500 text-white text-sm font-semibold hover:bg-blue-600 transition"
+          >
+            Xuất JSON
+          </button>
+          <button
+            onClick={exportCSV}
+            className="px-3 py-2 rounded-lg bg-green-500 text-white text-sm font-semibold hover:bg-green-600 transition"
+          >
+            Xuất CSV
+          </button>
+        </div>
       </div>
 
       <div className="overflow-x-auto bg-white rounded-xl shadow-md">

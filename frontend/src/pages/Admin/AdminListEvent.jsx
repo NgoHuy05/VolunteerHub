@@ -155,6 +155,44 @@ useEffect(() => {
   
   const totalPages = Math.ceil(filteredEvents.length / eventsPerPage);
   
+
+  
+  // ======= ✅ Thêm 2 hàm export =======
+  const exportJSON = () => {
+    const blob = new Blob([JSON.stringify(filteredEvents, null, 2)], {
+      type: "application/json",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "events.json";
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const exportCSV = () => {
+    if (filteredEvents.length === 0) return toast.error("Không có dữ liệu");
+    const headers = Object.keys(filteredEvents[0])
+      .filter((key) => key !== "__v")
+      .join(",");
+    const rows = filteredEvents
+      .map((e) =>
+        Object.values(e)
+          .map((v) => `"${String(v).replace(/"/g, '""')}"`)
+          .join(",")
+      )
+      .join("\n");
+
+    const csv = headers + "\n" + rows;
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "events.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-[300px]">
@@ -186,6 +224,22 @@ useEffect(() => {
           <option value="pending">Đang chờ</option>
           <option value="rejected">Từ chối</option>
         </select>
+
+         {/* ✅ Nút xuất file */}
+        <div className="ml-auto flex gap-2">
+          <button
+            onClick={exportJSON}
+            className="px-3 py-2 rounded-lg bg-blue-500 text-white text-sm font-semibold hover:bg-blue-600 transition"
+          >
+            Xuất JSON
+          </button>
+          <button
+            onClick={exportCSV}
+            className="px-3 py-2 rounded-lg bg-green-500 text-white text-sm font-semibold hover:bg-green-600 transition"
+          >
+            Xuất CSV
+          </button>
+        </div>
       </div>
       {currentEvents.length === 0 ? (
         <div className="text-center text-gray-500">Không có sự kiện nào</div>

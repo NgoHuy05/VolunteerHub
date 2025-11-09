@@ -63,12 +63,13 @@ const AdminDashboard = () => {
       const latestPosts = posts
         .slice(-3)
         .reverse()
-        .map(
-          (p) =>
-            `📰 Bài viết "${p.content}" vừa được đăng ${getTimeAgo(
-              p.createdAt
-            )}.`
-        );
+      .map((p) => {
+        const shortContent =
+          p.content.length > 50 ? p.content.slice(0, 50) + "..." : p.content;
+        return `📰 Bài viết "${shortContent}" vừa được đăng ${getTimeAgo(
+          p.createdAt
+        )}.`;
+      });
       const latestUsers = users
         .slice(-3)
         .reverse()
