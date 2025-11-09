@@ -148,7 +148,7 @@ const Profile = () => {
         <div className="bg-white flex flex-col gap-5 p-5">
           <div
             onClick={() => setIsSelectAccount(true)}
-            className={`flex gap-2 items-center w-full p-2 rounded-2xl cursor-pointer ${
+            className={`flex flex-wrap gap-2 items-center w-full p-2 rounded-2xl cursor-pointer ${
               isSelectAccount
                 ? "bg-sky-400 text-white"
                 : "hover:bg-gray-200 transition duration-300"
@@ -160,7 +160,7 @@ const Profile = () => {
 
           <div
             onClick={() => setIsSelectAccount(false)}
-            className={`flex gap-2 items-center w-full p-2 rounded-2xl cursor-pointer ${
+            className={`flex flex-wrap gap-2 items-center w-full p-2 rounded-2xl cursor-pointer ${
               !isSelectAccount
                 ? "bg-sky-400 text-white"
                 : "hover:bg-gray-200 transition duration-300"

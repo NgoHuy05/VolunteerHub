@@ -74,9 +74,14 @@ const ManagePost = () => {
   return (
     <div className="min-h-screen p-6 bg-gray-50">
       {events.length === 0 ? (
+        <>
+        <h2 className="text-2xl font-bold mb-6 text-gray-800 border-b pb-3">
+            📝 Danh sách bài viết đang chờ duyệt
+          </h2>
         <div className="text-center text-gray-600 text-lg font-medium mt-10">
           ✅ Tất cả bài viết đã được duyệt
         </div>
+        </>
       ) : (
         <>
           <h2 className="text-2xl font-bold mb-6 text-gray-800 border-b pb-3">

@@ -25,6 +25,7 @@ import {
   countPendingUserByEventId,
   createUserEvent,
   deleteUserEvent,
+  getAllUsersByEventId,
   getUserEvent,
 } from "../../api/userEvent.api";
 import { convertDate, getPostTimeAgo } from "../../utils";
@@ -42,6 +43,8 @@ const EventDetail = () => {
   const [posts, setPosts] = useState([]);
   const [user, setUser] = useState(null);
   const [event, setEvent] = useState({});
+  const [participants, setParticipants] = useState([]);
+const [showParticipants, setShowParticipants] = useState(false);
   const [userEvents, setUserEvents] = useState([]);
 const [isJoined, setIsJoined] = useState(false);
 const [isPending, setIsPending] = useState(false);
@@ -59,6 +62,16 @@ const [isCompleted, setIsCompleted] = useState(false);
   const [openCreateModel, setOpenCreateModel] = useState(false);
   const [search, setSearch] = useState("");
   const [filteredPosts, setFilteredPosts] = useState([]); 
+
+  const fetchParticipants = async () => {
+  try {
+    const res = await getAllUsersByEventId(eventId.id); 
+    setParticipants(res.data.users);
+    setShowParticipants(true);
+  } catch (err) {
+    toast.error(err?.response?.data?.message || err.message);
+  }
+};
 
 
   useEffect(() => {
@@ -269,7 +282,7 @@ useEffect(() => {
       const data = {
         userId: user._id,
         eventId,
-        role: "user",
+        role: user.role,
         status: "pending",
         startDay: new Date(),
       };
@@ -504,6 +517,46 @@ const handleOutEvent = async (eventId) => {
                 <div className="text-[18px]">Người đang tham gia </div>
               </div>
             </div>
+            {(user?._id === event?.createBy?._id || user?.role === "admin") && (
+  <button
+    onClick={fetchParticipants}
+    className="px-4 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600"
+  >
+    Xem danh sách người tham gia
+  </button>
+)}
+{showParticipants && (
+  <div className="fixed inset-0 bg-[rgba(0,0,0,0.3)] flex justify-center items-center z-50">
+    <div className="bg-white rounded-xl w-96 p-6">
+      <h2 className="font-bold text-xl mb-4">Người tham gia</h2>
+      <ul className="flex flex-col gap-3 max-h-80 overflow-y-auto">
+        {participants && participants.length > 0 ? (
+          participants.map((p) => (
+            <li key={p._id} className="flex items-center gap-3">
+              {p.userId.avatar ? (
+                <img src={p.userId.avatar} className="w-10 h-10 rounded-full object-cover" />
+              ) : (
+                <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
+                  {p.userId.name[0]}
+                </div>
+              )}
+              <span>{p.userId.name}</span>
+            </li>
+          ))
+        ) : (
+          <li className="text-gray-500">Chưa có người tham gia</li>
+        )}
+      </ul>
+      <button
+        onClick={() => setShowParticipants(false)}
+        className="mt-4 px-4 py-2 bg-gray-200 rounded-xl hover:bg-gray-300"
+      >
+        Đóng
+      </button>
+    </div>
+  </div>
+)}
+
             <div className="font-bold text-2xl">Người tổ chức sự kiện</div>
             <div className="flex items-center gap-2 text-[18px]">
               {event?.createBy?.avatar ? (

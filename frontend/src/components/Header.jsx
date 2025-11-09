@@ -226,8 +226,8 @@ const Header = () => {
 
             {(user.role === "manager" || user.role === "admin") && (
               <NavLink
-                key="/manage/your-event"
-                to="/manage/your-event"
+                key="/manage/approved"
+                to="/manage/approved"
                 onClick={() => setOpenDropdown(null)}
                 className="block py-2 px-3 hover:bg-gray-100 rounded"
               >

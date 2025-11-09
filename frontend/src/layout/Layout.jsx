@@ -16,10 +16,11 @@ import { CgProfile } from "react-icons/cg";
 import { FaSearch } from "react-icons/fa";
 
 const sortCategories = [
-  { id: 1, title: "Tất cả" },
-  { id: 2, title: "Mới nhất" },
-  { id: 3, title: "Cũ nhất" },
-  { id: 4, title: "Top" },
+  { id: 1, title: "Đang tham gia" },
+  { id: 2, title: "Tất cả" },
+  { id: 3, title: "Mới nhất" },
+  { id: 4, title: "Cũ nhất" },
+  { id: 5, title: "Top" },
 ];
 
 const Layout = () => {
@@ -57,7 +58,10 @@ const Layout = () => {
       try {
         setLoading(true);
         const resEventJoining = await getEventByUserIdAndStatus("joining");
-        setEventJoining(resEventJoining?.data?.events);
+        const eventsWithId = resEventJoining?.data?.events?.filter(
+          (ev) => ev._id
+        );
+        setEventJoining(eventsWithId);
       } catch (error) {
         console.error(error?.response?.data?.message || error.message);
       } finally {
@@ -79,6 +83,7 @@ const Layout = () => {
     }
     setFilteredPosts(filtered);
   }, [search, posts]);
+  console.log(eventJoining);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -118,7 +123,7 @@ const Layout = () => {
     <>
       <ScrollToTop />
       <Header />
-      <div className="grid grid-cols-1 lg:grid-cols-[20%_60%_20%] text-gray-900 bg-gray-200">
+      <div className="grid grid-cols-1 lg:grid-cols-[20%_70%] text-gray-900 bg-gray-200">
         <div>
           <div className="hidden lg:flex flex-col min-h-screen overflow-y px-2 py-4">
             <NavLink
@@ -151,56 +156,19 @@ const Layout = () => {
               <div className="text-[18px]">Sự kiện</div>
             </NavLink>
 
-            <div className="w-full h-[1px] bg-gray-500 mt-5"></div>
-            <div className="mt-5 mb-5">Sự kiện đang tham gia</div>
-            <div className="flex flex-col gap-2">
-              {eventJoining
-                .filter((ev) => ev)
-                .map((ev) => (
-                  <NavLink
-                    key={ev._id}
-                    to={`/event/detail/${ev._id}`}
-                    className="flex items-center gap-3 p-3 rounded-lg bg-white shadow-sm hover:shadow-md hover:bg-gray-100 transition-all duration-300 "
-                  >
-                    <div
-                      style={{
-                        backgroundImage: `url(${
-                          ev.banner ? ev.banner : "/default-banner.jpg"
-                        })`,
-                      }}
-                      className="size-[60px] bg-cover bg-center rounded-md flex-shrink-0"
-                    />
-
-                    <h3 className="text-base font-medium text-gray-800">
-                      {ev.title}
-                    </h3>
-                  </NavLink>
-                ))}
+            <div className="flex w-full justify-center items-center pl-5 pr-5 mt-5">
+              <div className="relative flex-1">
+                <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Tìm kiếm"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="w-full bg-white pl-10 pr-3 py-2 rounded-2xl border border-gray-300 focus:ring focus:ring-blue-200 outline-none"
+                />
+              </div>
             </div>
-          </div>
-        </div>
-        <div className="px-[32px] py-4 min-h-screen">
-          <Outlet context={{ posts: filteredPosts, setPosts, user, loading }} />
-          <button
-            onClick={handleScrollToTop}
-            className="hidden md:block fixed bottom-5 right-5 text-[25px] border rounded-full p-2 z-50 hover:bg-white transition duration-300 cursor-pointer"
-          >
-            <FaArrowUp />
-          </button>
-        </div>
-        <div className="p-4 ">
-          <div className="fixed flex flex-col gap-5 w-[20%]">
-            <div className="relative w-full max-w-sm items-center">
-              <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Tìm kiếm"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-[200px] pl-10 bg-white border border-gray-300 rounded-2xl px-3 py-2 focus:ring focus:ring-blue-200 outline-none"
-              />
-            </div>
-            <div className="relative " ref={ref}>
+            <div className="relative flex pl-5 mt-5" ref={ref}>
               <button
                 onClick={() => handleToggle("category")}
                 className="flex p-2 gap-2 items-center text-[18px] bg-white shadow-lg shadow-gray-300  rounded-2xl cursor-pointer transition focus:bg-amber-200 hover:bg-gray-300 duration-300"
@@ -233,7 +201,39 @@ const Layout = () => {
                 </div>
               )}
             </div>
+            <div className="w-full h-[1px] bg-gray-500 mt-5"></div>
+            <div className="mt-5 mb-5">Sự kiện đang tham gia</div>
+            <div className="flex flex-col gap-2">
+              {eventJoining.map((ev, idx) => (
+                <NavLink
+                  key={`${ev._id}-${idx}`} // thêm index để chắc chắn không trùng
+                  to={`/event/detail/${ev._id}`}
+                  className="flex items-center gap-3 p-3 rounded-lg bg-white shadow-sm hover:shadow-md hover:bg-gray-100 transition-all duration-300 "
+                >
+                  <div
+                    style={{
+                      backgroundImage: `url(${
+                        ev.banner || "/default-banner.jpg"
+                      })`,
+                    }}
+                    className="size-[60px] bg-cover bg-center rounded-md flex-shrink-0"
+                  />
+                  <h3 className="text-base font-medium text-gray-800">
+                    {ev.title}
+                  </h3>
+                </NavLink>
+              ))}
+            </div>
           </div>
+        </div>
+        <div className="px-[32px] py-4 min-h-screen">
+          <Outlet context={{ posts: filteredPosts, setPosts, user, loading }} />
+          <button
+            onClick={handleScrollToTop}
+            className="hidden md:block fixed bottom-5 right-5 text-[25px] border rounded-full p-2 z-50 hover:bg-white transition duration-300 cursor-pointer"
+          >
+            <FaArrowUp />
+          </button>
         </div>
       </div>
     </>

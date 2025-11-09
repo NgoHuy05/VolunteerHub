@@ -121,7 +121,7 @@ const EventList = () => {
       const data = {
         userId: user._id,
         eventId,
-        role: "user",
+        role: user.role,
         status: "pending",
         startDay: new Date(),
       };

@@ -2,6 +2,7 @@ const Post = require("../models/Post.model");
 const Like = require("../models/Like.model");
 const Comment = require("../models/Comment.model");
 const Event = require("../models/Event.model");
+const UserEvent = require("../models/UserEvent.model")
 const createPost = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -13,10 +14,10 @@ const createPost = async (req, res) => {
       req.files && req.files.length > 0
         ? req.files.map(file => file.path)
         : Array.isArray(bodyImages)
-        ? bodyImages
-        : bodyImages
-        ? [bodyImages]
-        : [];
+          ? bodyImages
+          : bodyImages
+            ? [bodyImages]
+            : [];
 
     const post = await Post.create({
       eventId,
@@ -38,6 +39,7 @@ const createPost = async (req, res) => {
     });
   }
 };
+
 const getAllPostFull = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -45,8 +47,23 @@ const getAllPostFull = async (req, res) => {
 
     let posts = [];
 
+    if (sort === "Đang tham gia") {
+      // Lấy danh sách event user đang tham gia
+      const joiningEvents = await UserEvent.find({ userId, status: "joining" })
+        .select("eventId")
+        .lean();
+      const joiningEventIds = joiningEvents.map((e) => e.eventId);
+
+      // Lấy post trực tiếp theo các event đang tham gia
+      posts = await Post.find({ status: "approved", eventId: { $in: joiningEventIds } })
+        .populate("userId", "name avatar")
+        .sort({ approvedAt: -1 }) // sort mặc định theo mới nhất
+        .lean();
+    }
+
+
     // 1️⃣ Nếu là “Tất cả” → random bằng $sample
-    if (sort === "Tất cả" || !sort) {
+    else if (sort === "Tất cả" || !sort) {
       posts = await Post.aggregate([
         { $match: { status: "approved" } },
         { $sample: { size: 20 } }, // số lượng bài random mỗi lần
@@ -259,13 +276,14 @@ const getPostByIdEventApproved = async (req, res) => {
 
 const getEventApprovedWithPostByIdEventPending = async (req, res) => {
   try {
-    const events = await Event.find({ status: "approved" });
+    // Chỉ lấy event approved do chính user tạo
+    const events = await Event.find({ status: "approved", createBy: req.user.id });
 
     const eventsWithAllPosts = await Promise.all(
       events.map(async (event) => {
         const posts = await Post.find({
           eventId: event._id,
-          status: "pending",
+          status: "pending", // Chỉ lấy bài chưa duyệt
         }).populate("userId", "name avatar");
 
         return {
@@ -275,17 +293,19 @@ const getEventApprovedWithPostByIdEventPending = async (req, res) => {
       })
     );
 
+    // Loại bỏ event không còn post pending
+    const filteredEvents = eventsWithAllPosts.filter(event => event.posts.length > 0);
+
     return res.status(200).json({
       success: true,
-      message: "Lấy danh sách bài đăng đang chờ duyệt theo eventId thành công",
-      events: eventsWithAllPosts,
+      message: "Lấy danh sách bài đăng đang chờ duyệt theo event do bạn tạo thành công",
+      events: filteredEvents,
     });
   } catch (error) {
-    return res
-      .status(500)
-      .json({ success: false, message: error.message });
+    return res.status(500).json({ success: false, message: error.message });
   }
 };
+
 
 const getPostByIdUser = async (req, res) => {
   try {
@@ -372,7 +392,7 @@ const filterPost = async (req, res) => {
 
 module.exports = {
   createPost,
-  getAllPostFull, 
+  getAllPostFull,
   updatePost,
   deletePost,
   getPostById,

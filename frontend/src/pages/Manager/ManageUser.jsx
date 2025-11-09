@@ -68,9 +68,14 @@ const ManageUser = () => {
   return (
     <div className="min-h-screen p-6 bg-gray-50">
       {userEvents.length === 0 ? (
+        <>
+        <h2 className="text-2xl font-bold mb-6 text-gray-800 border-b pb-3">
+            Danh sách người dùng đang chờ duyệt
+          </h2>
         <div className="text-center text-gray-600 text-lg font-medium mt-10">
           Tất cả người dùng đã được duyệt
         </div>
+        </>
       ) : (
         <>
           <h2 className="text-2xl font-bold mb-6 text-gray-800 border-b pb-3">

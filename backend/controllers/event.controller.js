@@ -25,6 +25,14 @@ const createEvent = async (req, res) => {
       status: "pending",
     });
 
+    await UserEvent.create({
+      userId: req.user.id,
+      eventId: event._id,
+      role: req.user.role,
+      status: "joining",
+      startDay: new Date(),
+    });
+
     res.status(201).json({
       success: true,
       message: "Tạo sự kiện thành công, vui lòng chờ duyệt",
