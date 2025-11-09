@@ -23,7 +23,7 @@ const EventRejected = () => {
     fetchEvent();
   }, []);
 const handleWatchDetail = (id) => {
-  navigate(`/event/detail/${id}`, { state: { from: "rejected" } });
+  navigate(`/event/detail/${id}`);
 };
 
   if (loading) {

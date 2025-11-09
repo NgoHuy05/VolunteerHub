@@ -1,5 +1,6 @@
 const UserEvent = require("../models/UserEvent.model");
 const Event = require("../models/Event.model");
+
 const createUserEvent = async (req, res) => {
   try {
     const { userId, eventId, role, status } = req.body;
@@ -29,6 +30,40 @@ const createUserEvent = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: error.message,
+    });
+  }
+};
+
+const deleteUserEvent = async (req, res) => {
+  try {
+    const { userId, eventId } = req.body;
+
+    if (!userId || !eventId) {
+      return res.status(400).json({
+        success: false,
+        message: "Thiếu userId hoặc eventId!",
+      });
+    }
+
+    const userEvent = await UserEvent.findOneAndDelete({ userId, eventId });
+
+    if (!userEvent) {
+      return res.status(404).json({
+        success: false,
+        message: "Không tìm thấy đăng ký sự kiện để hủy!",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Hủy đăng ký tham gia sự kiện thành công!",
+      userEvent,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      success: false,
+      message: "Lỗi server khi hủy đăng ký!",
     });
   }
 };
@@ -271,6 +306,7 @@ const approveUserJoinEvent = async (req, res) => {
 
 module.exports = {
   createUserEvent,
+  deleteUserEvent,
   getEventByUserIdAndStatus,
   countAllUserByEventId,
   countPendingUserByEventId,

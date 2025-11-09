@@ -8,6 +8,9 @@ export const approveUserJoinEvent = (id, status) => {
 export const createUserEvent = (data) => {
     return axios.post(`${BASE_URL}/create`, data, getAuthHeader());
 }
+export const deleteUserEvent = (data) => {
+    return axios.post(`${BASE_URL}/delete`, data, getAuthHeader());
+}
 export const countAllUserByEventId = (id) => {
     return axios.get(`${BASE_URL}/all/${id}`, getAuthHeader());
 }

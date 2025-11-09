@@ -24,7 +24,7 @@ const EventCompleted = () => {
   }, []);
 
 const handleWatchDetail = (id) => {
-  navigate(`/event/detail/${id}`, { state: { from: "completed" } });
+  navigate(`/event/detail/${id}`);
 };
 
 

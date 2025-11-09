@@ -15,4 +15,6 @@ router.get("/pending-user", authMiddleware, controllers.getPendingUsersWithAppro
 router.post("/create", authMiddleware, controllers.createUserEvent);
 router.post("/approve/:id", authMiddleware, controllers.approveUserJoinEvent);
 
+router.post("/delete", authMiddleware, controllers.deleteUserEvent);
+
 module.exports = router;

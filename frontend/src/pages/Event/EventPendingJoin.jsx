@@ -25,7 +25,7 @@ const EventPendingJoin = () => {
   }, []);
 
 const handleWatchDetail = (id) => {
-  navigate(`/event/detail/${id}`, { state: { from: "pending" } });
+  navigate(`/event/detail/${id}`);
 };
 console.log(events);
 

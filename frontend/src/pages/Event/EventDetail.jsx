@@ -24,6 +24,7 @@ import {
   countJoiningUserByEventId,
   countPendingUserByEventId,
   createUserEvent,
+  deleteUserEvent,
   getUserEvent,
 } from "../../api/userEvent.api";
 import { convertDate, getPostTimeAgo } from "../../utils";
@@ -42,7 +43,10 @@ const EventDetail = () => {
   const [user, setUser] = useState(null);
   const [event, setEvent] = useState({});
   const [userEvents, setUserEvents] = useState([]);
-  const [isJoined, setIsJoined] = useState(false);
+const [isJoined, setIsJoined] = useState(false);
+const [isPending, setIsPending] = useState(false);
+const [isRejected, setIsRejected] = useState(false);
+const [isCompleted, setIsCompleted] = useState(false);
   const eventId = useParams();
   const location = useLocation();
   const { openCommentModal: openFromNotify, postId } = location.state || {};
@@ -54,9 +58,8 @@ const EventDetail = () => {
   });
   const [openCreateModel, setOpenCreateModel] = useState(false);
   const [search, setSearch] = useState("");
-  const [filteredPosts, setFilteredPosts] = useState([]);
+  const [filteredPosts, setFilteredPosts] = useState([]); 
 
-const fromStatus = location?.state?.from; // 'completed' | 'rejected' | 'pending'
 
   useEffect(() => {
     const fetchData = async () => {
@@ -246,18 +249,18 @@ const fromStatus = location?.state?.from; // 'completed' | 'rejected' | 'pending
       );
     }
   };
-  useEffect(() => {
-    if (!userEvents || !event || !user?._id) return;
+useEffect(() => {
+  if (!userEvents || !event || !user?._id) return;
 
-    const joined =
-      event?.createBy?._id === user._id ||
-      userEvents.some(
-        (u) =>
-          u.eventId?._id?.toString() === event._id && u.status === "joining"
-      );
+  const eventStatus = userEvents.find(
+    (u) => u.eventId?._id === event._id
+  )?.status;
 
-    setIsJoined(joined);
-  }, [userEvents, event, user]);
+  setIsPending(eventStatus === "pending");
+  setIsJoined(eventStatus === "joining" || eventStatus === "accepted");
+  setIsRejected(eventStatus === "rejected");
+  setIsCompleted(eventStatus === "completed");
+}, [userEvents, event, user]);
 
   const handleRegisterJoinEvent = async (eventId) => {
     try {
@@ -280,6 +283,41 @@ const fromStatus = location?.state?.from; // 'completed' | 'rejected' | 'pending
       toast.error(error?.response?.data?.message || "Lỗi khi đăng ký sự kiện");
     }
   };
+
+   
+const handleOutEvent = async (eventId) => {
+  if (!user) return toast.error("Bạn cần đăng nhập trước khi rời sự kiện!");
+
+  toast((t) => (
+    <span>
+      Rời khỏi sự kiện này?
+      <div className="mt-2 flex gap-2">
+        <button
+          className="bg-red-400 text-white px-3 py-1 rounded"
+          onClick={async () => {
+            try {
+              const res = await deleteUserEvent({ userId: user._id, eventId });
+              toast.success(res.data.message || "Đã rời sự kiện!");
+              const resUserEvent = await getUserEvent();
+              setUserEvents(resUserEvent.data.userEvents);
+            } catch (error) {
+              toast.error(error?.response?.data?.message || "Lỗi khi rời sự kiện!");
+            }
+            toast.dismiss(t.id);
+          }}
+        >
+          Có
+        </button>
+        <button
+          className="bg-gray-300 px-3 py-1 rounded"
+          onClick={() => toast.dismiss(t.id)}
+        >
+          Hủy
+        </button>
+      </div>
+    </span>
+  ));
+};
 
   const handleSubmitComment = async (e, postId) => {
     e.preventDefault();
@@ -366,30 +404,39 @@ const fromStatus = location?.state?.from; // 'completed' | 'rejected' | 'pending
               </div>
             </div>
             <div className="flex flex-wrap gap-4 items-center">
- {fromStatus === "completed" ? (
-  <div className="ml-4 px-4 py-2 w-[200px] text-center bg-blue-300 rounded-2xl cursor-default">
-    Đã hoàn thành
-  </div>
-) : fromStatus === "rejected" ? (
-  <div className="ml-4 px-4 py-2 w-[220px] text-center bg-red-300 rounded-2xl cursor-default">
-    Bị từ chối tham gia
-  </div>
-) : fromStatus === "pending" ? (
+{isPending ? (
   <div className="ml-4 px-4 py-2 w-[220px] text-center bg-amber-200 rounded-2xl cursor-default">
     Đang chờ duyệt
   </div>
-) : !isJoined ? (
+) : isRejected ? (
+  <div className="ml-4 px-4 py-2 w-[220px] text-center bg-red-300 rounded-2xl cursor-default">
+    Bị từ chối
+  </div>
+) : isCompleted ? (
+  <div className="ml-4 px-4 py-2 w-[220px] text-center bg-blue-300 rounded-2xl cursor-default">
+    Đã hoàn thành
+  </div>
+) : isJoined ? (
+  <div className="flex gap-2">
+    <div className="ml-4 px-4 py-2 w-[190px] text-center bg-green-400 rounded-2xl cursor-default">
+      Đang tham gia
+    </div>
+    <button
+      onClick={() => handleOutEvent(event._id)}
+      className="px-4 py-2 bg-red-400 text-white rounded-2xl hover:bg-red-500 transition duration-300"
+    >
+      Rời sự kiện
+    </button>
+  </div>
+) : (
   <div
-    onClick={() => handleRegisterJoinEvent(eventId.id)}
+    onClick={() => handleRegisterJoinEvent(event._id)}
     className="ml-4 px-4 py-2 w-[200px] text-center bg-gray-200 rounded-2xl hover:bg-gray-300 cursor-pointer transition duration-300"
   >
     Đăng ký tham gia
   </div>
-) : (
-  <div className="ml-4 px-4 py-2 w-[190px] text-center bg-green-400 rounded-2xl hover:bg-green-500 cursor-pointer transition duration-300">
-    Đang tham gia
-  </div>
 )}
+
 
               {/* Tìm kiếm */}
               <div className="relative w-[220px] max-w-sm p-4 items-center">
