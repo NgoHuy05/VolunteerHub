@@ -60,10 +60,9 @@ const deleteUser = async (req, res) => {
 const updateUser = async (req, res) => {
   try {
     const { name, location, age, gender } = req.body;
-    const avatar = req.file?.path || "";
     const user = await User.findByIdAndUpdate(
       req.user.id,
-      { name, location, age, gender, avatar },
+      { name, location, age, gender },
       { new: true }
     ).select("-password");
 

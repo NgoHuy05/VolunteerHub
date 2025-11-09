@@ -14,11 +14,10 @@ import toast from "react-hot-toast";
 import { getApprovedEventsUserNotJoined } from "../api/event.api";
 
 const EventLayout = () => {
-  const [isOpenYourEvent, setIsOpenYourEvent] = useState(false);
+  const [isOpenYourEvent, setIsOpenYourEvent] = useState(true);
   const [search, setSearch] = useState("");
   const [filteredEvents, setFilteredEvents] = useState([]);
   const [events, setEvents] = useState([]);
-
   const fetchEventApproved = async () => {
     try {
       const res = await getApprovedEventsUserNotJoined();
@@ -88,7 +87,8 @@ const EventLayout = () => {
               </NavLink>
 
               {/* Sự kiện của bạn */}
-              <NavLink to="/event/your-event">
+              <div className="cursor-pointer">
+                {/* Thanh tiêu đề (chỉ toggle menu) */}
                 <div
                   onClick={() => setIsOpenYourEvent(!isOpenYourEvent)}
                   className="flex items-center justify-between ml-1 mr-1 p-4 rounded gap-2 hover:bg-gray-200 duration-300 cursor-pointer"
@@ -104,6 +104,7 @@ const EventLayout = () => {
                   )}
                 </div>
 
+                {/* Danh sách con */}
                 {isOpenYourEvent && (
                   <div className="flex flex-col">
                     <NavLink
@@ -155,7 +156,7 @@ const EventLayout = () => {
                     </NavLink>
                   </div>
                 )}
-              </NavLink>
+              </div>
             </div>
           </div>
 

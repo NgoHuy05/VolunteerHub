@@ -25,7 +25,7 @@ const sortCategories = [
 const Layout = () => {
   const [posts, setPosts] = useState([]);
   const [openDropdown, setOpenDropdown] = useState(null);
-  const [selectedSort, setSelectedSort] = useState("Mới nhất");
+  const [selectedSort, setSelectedSort] = useState("Tất cả");
   const [user, setUser] = useState(null);
   const [eventJoining, setEventJoining] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -123,13 +123,13 @@ const Layout = () => {
           <div className="hidden lg:flex flex-col min-h-screen overflow-y px-2 py-4">
             <NavLink
               to="profile"
-              className="flex flex-wrap items-center justify-center ml-1 mr-1 p-2 rounded gap-2 transition-all hover:bg-gray-300 duration-300 cursor-pointer"
+              className="flex flex-wrap items-center  ml-4 mr-1 p-2 rounded gap-2 transition-all hover:bg-gray-300 duration-300 cursor-pointer"
             >
               {user?.avatar ? (
                 <img
                   src={user.avatar}
                   alt="avatar"
-                  className="w-10 h-10 rounded-full object-cover"
+                  className="w-10 h-10 rounded-full object-cover "
                 />
               ) : (
                 <div className="p-1 text-3xl rounded-full">
@@ -137,13 +137,15 @@ const Layout = () => {
                 </div>
               )}
 
-              <div className="text-[18px]">{user?.name || "Default name"} </div>
+              <div className="text-[18px] ">
+                {user?.name || "Default name"}{" "}
+              </div>
             </NavLink>
             <NavLink
               to="/event/home"
               className="flex items-center ml-4 mr-1 p-4 rounded gap-2 transition-all hover:bg-gray-300 duration-300 cursor-pointer"
             >
-              <div className="text-[25px] p-2">
+              <div className="text-[25px] ">
                 <MdEventNote />
               </div>
               <div className="text-[18px]">Sự kiện</div>
@@ -152,26 +154,28 @@ const Layout = () => {
             <div className="w-full h-[1px] bg-gray-500 mt-5"></div>
             <div className="mt-5 mb-5">Sự kiện đang tham gia</div>
             <div className="flex flex-col gap-2">
-              {eventJoining.map((ev) => (
-                <NavLink
-                  key={ev._id}
-                  to={`/event/detail/${ev._id}`}
-                  className="flex items-center gap-3 p-3 rounded-lg bg-white shadow-sm hover:shadow-md hover:bg-gray-100 transition-all duration-300 "
-                >
-                  <div
-                    style={{
-                      backgroundImage: `url(${
-                        ev.banner ? ev.banner : "/default-banner.jpg"
-                      })`,
-                    }}
-                    className="size-[60px] bg-cover bg-center rounded-md flex-shrink-0"
-                  />
+              {eventJoining
+                .filter((ev) => ev)
+                .map((ev) => (
+                  <NavLink
+                    key={ev._id}
+                    to={`/event/detail/${ev._id}`}
+                    className="flex items-center gap-3 p-3 rounded-lg bg-white shadow-sm hover:shadow-md hover:bg-gray-100 transition-all duration-300 "
+                  >
+                    <div
+                      style={{
+                        backgroundImage: `url(${
+                          ev.banner ? ev.banner : "/default-banner.jpg"
+                        })`,
+                      }}
+                      className="size-[60px] bg-cover bg-center rounded-md flex-shrink-0"
+                    />
 
-                  <h3 className="text-base font-medium text-gray-800">
-                    {ev.title}
-                  </h3>
-                </NavLink>
-              ))}
+                    <h3 className="text-base font-medium text-gray-800">
+                      {ev.title}
+                    </h3>
+                  </NavLink>
+                ))}
             </div>
           </div>
         </div>
@@ -186,8 +190,8 @@ const Layout = () => {
         </div>
         <div className="p-4 ">
           <div className="fixed flex flex-col gap-5 w-[20%]">
-              <div className="relative w-full max-w-sm items-center">
-                <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <div className="relative w-full max-w-sm items-center">
+              <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
               <input
                 type="text"
                 placeholder="Tìm kiếm"

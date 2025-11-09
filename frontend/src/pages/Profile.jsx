@@ -46,7 +46,6 @@ const Profile = () => {
           age: data.age || "",
           gender: data.gender || "none",
           email: data.email || "",
-          avatar: data.avatar || "",
         });
       } catch (error) {
         toast.error(
@@ -75,11 +74,9 @@ const Profile = () => {
 
     updateUserAvatar(formData)
       .then((res) => {
-        setUser(res.data.user);
-        setForm((prev) => ({ ...prev, avatar: res.data.user.avatar }));
+        setUser(res.data.user); // ✅ chỉ cập nhật user
         toast.success("Cập nhật avatar thành công!");
       })
-
       .catch((err) => {
         toast.error(err?.response?.data?.message || "Lỗi khi cập nhật avatar!");
       });
@@ -181,9 +178,9 @@ const Profile = () => {
             <>
               {/* Avatar */}
               <div className="flex items-center gap-5">
-                {form.avatar ? (
+                {user.avatar ? (
                   <img
-                    src={form.avatar}
+                    src={user.avatar}
                     alt="avatar"
                     className="w-20 h-20 rounded-full object-cover"
                   />

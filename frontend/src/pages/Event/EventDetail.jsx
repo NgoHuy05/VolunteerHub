@@ -10,7 +10,7 @@ import { useEffect } from "react";
 import { LikeUnLike } from "../../api/like.api";
 import { createComment } from "../../api/comment.api";
 import { getProfileUser } from "../../api/user.api";
-import { createPost, getAllPostFull } from "../../api/post.api";
+import { createPost, getPostByIdEventApproved } from "../../api/post.api";
 import { getEventById } from "../../api/event.api";
 import { FaPlus } from "react-icons/fa";
 import { FaUsers } from "react-icons/fa";
@@ -43,7 +43,6 @@ const EventDetail = () => {
   const [event, setEvent] = useState({});
   const [userEvents, setUserEvents] = useState([]);
   const [isJoined, setIsJoined] = useState(false);
-  const [isPending, setIsPending] = useState(false);
   const eventId = useParams();
   const location = useLocation();
   const { openCommentModal: openFromNotify, postId } = location.state || {};
@@ -56,6 +55,9 @@ const EventDetail = () => {
   const [openCreateModel, setOpenCreateModel] = useState(false);
   const [search, setSearch] = useState("");
   const [filteredPosts, setFilteredPosts] = useState([]);
+
+const fromStatus = location?.state?.from; // 'completed' | 'rejected' | 'pending'
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -74,7 +76,7 @@ const EventDetail = () => {
           countAllUserByEventId(eventId.id),
           countPendingUserByEventId(eventId.id),
           countJoiningUserByEventId(eventId.id),
-          getAllPostFull(),
+          getPostByIdEventApproved(eventId.id),
           getUserEvent(),
         ]);
 
@@ -149,12 +151,6 @@ const EventDetail = () => {
     e.target.value = null;
   };
 
-  useEffect(() => {
-    return () => {
-      bannerPreview.forEach((url) => URL.revokeObjectURL(url));
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   useEffect(() => {
     return () => {
@@ -219,7 +215,8 @@ const EventDetail = () => {
     };
     fetchUser();
   }, []);
-  console.log(event);
+
+
 
   //  Mở modal bình luận
   const handleOpenModal = (post) => {
@@ -259,12 +256,7 @@ const EventDetail = () => {
           u.eventId?._id?.toString() === event._id && u.status === "joining"
       );
 
-    const pending = userEvents.some(
-      (u) => u.eventId?._id?.toString() === event._id && u.status === "pending"
-    );
-
     setIsJoined(joined);
-    setIsPending(pending);
   }, [userEvents, event, user]);
 
   const handleRegisterJoinEvent = async (eventId) => {
@@ -374,24 +366,30 @@ const EventDetail = () => {
               </div>
             </div>
             <div className="flex flex-wrap gap-4 items-center">
-              {!isJoined ? (
-                isPending ? (
-                  <div className="ml-4 px-4 py-2 w-[220px] text-center bg-amber-200 rounded-2xl hover:bg-amber-300 cursor-pointer transition duration-300">
-                    Đang chờ duyệt
-                  </div>
-                ) : (
-                  <div
-                    onClick={() => handleRegisterJoinEvent(eventId.id)}
-                    className="ml-4 px-4 py-2 w-[200px] text-center bg-gray-200 rounded-2xl hover:bg-gray-300 cursor-pointer transition duration-300"
-                  >
-                    Đăng kí tham gia
-                  </div>
-                )
-              ) : (
-                <div className="ml-4 px-4 py-2 w-[190px] text-center bg-green-400 rounded-2xl hover:bg-green-500 cursor-pointer transition duration-300">
-                  Đang tham gia
-                </div>
-              )}
+ {fromStatus === "completed" ? (
+  <div className="ml-4 px-4 py-2 w-[200px] text-center bg-blue-300 rounded-2xl cursor-default">
+    Đã hoàn thành
+  </div>
+) : fromStatus === "rejected" ? (
+  <div className="ml-4 px-4 py-2 w-[220px] text-center bg-red-300 rounded-2xl cursor-default">
+    Bị từ chối tham gia
+  </div>
+) : fromStatus === "pending" ? (
+  <div className="ml-4 px-4 py-2 w-[220px] text-center bg-amber-200 rounded-2xl cursor-default">
+    Đang chờ duyệt
+  </div>
+) : !isJoined ? (
+  <div
+    onClick={() => handleRegisterJoinEvent(eventId.id)}
+    className="ml-4 px-4 py-2 w-[200px] text-center bg-gray-200 rounded-2xl hover:bg-gray-300 cursor-pointer transition duration-300"
+  >
+    Đăng ký tham gia
+  </div>
+) : (
+  <div className="ml-4 px-4 py-2 w-[190px] text-center bg-green-400 rounded-2xl hover:bg-green-500 cursor-pointer transition duration-300">
+    Đang tham gia
+  </div>
+)}
 
               {/* Tìm kiếm */}
               <div className="relative w-[220px] max-w-sm p-4 items-center">
@@ -584,14 +582,14 @@ const EventDetail = () => {
                   {/* Header */}
                   <div className="p-4 flex gap-3 items-center border-b border-gray-200">
                     <img
-                      src={post?.event?.banner || "/default-banner.png"}
+                      src={event?.banner || "/default-banner.png"}
                       alt="avatar"
                       className="size-15 rounded-full object-cover"
                     />
 
                     <div className="flex flex-col">
                       <div className="font-bold text-[15px]">
-                        {post.event?.title || "Chưa có nhóm"}
+                        {event?.title || "Chưa có nhóm"}
                       </div>
                       <div className="flex gap-2 items-center text-[13px] text-gray-600">
                         {post?.userId?.avatar ? (

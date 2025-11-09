@@ -112,36 +112,67 @@ const getEventByUserId = async (req, res) => {
     });
   }
 };
-
 const getEventByUserIdAndStatus = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { status } = req.query; 
+    const { status } = req.query;
     let events = [];
 
     if (status) {
       if (status === "joining") {
-        // chạy song song hai truy vấn thay vì đợi tuần tự
-        const [eventsUserJoined, eventsUserCreated] = await Promise.all([
+        const [joinedList, createdList] = await Promise.all([
           UserEvent.find({ userId, status: "joining" })
             .populate("eventId")
             .populate("userId", "-password"),
           Event.find({ createBy: userId, status: "approved" }),
         ]);
 
+        const now = new Date();
+
+        for (const record of joinedList) {
+          if (
+            record.eventId &&
+            record.eventId.endDate &&
+            new Date(record.eventId.endDate) < now &&
+            record.status !== "completed"
+          ) {
+            record.status = "completed";
+            await record.save();
+          }
+        }
+
+        for (const ev of createdList) {
+          if (ev.endDate && new Date(ev.endDate) < now && ev.status !== "ended") {
+            ev.status = "ended";
+            await ev.save();
+          }
+        }
+
+        const [updatedJoined, updatedCreated] = await Promise.all([
+          UserEvent.find({ userId, status: "joining" })
+            .populate("eventId")
+            .populate("userId", "-password"),
+          Event.find({ createBy: userId, status: { $in: ["approved", "ended"] } }),
+        ]);
+
+        // lọc null eventId
         events = [
-          ...eventsUserJoined.map(item => item.eventId),
-          ...eventsUserCreated,
+          ...updatedJoined.filter(item => item.eventId).map(item => item.eventId),
+          ...updatedCreated,
         ];
       } else {
-        events = await UserEvent.find({ userId, status })
-          .populate("eventId")
-          .populate("userId", "-password");
+        events = (
+          await UserEvent.find({ userId, status })
+            .populate("eventId")
+            .populate("userId", "-password")
+        ).filter(ev => ev.eventId);
       }
     } else {
-      events = await UserEvent.find({ userId })
-        .populate("eventId")
-        .populate("userId", "-password");
+      events = (
+        await UserEvent.find({ userId })
+          .populate("eventId")
+          .populate("userId", "-password")
+      ).filter(ev => ev.eventId);
     }
 
     return res.status(200).json({
@@ -156,7 +187,6 @@ const getEventByUserIdAndStatus = async (req, res) => {
     });
   }
 };
-
 
 
 const countAllUserByEventId = async (req, res) => {

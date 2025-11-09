@@ -41,20 +41,32 @@ const createPost = async (req, res) => {
 const getAllPostFull = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { sort } = req.query; // 🟢 nhận loại sort từ client: "Tất cả" | "Mới nhất" | "Cũ nhất" | "Top"
+    const { sort } = req.query; // "Tất cả" | "Mới nhất" | "Cũ nhất" | "Top"
 
-    // 1️⃣ Lấy bài viết theo điều kiện sort
-    let sortOption = { approvedAt: -1 }; // mặc định: mới nhất
+    let posts = [];
 
-    if (sort === "Cũ nhất") sortOption = { approvedAt: 1 };
-    else if (sort === "Top") sortOption = { likeCount: -1 }; // tạm thời sort theo số like
-    else if (sort === "Tất cả" || !sort) sortOption = { approvedAt: -1 };
+    // 1️⃣ Nếu là “Tất cả” → random bằng $sample
+    if (sort === "Tất cả" || !sort) {
+      posts = await Post.aggregate([
+        { $match: { status: "approved" } },
+        { $sample: { size: 20 } }, // số lượng bài random mỗi lần
+      ]);
+      // populate thủ công vì aggregate không hỗ trợ populate trực tiếp
+      posts = await Post.populate(posts, {
+        path: "userId",
+        select: "name avatar",
+      });
+    } else {
+      // 2️⃣ Các sort khác
+      let sortOption = { approvedAt: -1 };
+      if (sort === "Cũ nhất") sortOption = { approvedAt: 1 };
+      else if (sort === "Top") sortOption = { likeCount: -1 };
 
-    // 2️⃣ Query bài viết
-    const posts = await Post.find({ status: "approved" })
-      .populate("userId", "name avatar")
-      .sort(sortOption)
-      .lean();
+      posts = await Post.find({ status: "approved" })
+        .populate("userId", "name avatar")
+        .sort(sortOption)
+        .lean();
+    }
 
     if (!posts.length)
       return res.status(200).json({ success: true, posts: [] });
@@ -87,7 +99,7 @@ const getAllPostFull = async (req, res) => {
     const eventMap = new Map(events.map((e) => [e._id.toString(), e]));
     const likedIds = new Set(likedDocs.map((l) => l.postId.toString()));
 
-    // 6️⃣ Merge
+    // 6️⃣ Merge dữ liệu
     const fullPosts = posts.map((p) => ({
       ...p,
       likeCount: likeCountMap.get(p._id.toString()) || 0,
@@ -96,7 +108,7 @@ const getAllPostFull = async (req, res) => {
       event: eventMap.get(p.eventId?.toString()) || null,
     }));
 
-    // 7️⃣ Nếu sort === "Top", sort lại theo likeCount
+    // 7️⃣ Nếu sort === "Top" → sort lại theo likeCount
     if (sort === "Top") {
       fullPosts.sort((a, b) => b.likeCount - a.likeCount);
     }
@@ -114,6 +126,7 @@ const getAllPostFull = async (req, res) => {
     });
   }
 };
+
 
 
 const updatePost = async (req, res) => {
@@ -190,13 +203,59 @@ const getPostByIdEvent = async (req, res) => {
 
 const getPostByIdEventApproved = async (req, res) => {
   try {
+    const userId = req.user.id;
     const { eventId } = req.params;
-    const posts = await Post.find({ eventId, status: "approved" }).populate("userId", "name avatar");
-    return res.status(200).json({ success: true, message: "Lấy danh sách bài đăng đã duyệt theo eventId", posts });
+
+    // Lấy post của 1 event và đã duyệt
+    const posts = await Post.find({ eventId, status: "approved" })
+      .populate("userId", "name avatar")
+      .lean();
+
+    if (!posts.length)
+      return res.status(200).json({ success: true, posts: [] });
+
+    // gom id post
+    const postIds = posts.map(p => p._id);
+
+    // chạy song song
+    const [likes, comments, likedDocs] = await Promise.all([
+      Like.aggregate([
+        { $match: { postId: { $in: postIds } } },
+        { $group: { _id: "$postId", count: { $sum: 1 } } },
+      ]),
+      Comment.find({ postId: { $in: postIds } })
+        .populate("userId", "name avatar")
+        .lean(),
+      Like.find({ userId }).select("postId").lean(),
+    ]);
+
+    // map dữ liệu
+    const likeCountMap = new Map(likes.map(l => [l._id.toString(), l.count]));
+    const commentMap = new Map();
+    comments.forEach(c => {
+      const pid = c.postId.toString();
+      if (!commentMap.has(pid)) commentMap.set(pid, []);
+      commentMap.get(pid).push(c);
+    });
+    const likedIds = new Set(likedDocs.map(l => l.postId.toString()));
+
+    const fullPosts = posts.map(p => ({
+      ...p,
+      likeCount: likeCountMap.get(p._id.toString()) || 0,
+      liked: likedIds.has(p._id.toString()),
+      comments: commentMap.get(p._id.toString()) || [],
+    }));
+
+    res.status(200).json({
+      success: true,
+      message: "Lấy danh sách bài đăng đã duyệt theo eventId thành công",
+      posts: fullPosts,
+    });
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
+
 
 const getEventApprovedWithPostByIdEventPending = async (req, res) => {
   try {

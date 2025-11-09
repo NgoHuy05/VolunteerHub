@@ -128,6 +128,9 @@ const createApproveEventNotification = async (req, res) => {
     const event = await Event.findById(eventId).populate("createBy");
     if (!event) return res.status(404).json({ success: false, message: "Không tìm thấy sự kiện" });
 
+        if (event.createBy._id.toString() === adminId.toString())
+      return res.status(200).json({ success: true, message: "Không tạo thông báo cho chính mình" });
+    
     const content = `Sự kiện "${event.title}" của bạn đã được duyệt.`;
     const notification = await Notification.create({
       userId: event.createBy._id,

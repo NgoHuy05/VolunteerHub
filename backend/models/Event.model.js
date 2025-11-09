@@ -11,7 +11,7 @@ const EventSchema = new mongoose.Schema({
     createBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     status: {
         type: String,
-        enum: ["pending", "rejected", "approved", "completed"],
+        enum: ["pending", "rejected", "approved", "completed", "ended"],
         default: "pending"
     },
 }, { timestamps: true })

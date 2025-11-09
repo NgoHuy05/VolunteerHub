@@ -84,8 +84,8 @@ const ManagePost = () => {
           </h2>
 
           <div className="space-y-5">
-            {events.map((event) =>
-              event.posts.map((post) => (
+            {events.filter(ev => ev).map((event) =>
+              event?.posts.map((post) => (
                 <div
                   key={post._id}
                   className="bg-white rounded-2xl shadow-md hover:shadow-lg transition duration-300 border border-gray-200 p-5"
@@ -107,7 +107,7 @@ const ManagePost = () => {
                         Sự kiện
                       </div>
                       <div className="font-medium text-gray-800">
-                        {event.title}
+                        {event?.title}
                       </div>
                     </div>
 

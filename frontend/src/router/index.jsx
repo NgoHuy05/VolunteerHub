@@ -1,32 +1,36 @@
 import { createBrowserRouter } from "react-router-dom";
-import Home from "../pages/Home";
+
+
+import Login from "../pages/Auth/Login";
+import Register from "../pages/Auth/Register";
 
 import Layout from "../layout/Layout";
+import AdminLayout from "../layout/AdminLayout";
+import ManageLayout from "../layout/ManageLayout";
+
 import EventList from "../pages/Event/EventList";
 import EventJoining from "../pages/Event/EventJoining";
 import EventPendingJoin from "../pages/Event/EventPendingJoin";
 import EventCompleted from "../pages/Event/EventCompleted";
-import EventYour from "../pages/Event/EventYour";
 import EventRejected from "../pages/Event/EventRejected";
 import EventLayout from "../layout/EventLayout";
-import Login from "../pages/Auth/Login";
-import Register from "../pages/Auth/Register";
+import EventDetail from "../pages/Event/EventDetail";
+
+import Home from "../pages/Home";
 import Profile from "../pages/Profile";
-import ManageLayout from "../layout/ManageLayout";
-import ManageYourEvent from "../pages/Manager/ManageYourEvent";
+
 import ManagePost from "../pages/Manager/ManagePost";
 import ManageApproved from "../pages/Manager/ManageApproved";
 import ManagePending from "../pages/Manager/ManagePending";
 import ManageRejected from "../pages/Manager/ManageRejected";
 import ManageCompleted from "../pages/Manager/ManageCompleted";
 import ManageUser from "../pages/Manager/ManageUser";
-import AdminLayout from "../layout/AdminLayout";
+import ManageCreateEvent from "../pages/Manager/ManageCreateEvent";
+
 import AdminDashboard from "../pages/Admin/AdminDashboard";
 import AdminListEvent from "../pages/Admin/AdminListEvent";
 import AdminListUser from "../pages/Admin/AdminListUser";
 import AdminListPost from "../pages/Admin/AdminListPost";
-import ManageCreateEvent from "../pages/Manager/ManageCreateEvent";
-import EventDetail from "../pages/Event/EventDetail";
 
 export const routers = createBrowserRouter([
   {
@@ -66,11 +70,7 @@ export const routers = createBrowserRouter([
       {
         path: "completed",
         element: <EventCompleted />,
-      },
-      {
-        path: "your-event",
-        element: <EventYour />,
-      },
+      }
     ],
   },
   {
@@ -92,10 +92,6 @@ export const routers = createBrowserRouter([
       {
         path: "create",
         element: <ManageCreateEvent />,
-      },
-      {
-        path: "your-event",
-        element: <ManageYourEvent />,
       },
       {
         path: "post",

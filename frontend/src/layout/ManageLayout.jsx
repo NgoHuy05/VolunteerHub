@@ -14,12 +14,11 @@ import ScrollToTop from "../components/ScrollToTop";
 import { getAllEventCreatedBy } from "../api/event.api";
 
 const ManageLayout = () => {
-  const [isOpenYourEvent, setIsOpenYourEvent] = useState(false);
+  const [isOpenYourEvent, setIsOpenYourEvent] = useState(true);
   const [search, setSearch] = useState("");
   const [filteredEvents, setFilteredEvents] = useState([]);
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
-
   useEffect(() => {
     const fetchEvent = async () => {
       try {
@@ -34,17 +33,17 @@ const ManageLayout = () => {
     };
     fetchEvent();
   }, []);
-  
-    useEffect(() => {
-      const keyword = search.toLowerCase().trim();
-      if (!keyword) return setFilteredEvents(events);
-  
-      const filtered = events.filter((e) =>
-        e.title?.toLowerCase().includes(keyword)
-      );
-      setFilteredEvents(filtered);
-    }, [search, events]);
-  
+
+  useEffect(() => {
+    const keyword = search.toLowerCase().trim();
+    if (!keyword) return setFilteredEvents(events);
+
+    const filtered = events.filter((e) =>
+      e.title?.toLowerCase().includes(keyword)
+    );
+    setFilteredEvents(filtered);
+  }, [search, events]);
+
   const handleScrollToTop = () => {
     window.scrollTo({
       top: 0,
@@ -122,7 +121,7 @@ const ManageLayout = () => {
               </NavLink>
 
               {/* Sự kiện của bạn */}
-              <NavLink to="/manage/your-event">
+              <div className="cursor-pointer">
                 <div
                   onClick={() => setIsOpenYourEvent(!isOpenYourEvent)}
                   className="flex items-center justify-between ml-1 mr-1 p-4 rounded gap-2 hover:bg-gray-200 duration-300 cursor-pointer"
@@ -189,13 +188,13 @@ const ManageLayout = () => {
                     </NavLink>
                   </div>
                 )}
-              </NavLink>
+              </div>
             </div>
           </div>
 
           {/* 📄 Nội dung chính */}
           <div className="bg-white p-5 m-5 mr-10 rounded-2xl min-h-screen relative">
-            <Outlet context={{events: filteredEvents, loading}} />
+            <Outlet context={{ events: filteredEvents, loading }} />
             <button
               onClick={handleScrollToTop}
               className="hidden lg:block fixed bottom-5 right-5 text-[25px] border rounded-full p-2 z-50 hover:bg-white transition duration-300 cursor-pointer"
@@ -205,7 +204,6 @@ const ManageLayout = () => {
           </div>
         </div>
       </div>
-    
     </>
   );
 };

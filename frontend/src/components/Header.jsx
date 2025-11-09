@@ -166,7 +166,7 @@ const Header = () => {
         {(user?.role === "manager" || user?.role === "admin") && (
           <NavLink
             key="/manage"
-            to="/manage/your-event"
+            to="/manage/approved"
             className={({ isActive }) =>
               `flex gap-2 items-center p-2 rounded hover:bg-gray-200 transition duration-300 cursor-pointer ${
                 isActive ? "border-b-3   rounded-none" : ""
