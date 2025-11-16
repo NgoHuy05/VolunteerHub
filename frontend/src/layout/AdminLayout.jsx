@@ -138,12 +138,12 @@ const AdminLayout = () => {
   if (loading)
     return (
       <div className="flex justify-center items-center h-[300px]">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-gray-800"></div>
+        <div className="w-10 h-10 border-b-2 border-gray-800 rounded-full animate-spin"></div>
       </div>
     );
 
   return (
-    <div className="flex bg-gray-200 min-h-screen">
+    <div className="flex min-h-screen bg-gray-200">
       {/* SIDEBAR */}
       <div
         className={`${
@@ -154,7 +154,7 @@ const AdminLayout = () => {
           onClick={() => navigate("/admin/dashboard")}
           className="bg-[#182444] flex items-center gap-3 justify-center py-6 cursor-pointer"
         >
-          <FaCrown className="text-yellow-400 text-2xl" />
+          <FaCrown className="text-2xl text-yellow-400" />
           {sidebarOpen && <span className="text-2xl font-semibold">Admin</span>}
         </div>
 
@@ -198,22 +198,22 @@ const AdminLayout = () => {
       </div>
 
       {/* MAIN */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex flex-col flex-1">
         {/* HEADER */}
-        <div className="relative flex justify-between items-center bg-white shadow p-4">
+        <div className="relative flex items-center justify-between p-4 bg-white shadow">
           <div className="flex items-center gap-4">
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="text-2xl text-gray-600 hover:text-black cursor-pointer"
+              className="text-2xl text-gray-600 cursor-pointer hover:text-black"
             >
               <MdMenu />
             </button>
-            <h1 className="text-xl font-semibold text-gray-700 flex items-center gap-2">
+            <h1 className="flex items-center gap-2 text-xl font-semibold text-gray-700">
               <MdSpaceDashboard className="text-blue-600" />
               Admin Dashboard
             </h1>
           </div>
-
+          
           <div className="flex items-center gap-6">
             {/* Notification Button */}
             <button
@@ -222,7 +222,7 @@ const AdminLayout = () => {
             >
               <IoMdNotifications />
               {notificationUnread.length > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full animate-pulse">
+                <span className="absolute flex items-center justify-center w-5 h-5 text-xs text-white bg-red-500 rounded-full -top-1 -right-1 animate-pulse">
                   {notificationUnread.length}
                 </span>
               )}
@@ -239,7 +239,7 @@ const AdminLayout = () => {
                   "https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
                 }
                 alt="avatar"
-                className="w-10 h-10 rounded-full object-cover border"
+                className="object-cover w-10 h-10 border rounded-full"
               />
               <span className="font-medium text-gray-700">{user.name}</span>
             </div>
@@ -248,7 +248,7 @@ const AdminLayout = () => {
           {/* DROPDOWN THÔNG BÁO */}
           {openDropdown === "notification" && (
             <div className="absolute top-full right-0 mt-2 w-[340px] bg-white shadow-lg border border-gray-200 rounded-xl max-h-[400px] overflow-hidden">
-              <div className="px-4 py-2 border-b flex justify-between">
+              <div className="flex justify-between px-4 py-2 border-b">
                 <span className="font-semibold text-gray-700">Thông báo</span>
                 <span className="text-xs text-gray-400">Mới nhất</span>
               </div>
@@ -296,7 +296,7 @@ const AdminLayout = () => {
                   else list = [...notificationUnread, ...notificationRead];
                   if (list.length === 0)
                     return (
-                      <p className="text-gray-500 text-sm text-center py-3">
+                      <p className="py-3 text-sm text-center text-gray-500">
                         Chưa có thông báo
                       </p>
                     );
@@ -314,11 +314,11 @@ const AdminLayout = () => {
                         <img
                           src={n.senderId.avatar}
                           alt="avatar"
-                          className="w-10 h-10 rounded-full object-cover"
+                          className="object-cover w-10 h-10 rounded-full"
                         />
                       ) : (
-                        <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
-                          <CgProfile className="text-gray-600 text-2xl" />
+                        <div className="flex items-center justify-center w-10 h-10 bg-gray-300 rounded-full">
+                          <CgProfile className="text-2xl text-gray-600" />
                         </div>
                       )}
                       <div className="flex-1">
@@ -329,7 +329,7 @@ const AdminLayout = () => {
                         >
                           {n.content}
                         </p>
-                        <p className="text-xs text-gray-400 mt-1">
+                        <p className="mt-1 text-xs text-gray-400">
                           {new Date(n.createdAt).toLocaleString("vi-VN")}
                         </p>
                       </div>
@@ -345,14 +345,14 @@ const AdminLayout = () => {
             <div className="absolute top-full right-0 mt-2 w-[200px] bg-white shadow-lg border border-gray-200 p-3 rounded-xl">
               <Link
                 to="/profile"
-                className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 transition"
+                className="flex items-center gap-3 px-3 py-2 transition rounded-lg hover:bg-gray-100"
               >
                 <MdOutlineContactPage className="text-green-600" />
-                <span className="text-gray-800 font-medium">Profile</span>
+                <span className="font-medium text-gray-800">Profile</span>
               </Link>
               <button
                 onClick={logout}
-                className="w-full mt-2 flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-red-50 text-red-600 transition"
+                className="flex items-center w-full gap-3 px-3 py-2 mt-2 text-red-600 transition rounded-lg hover:bg-red-50"
               >
                 <CiLogout className="text-red-500" />
                 <span>Logout</span>
@@ -363,7 +363,7 @@ const AdminLayout = () => {
 
         {/* CONTENT */}
         <div className="p-5">
-          <div className="bg-white p-5 rounded-2xl shadow min-h-screen">
+          <div className="min-h-screen p-5 bg-white shadow rounded-2xl">
             <Outlet />
           </div>
         </div>
