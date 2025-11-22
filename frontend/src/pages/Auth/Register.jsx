@@ -119,7 +119,7 @@ const Register = () => {
 
         <p className="text-center text-gray-400 mt-6 text-sm">
           Đã có tài khoản?{" "}
-          <a to="login" className="text-indigo-400 hover:underline">
+          <a href="login" className="text-indigo-400 hover:underline">
             Đăng nhập ngay
           </a>
         </p>

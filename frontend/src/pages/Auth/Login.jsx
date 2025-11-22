@@ -73,7 +73,7 @@ const Login = () => {
               <input type="checkbox" className="accent-indigo-500" />
               Ghi nhớ tôi
             </label>
-            <a to="#" className="hover:text-indigo-400 transition">
+            <a href="#" className="hover:text-indigo-400 transition">
               Quên mật khẩu?
             </a>
           </div>
@@ -94,7 +94,7 @@ const Login = () => {
 
         <p className="text-center text-gray-400 mt-6 text-sm">
           Chưa có tài khoản?{" "}
-          <a to="register" className="text-indigo-400 hover:underline">
+          <a href="register" className="text-indigo-400 hover:underline">
             Đăng ký ngay
           </a>
         </p>
