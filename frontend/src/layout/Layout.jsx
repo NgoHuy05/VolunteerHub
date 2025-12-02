@@ -83,7 +83,6 @@ const Layout = () => {
     }
     setFilteredPosts(filtered);
   }, [search, posts]);
-  console.log(eventJoining);
 
   useEffect(() => {
     const fetchData = async () => {

@@ -226,6 +226,7 @@ const getPostByIdEventApproved = async (req, res) => {
     // Lấy post của 1 event và đã duyệt
     const posts = await Post.find({ eventId, status: "approved" })
       .populate("userId", "name avatar")
+      .populate("eventId")
       .lean();
 
     if (!posts.length)

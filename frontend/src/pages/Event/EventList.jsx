@@ -182,7 +182,6 @@ const EventList = () => {
     );
   }
 
-  console.log(events);
 
   return (
     <>

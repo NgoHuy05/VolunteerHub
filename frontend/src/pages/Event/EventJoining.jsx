@@ -26,7 +26,6 @@ const EventJoining = () => {
   const handleWatchDetail = (id) => {
     navigate(`/event/detail/${id}`);
   };
-  console.log(events);
 
   if (loading) {
     return (

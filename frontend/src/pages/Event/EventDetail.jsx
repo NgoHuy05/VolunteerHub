@@ -63,6 +63,7 @@ const [isCompleted, setIsCompleted] = useState(false);
   const [search, setSearch] = useState("");
   const [filteredPosts, setFilteredPosts] = useState([]); 
 
+
   const fetchParticipants = async () => {
   try {
     const res = await getAllUsersByEventId(eventId.id); 
@@ -780,7 +781,7 @@ const handleOutEvent = async (eventId) => {
                     <div className="p-4 flex gap-3 items-center border-b border-gray-200">
                       <img
                         src={
-                          currentPost?.event?.banner || "/default-banner.png"
+                          currentPost?.eventId?.banner || "/default-banner.png"
                         }
                         alt="avatar"
                         className="size-15 rounded-xl object-cover"
@@ -791,7 +792,7 @@ const handleOutEvent = async (eventId) => {
                 
                 5px] cursor-pointer hover:text-gray-600 transition duration-300"
                         >
-                          {currentPost.event?.title || "Chưa có nhóm"}
+                          {currentPost.eventId?.title || "Chưa có nhóm"}
                         </div>
                         <div className="flex gap-2 items-center text-[13px] text-gray-600">
                           {currentPost?.userId?.avatar ? (
