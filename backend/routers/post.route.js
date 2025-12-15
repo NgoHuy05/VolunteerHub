@@ -19,6 +19,6 @@ router.post("/create", authMiddleware, upload.array("images"), controllers.creat
 router.post("/filter", authMiddleware, controllers.filterPost);
 router.delete("/delete/:id", authMiddleware, roleMiddleware(["admin", "manager"]), controllers.deletePost);
 router.patch("/update/:id", authMiddleware, controllers.updatePost);
-router.patch("/approve/:id", authMiddleware, roleMiddleware(["admin"]), controllers.approvePost);
+router.patch("/approve/:id", authMiddleware, roleMiddleware(["admin", "manager"]), controllers.approvePost);
 
 module.exports = router;

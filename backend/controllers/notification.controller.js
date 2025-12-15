@@ -157,12 +157,11 @@ const createUserRegisterNotification = async (req, res) => {
     if (!event)
       return res.status(404).json({ success: false, message: "Không tìm thấy sự kiện" });
 
-    const user = await User.findById(userId);
-    let receiver = await User.findOne({ role: "manager" });
-    if (!receiver) receiver = await User.findOne({ role: "admin" });
-
+    const receiver = event.createBy;
     if (!receiver)
-      return res.status(404).json({ success: false, message: "Không tìm thấy người nhận thông báo" });
+      return res.status(404).json({ success: false, message: "Không tìm thấy người tạo sự kiện" });
+
+    const user = await User.findById(userId);
 
     const content = `${user.name} đã đăng ký tham gia sự kiện "${event.title}".`;
 
@@ -174,13 +173,20 @@ const createUserRegisterNotification = async (req, res) => {
       content,
     });
 
+    // gửi socket TRƯỚC khi res
+    global.sendToUser(
+      receiver._id.toString(),
+      "new_notification",
+      notification
+    );
+
     res.status(201).json({ success: true, notification });
-    global.sendToUser(receiver._id.toString(),"new_notification", notification);
   } catch (err) {
-    console.error(" Lỗi tạo thông báo user đăng ký:", err);
+    console.error("Lỗi tạo thông báo:", err);
     res.status(500).json({ success: false, message: "Lỗi server" });
   }
 };
+
 
 const createEventNotification = async (req, res) => {
   try {
