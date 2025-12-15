@@ -30,6 +30,7 @@ import {
 } from "../../api/userEvent.api";
 import { convertDate, getPostTimeAgo } from "../../utils";
 import {
+  createCommentNotification,
   createLikeNotification,
   createPostNotification,
   createUserRegisterNotification,
@@ -343,6 +344,8 @@ const handleOutEvent = async (eventId) => {
       const res = await createComment({ content, postId });
       toast.success(res?.message || "Tạo bình luận thành công");
 
+            await createCommentNotification(postId);
+      
       setPosts((prev) =>
         prev.map((p) =>
           p._id === postId
