@@ -1,5 +1,23 @@
 # 🌍 VolunteerHub - Fullstack Web Application
 
+## TESTING:
+role: admin
+account: admin@gmail.com 
+password: Huy131205
+
+role: manager
+account: manager1@gmail.com 
+password: Huy131205
+account: manager2@gmail.com 
+password: Huy131205
+
+role: user
+account: user1@gmail.com 
+password: Huy131205
+account: user2@gmail.com 
+password: Huy131205
+account: user3@gmail.com 
+password: Huy131205
 ## 🚀 Introduction
 
 **VolunteerHub** is a fullstack web application that connects volunteers with meaningful events.
